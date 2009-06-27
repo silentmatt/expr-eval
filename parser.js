@@ -1,4 +1,7 @@
-/* Based on ndef.parser, by Raphael Graf(r@undefined.ch) */
+/*
+ Based on ndef.parser, by Raphael Graf(r@undefined.ch)
+ http://www.undefined.ch/mparser/index.html
+*/
 var Parser = function () {
 	function object(o) {
 		function F() {}
@@ -7,11 +10,10 @@ var Parser = function () {
 	}
 
 	var TNUMBER = 0;
-	var TFUNC1 = 1;
-	var TFUNC2 = 2;
+	var TOP1 = 1;
+	var TOP2 = 2;
 	var TVAR = 3;
-	var TMARKER = 4;
-	var TFUNCALL = 5;
+	var TFUNCALL = 4;
 
 	function Token(type_, index_, prio_, number_) {
 		this.type_ = type_;
@@ -22,12 +24,10 @@ var Parser = function () {
 			switch (this.type_) {
 			case TNUMBER:
 				return this.number_;
-			case TFUNC1:
-			case TFUNC2:
+			case TOP1:
+			case TOP2:
 			case TVAR:
 				return this.index_;
-			case TMARKER:
-				return ",";
 			case TFUNCALL:
 				return "CALL";
 			default:
@@ -36,11 +36,37 @@ var Parser = function () {
 		};
 	}
 
-	function Expression(tokens, funcs1, funcs2, functions) {
+	function Expression(tokens, ops1, ops2, functions) {
 		this.tokens = tokens;
-		this.funcs1 = funcs1;
-		this.funcs2 = funcs2;
+		this.ops1 = ops1;
+		this.ops2 = ops2;
 		this.functions = functions;
+	}
+
+    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        meta = {    // table of character substitutions
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            "'" : "\\'",
+            '\\': '\\\\'
+        };
+
+	function escapeValue(v) {
+		if (typeof v === "string") {
+			escapable.lastIndex = 0;
+	        return escapable.test(v) ?
+	            "'" + v.replace(escapable, function (a) {
+	                var c = meta[a];
+	                return typeof c === 'string' ? c :
+	                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+	            }) + "'" :
+	            "'" + v + "'";
+		}
+		return v;
 	}
 
 	Expression.prototype = {
@@ -64,20 +90,18 @@ var Parser = function () {
 					item = new Token(TNUMBER, 0, 0, values[item.index_]);
 					nstack.push(item);
 				}
-				else if (type_ === TFUNC2 && nstack.length > 1) {
+				else if (type_ === TOP2 && nstack.length > 1) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
-					f = this.funcs2[item.index_];
+					f = this.ops2[item.index_];
 					item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
 					nstack.push(item);
 				}
-				else if (type_ === TFUNC1 && nstack.length > 0) {
+				else if (type_ === TOP1 && nstack.length > 0) {
 					n1 = nstack.pop();
-					f = this.funcs1[item.index_];
+					f = this.ops1[item.index_];
 					item = new Token(TNUMBER, 0, 0, f(n1.number_));
 					nstack.push(item);
-				}
-				else if (type_ === TMARKER) {
 				}
 				else {
 					while (nstack.length > 0) {
@@ -90,12 +114,12 @@ var Parser = function () {
 				newexpression.push(nstack.shift());
 			}
 
-			return new Expression(newexpression, object(this.funcs1), object(this.funcs2), object(this.functions));
+			return new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
 		},
 
 		substitute: function (variable, expr) {
 			if (!(expr instanceof Expression)) {
-				expr = new Parser().parse(expr);
+				expr = new Parser().parse(String(expr));
 			}
 			var newexpression = [];
 			var L = this.tokens.length;
@@ -116,7 +140,7 @@ var Parser = function () {
 				}
 			}
 
-			var ret = new Expression(newexpression, object(this.funcs1), object(this.funcs2), object(this.functions));
+			var ret = new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
 			return ret;
 		},
 
@@ -135,10 +159,10 @@ var Parser = function () {
 				if (type_ === TNUMBER) {
 					nstack.push(item.number_);
 				}
-				else if (type_ === TFUNC2) {
+				else if (type_ === TOP2) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
-					f = this.funcs2[item.index_];
+					f = this.ops2[item.index_];
 					nstack.push(f(n1, n2));
 				}
 				else if (type_ === TVAR) {
@@ -152,12 +176,10 @@ var Parser = function () {
 						throw new Error("undefined variable: " + item.index_);
 					}
 				}
-				else if (type_ === TFUNC1) {
+				else if (type_ === TOP1) {
 					n1 = nstack.pop();
-					f = this.funcs1[item.index_];
+					f = this.ops1[item.index_];
 					nstack.push(f(n1));
-				}
-				else if (type_ === TMARKER) {
 				}
 				else if (type_ === TFUNCALL) {
 					n1 = nstack.pop();
@@ -196,33 +218,26 @@ var Parser = function () {
 				item = this.tokens[i];
 				var type_ = item.type_;
 				if (type_ === TNUMBER) {
-					nstack.push(item.number_);
+					nstack.push(escapeValue(item.number_));
 				}
-				else if (type_ === TFUNC2) {
+				else if (type_ === TOP2) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					if (f.length === 1) {
-						nstack.push("(" + n1 + f + n2 + ")");
-					}
-					else {
-						nstack.push(f + "(" + n1 + "," + n2 + ")");
-					}
+					nstack.push("(" + n1 + f + n2 + ")");
 				}
 				else if (type_ === TVAR) {
 					nstack.push(item.index_);
 				}
-				else if (type_ === TFUNC1) {
+				else if (type_ === TOP1) {
 					n1 = nstack.pop();
 					f = item.index_;
-					if (f.length === 1) {
+					if (f === "-") {
 						nstack.push("(" + f + n1 + ")");
 					}
 					else {
 						nstack.push(f + "(" + n1 + ")");
 					}
-				}
-				else if (type_ === TMARKER) {
 				}
 				else if (type_ === TFUNCALL) {
 					n1 = nstack.pop();
@@ -259,7 +274,7 @@ var Parser = function () {
 	};
 
 	function add(a, b) {
-		return a + b;
+		return Number(a) + Number(b);
 	}
 	function sub(a, b) {
 		return a - b; 
@@ -272,6 +287,9 @@ var Parser = function () {
 	}
 	function mod(a, b) {
 		return a % b;
+	}
+	function concat(a, b) {
+		return "" + a + b;
 	}
 
 	function neg(a) {
@@ -316,7 +334,7 @@ var Parser = function () {
 		this.tokenindex = 0;
 		this.tmpprio = 0;
 
-		this.funcs1 = {
+		this.ops1 = {
 			"sin": Math.sin,
 			"cos": Math.cos,
 			"tan": Math.tan,
@@ -329,49 +347,28 @@ var Parser = function () {
 			"ceil": Math.ceil,
 			"floor": Math.floor,
 			"round": Math.round,
-			//"random": random,
-			"fac": fac,
 			"-": neg,
 			"exp": Math.exp
 		};
 
-		this.funcs2 = {
-			//"min": Math.min,
-			//"max": Math.max,
-			"pyt": pyt,
+		this.ops2 = {
 			"+": add,
 			"-": sub,
 			"*": mul,
 			"/": div,
 			"%": mod,
-			"pow": Math.pow,
-			"atan2": Math.atan2,
-			";": append
+			",": append,
+			"||": concat
 		};
 
 		this.functions = {
-			//"sin": Math.sin,
-			//"cos": Math.cos,
-			//"tan": Math.tan,
-			//"asin": Math.asin,
-			//"acos": Math.acos,
-			//"atan": Math.atan,
-			//"sqrt": Math.sqrt,
-			//"log": Math.log,
-			//"abs": Math.abs,
-			//"ceil": Math.ceil,
-			//"floor": Math.floor,
-			//"round": Math.round,
 			"random": random,
-			//"fac": fac,
-			//"exp": Math.exp
+			"fac": fac,
 			"min": Math.min,
 			"max": Math.max,
-			//"pyt": pyt,
-			//"pow": Math.pow,
-			//"atan2": Math.atan2,
-			"at": Math.atan2,
-			"s": Math.sin
+			"pyt": pyt,
+			"pow": Math.pow,
+			"atan2": Math.atan2
 		};
 
 		this.consts = {
@@ -422,8 +419,7 @@ var Parser = function () {
 	var RPAREN   = 1 << 4;
 	var COMMA    = 1 << 5;
 	var SIGN     = 1 << 6;
-	var SEMI     = 1 << 7;
-	var CALL     = 1 << 8;
+	var CALL     = 1 << 7;
 
 	Parser.prototype = {
 		parse: function (expr) {
@@ -444,7 +440,7 @@ var Parser = function () {
 							this.tokenprio = 2;
 							this.tokenindex = "-";
 							noperators++;
-							this.addfunc(tokenstack, operstack, TFUNC1);
+							this.addfunc(tokenstack, operstack, TOP1);
 						}
 						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 					}
@@ -456,7 +452,7 @@ var Parser = function () {
 							this.error_parsing(this.pos, "unexpected operator");
 						}
 						noperators += 2;
-						this.addfunc(tokenstack, operstack, TFUNC2);
+						this.addfunc(tokenstack, operstack, TOP2);
 						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 					}
 				}
@@ -467,7 +463,7 @@ var Parser = function () {
 					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(token);
 
-					expected = (OPERATOR | RPAREN | COMMA | SEMI);
+					expected = (OPERATOR | RPAREN | COMMA);
 				}
 				else if (this.isString()) {
 					if ((expected & PRIMARY) === 0) {
@@ -476,7 +472,7 @@ var Parser = function () {
 					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(token);
 
-					expected = (OPERATOR | RPAREN | COMMA | SEMI);
+					expected = (OPERATOR | RPAREN | COMMA);
 				}
 				else if (this.isLeftParenth()) {
 					if ((expected & LPAREN) === 0) {
@@ -497,21 +493,13 @@ var Parser = function () {
 						this.error_parsing(this.pos, "unexpected \")\"");
 					}
 
-					expected = (OPERATOR | RPAREN | COMMA | SEMI | LPAREN | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
 				}
 				else if (this.isComma()) {
 					if ((expected & COMMA) === 0) {
 						this.error_parsing(this.pos, "unexpected \",\"");
 					}
-					this.addfunc(tokenstack, operstack, TMARKER);
-					noperators++;
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
-				}
-				else if (this.isSemicolon()) {
-					if ((expected & SEMI) === 0) {
-						this.error_parsing(this.pos, "unexpected \";\"");
-					}
-					this.addfunc(tokenstack, operstack, TFUNC2);
+					this.addfunc(tokenstack, operstack, TOP2);
 					noperators += 2;
 					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 				}
@@ -521,21 +509,21 @@ var Parser = function () {
 					}
 					var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(consttoken);
-					expected = (OPERATOR | RPAREN | COMMA | SEMI);
+					expected = (OPERATOR | RPAREN | COMMA);
 				}
-				else if (this.isFunc2()) {
+				else if (this.isOp2()) {
 					if ((expected & FUNCTION) === 0) {
 						this.error_parsing(this.pos, "unexpected function");
 					}
-					this.addfunc(tokenstack, operstack, TFUNC2);
+					this.addfunc(tokenstack, operstack, TOP2);
 					noperators += 2;
 					expected = (LPAREN);
 				}
-				else if (this.isFunc1()) {
+				else if (this.isOp1()) {
 					if ((expected & FUNCTION) === 0) {
 						this.error_parsing(this.pos, "unexpected function");
 					}
-					this.addfunc(tokenstack, operstack, TFUNC1);
+					this.addfunc(tokenstack, operstack, TOP1);
 					noperators++;
 					expected = (LPAREN);
 				}
@@ -546,7 +534,7 @@ var Parser = function () {
 					var vartoken = new Token(TVAR, this.tokenindex, 0, 0);
 					tokenstack.push(vartoken);
 
-					expected = (OPERATOR | RPAREN | COMMA | SEMI | LPAREN | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
 				}
 				else if (this.isWhite()) {
 				}
@@ -567,12 +555,12 @@ var Parser = function () {
 				tokenstack.push(tmp);
 			}
 			if (noperators + 1 !== tokenstack.length) {
-print(noperators + 1);
-print(tokenstack);
+				//print(noperators + 1);
+				//print(tokenstack);
 				this.error_parsing(this.pos, "parity");
 			}
 
-			return new Expression(tokenstack, object(this.funcs1), object(this.funcs2), object(this.functions));
+			return new Expression(tokenstack, object(this.ops1), object(this.ops2), object(this.functions));
 		},
 
 		evaluate: function (expr, variables) {
@@ -618,20 +606,76 @@ print(tokenstack);
 			return r;
 		},
 
+		unescape: function(v, pos) {
+			var buffer = [];
+			var escaping = false;
+	
+			for (var i = 0; i < v.length; i++) {
+				var c = v.charAt(i);
+	
+				if (escaping) {
+					switch (c) {
+					case "'":
+						buffer.push("'");
+						break;
+					case '\\':
+						buffer.push('\\');
+						break;
+					case '/':
+						buffer.push('/');
+						break;
+					case 'b':
+						buffer.push('\b');
+						break;
+					case 'f':
+						buffer.push('\f');
+						break;
+					case 'n':
+						buffer.push('\n');
+						break;
+					case 'r':
+						buffer.push('\r');
+						break;
+					case 't':
+						buffer.push('\t');
+						break;
+					case 'u':
+						// interpret the following 4 characters as the hex of the unicode code point
+						var codePoint = parseInt(v.substring(i + 1, i + 5), 16);
+						buffer.push(String.fromCharCode(codePoint));
+						i += 4;
+						break;
+					default:
+						throw this.error_parsing(pos + i, "Illegal escape sequence: '\\" + c + "'");
+					}
+					escaping = false;
+				} else {
+					if (c == '\\') {
+						escaping = true;
+					} else {
+						buffer.push(c);
+					}
+				}
+			}
+	
+			return buffer.join('');
+		},
+
 		isString: function () {
 			var r = false;
 			var str = "";
+			var startpos = this.pos;
 			if (this.pos < this.expression.length && this.expression.charAt(this.pos) == "'") {
 				this.pos++;
 				while (this.pos < this.expression.length) {
 					var code = this.expression.charAt(this.pos);
-					if (code != "'") {
+					if (code != "'" || str.slice(-1) == "\\") {
 						str += this.expression.charAt(this.pos);
 						this.pos++;
 					}
 					else {
 						this.pos++;
-						this.tokennumber = str;
+						this.tokennumber = this.unescape(str, startpos);
 						r = true;
 						break;
 					}
@@ -665,6 +709,16 @@ print(tokenstack);
 			else if (code === 45) { // -
 				this.tokenprio = 0;
 				this.tokenindex = "-";
+			}
+			else if (code === 124) { // |
+				if (this.expression.charCodeAt(this.pos + 1) === 124) {
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = "||";
+				}
+				else {
+					return false;
+				}
 			}
 			else if (code === 42) { // *
 				this.tokenprio = 1;
@@ -738,18 +792,7 @@ print(tokenstack);
 			if (code === 44) { // ,
 				this.pos++;
 				this.tokenprio = -1;
-				this.tokenindex = -1;
-				return true;
-			}
-			return false;
-		},
-
-		isSemicolon: function () {
-			var code = this.expression.charCodeAt(this.pos);
-			if (code === 59) { // ;
-				this.pos++;
-				this.tokenprio = -1;
-				this.tokenindex = ";";
+				this.tokenindex = ",";
 				return true;
 			}
 			return false;
@@ -764,7 +807,7 @@ print(tokenstack);
 			return false;
 		},
 
-		isFunc1: function () {
+		isOp1: function () {
 			var str = "";
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
@@ -775,7 +818,7 @@ print(tokenstack);
 				}
 				str += c;
 			}
-			if (str.length > 0 && (str in this.funcs1)) {
+			if (str.length > 0 && (str in this.ops1)) {
 				this.tokenindex = str;
 				this.tokenprio = 5;
 				this.pos += str.length;
@@ -784,7 +827,7 @@ print(tokenstack);
 			return false;
 		},
 
-		isFunc2: function () {
+		isOp2: function () {
 			var str = "";
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
@@ -795,7 +838,7 @@ print(tokenstack);
 				}
 				str += c;
 			}
-			if (str.length > 0 && (str in this.funcs2)) {
+			if (str.length > 0 && (str in this.ops2)) {
 				this.tokenindex = str;
 				this.tokenprio = 5;
 				this.pos += str.length;

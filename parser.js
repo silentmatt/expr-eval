@@ -43,6 +43,7 @@ var Parser = function () {
 		this.functions = functions;
 	}
 
+	// Based on http://www.json.org/json2.js
     var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
         escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
         meta = {    // table of character substitutions
@@ -206,7 +207,7 @@ var Parser = function () {
 			return nstack[0];
 		},
 
-		toString: function () {
+		toString: function (toJS) {
 			var nstack = [];
 			var n1;
 			var n2;
@@ -224,7 +225,12 @@ var Parser = function () {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					nstack.push("(" + n1 + f + n2 + ")");
+					if (toJS && f == "^") {
+						nstack.push("Math.pow(" + n1 + "," + n2 + ")");
+					}
+					else {
+						nstack.push("(" + n1 + f + n2 + ")");
+					}
 				}
 				else if (type_ === TVAR) {
 					nstack.push(item.index_);
@@ -268,7 +274,7 @@ var Parser = function () {
 		},
 
 		toJSFunction: function (param, variables) {
-			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString() + "; }");
+			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
 			return f;
 		}
 	};
@@ -357,6 +363,7 @@ var Parser = function () {
 			"*": mul,
 			"/": div,
 			"%": mod,
+			"^": Math.pow,
 			",": append,
 			"||": concat
 		};
@@ -606,10 +613,11 @@ var Parser = function () {
 			return r;
 		},
 
+		// Ported from the yajjl JSON parser at http://code.google.com/p/yajjl/
 		unescape: function(v, pos) {
 			var buffer = [];
 			var escaping = false;
-	
+
 			for (var i = 0; i < v.length; i++) {
 				var c = v.charAt(i);
 	
@@ -734,7 +742,7 @@ var Parser = function () {
 			}
 			else if (code === 94) { // ^
 				this.tokenprio = 3;
-				this.tokenindex = "pow";
+				this.tokenindex = "^";
 			}
 			else {
 				return false;

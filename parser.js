@@ -2,7 +2,7 @@
  Based on ndef.parser, by Raphael Graf(r@undefined.ch)
  http://www.undefined.ch/mparser/index.html
 */
-var Parser = function () {
+var Parser = (function (scope) {
 	function object(o) {
 		function F() {}
 		F.prototype = o;
@@ -888,6 +888,6 @@ var Parser = function () {
 		}
 	};
 
-	return Parser;
-}();
-
+	scope.Parser = Parser;
+	return Parser
+})(typeof exports === 'undefined' ? {} : exports);

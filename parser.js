@@ -219,14 +219,27 @@ var Parser = (function (scope) {
 				item = this.tokens[i];
 				var type_ = item.type_;
 				if (type_ === TNUMBER) {
-					nstack.push(escapeValue(item.number_));
+					if (toJS && typeof item.number_ === 'object') {
+						nstack.push(JSON.stringify(item.number_));
+					}
+					else {
+						nstack.push(escapeValue(item.number_));
+					}
 				}
 				else if (type_ === TOP2) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					if (toJS && f == "^") {
-						nstack.push("Math.pow(" + n1 + "," + n2 + ")");
+					if (toJS && (f == "^" || f == "," || f == ";")) {
+						if (f == "^") {
+							nstack.push("Math.pow(" + n1 + "," + n2 + ")");
+						}
+						else if (f == ",") {
+							nstack.push("append(" + n1 + "," + n2 + ")");
+						}
+						else if (f == ";") {
+							nstack.push("appendRow(" + n1 + "," + n2 + ")");
+						}
 					}
 					else {
 						nstack.push("(" + n1 + f + n2 + ")");
@@ -274,8 +287,7 @@ var Parser = (function (scope) {
 		},
 
 		toJSFunction: function (param, variables) {
-			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
-			return f;
+			return new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
 		}
 	};
 
@@ -286,6 +298,22 @@ var Parser = (function (scope) {
 		return a - b; 
 	}
 	function mul(a, b) {
+		if (typeof a === 'string') {
+			if (typeof b === 'number') {
+				return (new Array(b + 1)).join(a);
+			}
+			else {
+				throw new Error('Invalid multiplication: ' + typeof a + ' * ' + typeof b);
+			}
+		}
+		if (typeof b === 'string') {
+			if (typeof a === 'number') {
+				return (new Array(a + 1)).join(b);
+			}
+			else {
+				throw new Error('Invalid multiplication: ' + typeof a + ' * ' + typeof b);
+			}
+		}
 		return a * b;
 	}
 	function div(a, b) {
@@ -320,10 +348,27 @@ var Parser = (function (scope) {
 	}
 
 	function append(a, b) {
-		if (Object.prototype.toString.call(a) != "[object Array]") {
+		if (Object.prototype.toString.call(a) != "[object Array]" || Object.prototype.toString.call(a[0]) == "[object Array]") {
 			return [a, b];
 		}
 		a = a.slice();
+		a.push(b);
+		return a;
+	}
+
+	function appendRow(a, b) {
+		if (Object.prototype.toString.call(a) != "[object Array]") {
+			a = [a];
+		}
+		if (Object.prototype.toString.call(b) != "[object Array]") {
+			b = [b];
+		}
+
+		a = a.slice();
+
+		if (Object.prototype.toString.call(a[0]) != "[object Array]") {
+			a = [a];
+		}
 		a.push(b);
 		return a;
 	}
@@ -365,6 +410,7 @@ var Parser = (function (scope) {
 			"%": mod,
 			"^": Math.pow,
 			",": append,
+			";": appendRow,
 			"||": concat
 		};
 
@@ -414,19 +460,28 @@ var Parser = (function (scope) {
 		max: Math.max,
 		pyt: pyt,
 		pow: Math.pow,
+		append: append,
+		appendRow: appendRow,
 		atan2: Math.atan2,
 		E: Math.E,
 		PI: Math.PI
 	};
 
-	var PRIMARY  = 1 << 0;
-	var OPERATOR = 1 << 1;
-	var FUNCTION = 1 << 2;
-	var LPAREN   = 1 << 3;
-	var RPAREN   = 1 << 4;
-	var COMMA    = 1 << 5;
-	var SIGN     = 1 << 6;
-	var CALL     = 1 << 7;
+	var PRIMARY   = 1 << 0;
+	var OPERATOR  = 1 << 1;
+	var FUNCTION  = 1 << 2;
+	var LPAREN    = 1 << 3;
+	var RPAREN    = 1 << 4;
+	var COMMA     = 1 << 5;
+	var SEMICOLON = 1 << 6;
+	var SIGN      = 1 << 7;
+	var CALL      = 1 << 8;
+
+	var closeParen = {
+		'(': ')',
+		'[': ']',
+		'{': '}'
+	};
 
 	Parser.prototype = {
 		parse: function (expr) {
@@ -434,6 +489,7 @@ var Parser = (function (scope) {
 			this.success = true;
 			var operstack = [];
 			var tokenstack = [];
+			var parenstack = [];
 			this.tmpprio = 0;
 			var expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 			var noperators = 0;
@@ -465,30 +521,57 @@ var Parser = (function (scope) {
 				}
 				else if (this.isNumber()) {
 					if ((expected & PRIMARY) === 0) {
-						this.error_parsing(this.pos, "unexpected number");
+						if (expected & OPERATOR) {
+							var temp_tokenprio = this.tokenprio;
+							var temp_tokenindex = this.tokenindex;
+							this.tokenprio = 1;
+							this.tokenindex = "*";
+							noperators += 2;
+							this.addfunc(tokenstack, operstack, TOP2);
+							expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+							this.tokenprio = temp_tokenprio;
+							this.tokenindex = temp_tokenindex;
+						}
+						else {
+							this.error_parsing(this.pos, "unexpected number");
+						}
 					}
 					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(token);
 
-					expected = (OPERATOR | RPAREN | COMMA);
+					expected = (OPERATOR | RPAREN | COMMA | SEMICOLON);
 				}
 				else if (this.isString()) {
 					if ((expected & PRIMARY) === 0) {
-						this.error_parsing(this.pos, "unexpected string");
+						if (expected & OPERATOR) {
+							var temp_tokenprio = this.tokenprio;
+							var temp_tokenindex = this.tokenindex;
+							this.tokenprio = 1;
+							this.tokenindex = "*";
+							noperators += 2;
+							this.addfunc(tokenstack, operstack, TOP2);
+							expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+							this.tokenprio = temp_tokenprio;
+							this.tokenindex = temp_tokenindex;
+						}
+						else {
+							this.error_parsing(this.pos, "unexpected string");
+						}
 					}
 					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(token);
 
-					expected = (OPERATOR | RPAREN | COMMA);
+					expected = (OPERATOR | RPAREN | COMMA | SEMICOLON);
 				}
 				else if (this.isLeftParenth()) {
 					if ((expected & LPAREN) === 0) {
-						this.error_parsing(this.pos, "unexpected \"(\"");
+						this.error_parsing(this.pos, 'unexpected "' + this.tokenindex + '"');
 					}
+					parenstack.push(closeParen[this.tokenindex]);
 
 					if (expected & CALL) {
 						noperators += 2;
-						this.tokenprio = -2;
+						this.tokenprio = -3;
 						this.tokenindex = -1;
 						this.addfunc(tokenstack, operstack, TFUNCALL);
 					}
@@ -496,11 +579,11 @@ var Parser = (function (scope) {
 					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 				}
 				else if (this.isRightParenth()) {
-					if ((expected & RPAREN) === 0) {
-						this.error_parsing(this.pos, "unexpected \")\"");
+					if ((expected & RPAREN) === 0 || parenstack.pop() !== this.tokenindex) {
+						this.error_parsing(this.pos, 'unexpected "' + this.tokenindex + '"');
 					}
 
-					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | SEMICOLON | LPAREN | CALL);
 				}
 				else if (this.isComma()) {
 					if ((expected & COMMA) === 0) {
@@ -510,13 +593,34 @@ var Parser = (function (scope) {
 					noperators += 2;
 					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
 				}
+				else if (this.isSemicolon()) {
+					if ((expected & SEMICOLON) === 0) {
+						this.error_parsing(this.pos, "unexpected \";\"");
+					}
+					this.addfunc(tokenstack, operstack, TOP2);
+					noperators += 2;
+					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+				}
 				else if (this.isConst()) {
 					if ((expected & PRIMARY) === 0) {
-						this.error_parsing(this.pos, "unexpected constant");
+						if (expected & OPERATOR) {
+							var temp_tokenprio = this.tokenprio;
+							var temp_tokenindex = this.tokenindex;
+							this.tokenprio = 1;
+							this.tokenindex = "*";
+							noperators += 2;
+							this.addfunc(tokenstack, operstack, TOP2);
+							expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+							this.tokenprio = temp_tokenprio;
+							this.tokenindex = temp_tokenindex;
+						}
+						else {
+							this.error_parsing(this.pos, "unexpected constant");
+						}
 					}
 					var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(consttoken);
-					expected = (OPERATOR | RPAREN | COMMA);
+					expected = (OPERATOR | RPAREN | COMMA | SEMICOLON);
 				}
 				else if (this.isOp2()) {
 					if ((expected & FUNCTION) === 0) {
@@ -536,12 +640,25 @@ var Parser = (function (scope) {
 				}
 				else if (this.isVar()) {
 					if ((expected & PRIMARY) === 0) {
-						this.error_parsing(this.pos, "unexpected variable");
+						if (expected & OPERATOR) {
+							var temp_tokenprio = this.tokenprio;
+							var temp_tokenindex = this.tokenindex;
+							this.tokenprio = 1;
+							this.tokenindex = "*";
+							noperators += 2;
+							this.addfunc(tokenstack, operstack, TOP2);
+							expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+							this.tokenprio = temp_tokenprio;
+							this.tokenindex = temp_tokenindex;
+						}
+						else {
+							this.error_parsing(this.pos, "unexpected variable");
+						}
 					}
 					var vartoken = new Token(TVAR, this.tokenindex, 0, 0);
 					tokenstack.push(vartoken);
 
-					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | SEMICOLON | LPAREN | CALL);
 				}
 				else if (this.isWhite()) {
 				}
@@ -777,7 +894,8 @@ var Parser = (function (scope) {
 
 		isLeftParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 40) { // (
+			if (code === 40 || code === 91 || code === 123) { // (, [, or {
+				this.tokenindex = this.expression.charAt(this.pos);
 				this.pos++;
 				this.tmpprio += 10;
 				return true;
@@ -787,7 +905,8 @@ var Parser = (function (scope) {
 
 		isRightParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 41) { // )
+			if (code === 41 || code === 93 || code === 125) { // ), ], or }
+				this.tokenindex = this.expression.charAt(this.pos);
 				this.pos++;
 				this.tmpprio -= 10;
 				return true;
@@ -801,6 +920,17 @@ var Parser = (function (scope) {
 				this.pos++;
 				this.tokenprio = -1;
 				this.tokenindex = ",";
+				return true;
+			}
+			return false;
+		},
+
+		isSemicolon: function () {
+			var code = this.expression.charCodeAt(this.pos);
+			if (code === 59) { // ;
+				this.pos++;
+				this.tokenprio = -2;
+				this.tokenindex = ";";
 				return true;
 			}
 			return false;

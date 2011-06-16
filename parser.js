@@ -820,7 +820,7 @@ var Parser = (function (scope) {
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
 				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || c < '0' || c > '9') {
+					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
 						break;
 					}
 				}
@@ -840,7 +840,7 @@ var Parser = (function (scope) {
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
 				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || c < '0' || c > '9') {
+					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
 						break;
 					}
 				}
@@ -860,7 +860,7 @@ var Parser = (function (scope) {
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
 				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || c < '0' || c > '9') {
+					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
 						break;
 					}
 				}

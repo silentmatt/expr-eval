@@ -435,14 +435,15 @@ var Parser = (function (scope) {
 		PI: Math.PI
 	};
 
-	var PRIMARY  = 1 << 0;
-	var OPERATOR = 1 << 1;
-	var FUNCTION = 1 << 2;
-	var LPAREN   = 1 << 3;
-	var RPAREN   = 1 << 4;
-	var COMMA    = 1 << 5;
-	var SIGN     = 1 << 6;
-	var CALL     = 1 << 7;
+	var PRIMARY      = 1 << 0;
+	var OPERATOR     = 1 << 1;
+	var FUNCTION     = 1 << 2;
+	var LPAREN       = 1 << 3;
+	var RPAREN       = 1 << 4;
+	var COMMA        = 1 << 5;
+	var SIGN         = 1 << 6;
+	var CALL         = 1 << 7;
+	var NULLARY_CALL = 1 << 8;
 
 	Parser.prototype = {
 		parse: function (expr) {
@@ -509,10 +510,14 @@ var Parser = (function (scope) {
 						this.addfunc(tokenstack, operstack, TFUNCALL);
 					}
 
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+					expected = (PRIMARY | LPAREN | FUNCTION | SIGN | NULLARY_CALL);
 				}
 				else if (this.isRightParenth()) {
-					if ((expected & RPAREN) === 0) {
+				    if (expected & NULLARY_CALL) {
+						var token = new Token(TNUMBER, 0, 0, []);
+						tokenstack.push(token);
+					}
+					else if ((expected & RPAREN) === 0) {
 						this.error_parsing(this.pos, "unexpected \")\"");
 					}
 

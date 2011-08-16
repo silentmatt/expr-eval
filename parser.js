@@ -8,14 +8,14 @@
 //
 //  from http://stellapower.net/content/javascript-support-and-arrayindexof-ie
 	if (!Array.indexOf) {
-	  Array.prototype.indexOf = function (obj, start) {
-	    for (var i = (start || 0); i < this.length; i++) {
-	      if (this[i] === obj) {
-	        return i;
-	      }
-	    }
-	    return -1;
-	  }
+		Array.prototype.indexOf = function (obj, start) {
+			for (var i = (start || 0); i < this.length; i++) {
+				if (this[i] === obj) {
+					return i;
+				}
+			}
+			return -1;
+		}
 	}
 
 var Parser = (function (scope) {

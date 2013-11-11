@@ -1,4 +1,4 @@
-/*
+/*!
  Based on ndef.parser, by Raphael Graf(r@undefined.ch)
  http://www.undefined.ch/mparser/index.html
 

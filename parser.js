@@ -1,4 +1,4 @@
-/*!
+/*
  Based on ndef.parser, by Raphael Graf(r@undefined.ch)
  http://www.undefined.ch/mparser/index.html
 
@@ -886,8 +886,16 @@ var Parser = (function (scope) {
 			var str = "";
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
+				var whiteInVarName = false;
 				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
+					var code = this.expression.charCodeAt(i);
+					if ((code === 32 || code === 9 || code === 10 || code === 13) && str.length > 0) {
+						var d = this.expression.charAt(i+1);
+						if(!(d.toUpperCase() === d.toLowerCase())){
+							whiteInVarName = true;
+						}
+					}
+					if ((i === this.pos || (c != '_' && (c < '0' || c > '9'))) && !whiteInVarName) {
 						break;
 					}
 				}

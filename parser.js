@@ -323,6 +323,9 @@ var Parser = (function (scope) {
 	function neg(a) {
 		return -a;
 	}
+	function log10(a) {
+		return Math.LOG10E * Math.log(a);
+	}
 
 	function random(a) {
 		return Math.random() * (a || 1);
@@ -371,6 +374,8 @@ var Parser = (function (scope) {
 			"atan": Math.atan,
 			"sqrt": Math.sqrt,
 			"log": Math.log,
+			"log10": log10,
+			"lg": log10,
 			"abs": Math.abs,
 			"ceil": Math.ceil,
 			"floor": Math.floor,

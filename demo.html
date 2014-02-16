@@ -1,29 +1,30 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
 <title>Test math parser</title>
+<!-- Using Dojo to handle the AMD.  It is not used by parser.js -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/dojo/1.9.2/dojo/dojo.js"></script>
-<script type="text/javascript" src="parser.js"></script>
 <script type="text/javascript">
-//    var submit;
-//    require(["/laits/math-parser/parser.js"],function(){
-//        console.log("parser loaded", Parser);
-        //var p = new parser();
+    require(["./parser.js"],function(Parser){
+        console.log("parser loaded", Parser);
         submit = function(){
             var expr = document.getElementById('fName').value;
-            console.log(expr, " parsed as ", Parser.parse(expr).toString);
-       }
+            var output = document.getElementById('output');
+            var parse = Parser.parse(expr);
+            output.innerHTML = " parse is:  " + parse.toString();
+        };
+    });
 //});
 
 </script>
 </head>
 
 <body>
-<h1>Test math parser</h1>
+    <h1>Test math parser</h1>
 
-<input class="textBox" id="fName" type="text" maxlength="30" required/><br>
-<input type="button" class="loginButtons" value="Parse" onclick="submit();"/><br>
-Result shown in Javascript console.
+    Input math expression:<br>
+    <input class="textBox" id="fName" type="text" maxlength="30" required/> &nbsp; &nbsp; 
+    <input type="button" class="loginButtons" value="Parse" onclick="submit();"/>
+    <p> <span id='output'></span>
 
-
-
-</body> </html>
+</body>
+</html>

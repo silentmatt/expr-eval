@@ -6,69 +6,51 @@ Description
 
 This library is a modified version of Raphael Graf’s ActionScript Expression
 Parser. When I wrote the JavaScript Function Plotter, I wanted a better
-alternative to using JavaScript’s eval function. There’s no security risk
-currently, because you can only run code in your own browser, but it’s not as
-convenient for math (Math.pow(2^x) instead of 2^x, etc.).
+alternative to using JavaScript’s eval function. There’s no security
+risk using eval in this context, because you can only run code in your own browser, but it’s not as
+convenient for math (Math.pow(2,x) instead of 2^x, etc.).
 
-Documentation (incomplete, of course)
--------------------------------------
+## Documentation (incomplete, of course) ##
 
-### Parser ###
+The parser is written as an [AMD](http://en.wikipedia.org/wiki/Asynchronous_module_definition) module.
+Here are the methods:
 
-Parser is the main class in the library. It has “static” methods for parsing
-and evaluating expressions.
+**`parse({expression: string})`**  Convert a mathematical expression into an Expression object.
 
-**Parser()**
+**`evaluate({expression: string} [, {variables: object}])`**  Parse
+and immediately evaluate an expression using the values/functions from 
+the {variables} object. `evaluate(expr, vars)` is equivalent to calling
+`parse(expr).evaluate(vars)`. In fact, that’s exactly what it does.
 
-Constructor. In most cases, you don’t need this. Eventually, I’ll get around to
-documenting why you would want to, but for now, you can figure it
-out by reading the source ;-).
+### Expression Object ###
 
-**parse({expression: string})**
-
-Convert a mathematical expression into an Expression object.
-
-**evaluate({expression: string} [, {variables: object}])**
-
-Parse and immediately evaluate an expression using the values/functions from
-the {variables} object.
-
-Parser.evaluate(expr, vars) is equivalent to calling
-Parser.parse(expr).evaluate(vars). In fact, that’s exactly what it does.
-
-### Parser.Expression ###
-
-Parser.parse returns an Expression object. Expression objects are similar to
+`parse()` returns an Expression object. Expression objects are similar to
 JavaScript functions, i.e. they can be “called” with variables bound to
 passed-in values. In fact, they can even be converted into JavaScript
-functions.
+functions.  The associated methods are:
 
-**evaluate([{variables: object}])**
-
+**`evaluate([{variables: object}])`**
 Evaluate an expression, with variables bound to the values in {variables}. Each
 unbound variable in the expression is bound to the corresponding member of the
 {variables} object. If there are unbound variables, evaluate will throw an
 exception.
 
-    js> expr = Parser.parse("2 ^ x");
-    (2^x)
-    js> expr.evaluate({ x: 3 });
-    8
+	require(["./parser"], function(Parser){
+	    var expr = Parser.parse("2 ^ x");  // Returns an Expression object
+        console.log(expr.evaluate({ x: 3 }));  // 8
+    })
 
-**substitute({variable: string}, {expr: Expression, string, or number})**
-
+**`substitute({variable: string}, {expr: Expression, string, or number})`**
 Create a new expression with the specified variable replaced with another
 expression (essentially, function composition).
 
-    js> expr = Parser.parse("2 * x + 1");
-    ((2*x)+1)
-    js> expr.substitute("x", "4 * x");
-    ((2*(4*x))+1)
-    js> expr2.evaluate({ x: 3});
-    25
+    require(["./parser"], function(Parser){
+	    var expr = Parser.parse("2 * x + 1");
+        expr.substitute("x", "4 * x");  //     ((2*(4*x))+1)
+        console.log(expr.evaluate({ x: 3}));  // 25
+    })
 
-**simplify({variables: object>)** 
-
+**`simplify({variables: object>)`** 
 Simplify constant sub-expressions and replace
 variable references with literal values. This is basically a partial
 evaluation, that does as much of the calcuation as it can with the provided
@@ -76,40 +58,35 @@ variables. Function calls are not evaluated (except the built-in operator
 functions), since they may not be deterministic.
 
 Simplify is pretty simple (see what I did there?). It doesn’t know that
-addition and multiplication are associative, so “((2*(4*x))+1)” from the
-previous example cannot be simplified unless you provide a value for x. “2*4*x
-+ 1″ can however, because it’s parsed as “(((2*4)*x)+1)”, so the “(2*4)”
-sub-expression will be replaced with “8″, resulting in “((8*x)+1)”.
+addition and multiplication are associative, so ((2\*(4\*x))+1) from the
+previous example cannot be simplified unless you provide a value for x. 2\*4\*x
++ 1 can however, because it’s parsed as (((2\*4)\*x)+1), so the (2\*4)
+sub-expression will be replaced with 8, resulting in ((8\*x)+1).
 
-    js> expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4 });
-    (x*3.141592653589793)
-    js> expr.evaluate({ x: 2 });
-    6.283185307179586
+    require(["./parser"], function(Parser){
+        var expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4});  // (x*3.141592653589793)
+        console.log(expr.evaluate({ x: 2 }));    //    6.283185307179586
+    })
 
-**variables()**
+**`variables()`**
+Get an array of the unbound variables in the expression.
 
-    Get an array of the unbound variables in the expression.
+    require(["./parser"], function(Parser){
+        var expr = Parser.parse("x * (y * atan(1))");  // (x*(y*atan(1)))
+        console.log(expr.variables());   //  x,y
+        console.log(expr.simplify({ y: 4 }).variables());  // x
+    })
 
-    js> expr = Parser.parse("x * (y * atan(1))");
-    (x*(y*atan(1)))
-    js> expr.variables();
-    x,y
-    js> expr.simplify({ y: 4 }).variables();
-    x
-
-**toString()**
-
-Convert the expression to a string. toString() surrounds every sub-expression
+**`toString()`** Convert the expression to a string. toString() surrounds every sub-expression
 with parentheses (except literal values, variables, and function calls), so
 it’s useful for debugging precidence errors.
 
-**toJSFunction({parameters: Array} [, {variables: object}])**
-
+**`toJSFunction({parameters: Array} [, {variables: object}])`**
 Convert an Expression object into a callable JavaScript function. You need to
 provide an array of parameter names that should normally be expr.variables().
 Any unbound-variables will get their values from the global scope.
 
-toJSFunction works by simplifying the Expression (with {variables}, if
+`toJSFunction()` works by simplifying the Expression (with `{variables}`, if
 provided), converting it to a string, and passing the string to the Function
 constructor (with some of its own code to bring built-in functions and
 constants into scope and return the result of the expression).
@@ -117,7 +94,7 @@ constants into scope and return the result of the expression).
 ### Expression Syntax ###
 
 The parser accepts a pretty basic grammar. Operators have the normal precidence
-— f(x,y,z) (function calls), ^ (exponentiation), *, /, and % (multiplication,
+— f(x,y,z) (function calls), ^ (exponentiation), \*, /, and % (multiplication,
 division, and remainder), and finally +, -, and || (addition, subtraction, and
 string concatenation) — and bind from left to right (yes, even exponentiation…
 it’s simpler that way).

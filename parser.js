@@ -1,3 +1,4 @@
+/* global define */
 /*
  Based on ndef.parser, by Raphael Graf(r@undefined.ch)
  http://www.undefined.ch/mparser/index.html
@@ -8,6 +9,8 @@
  to acknowledge its original source. If you feel like it, I enjoy hearing about projects that use my code,
  but don't feel like you have to let me know or ask permission.
 */
+
+define([],function(){
 
 //  Added by stlsmiths 6/13/2011
 //  re-define Array.indexOf, because IE doesn't know it ...
@@ -21,10 +24,9 @@
 				}
 			}
 			return -1;
-		}
+		};
 	}
 
-var Parser = (function (scope) {
 	function object(o) {
 		function F() {}
 		F.prototype = o;
@@ -490,8 +492,8 @@ var Parser = (function (scope) {
 					if ((expected & PRIMARY) === 0) {
 						this.error_parsing(this.pos, "unexpected number");
 					}
-					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
-					tokenstack.push(token);
+					var token1 = new Token(TNUMBER, 0, 0, this.tokennumber);
+					tokenstack.push(token1);
 
 					expected = (OPERATOR | RPAREN | COMMA);
 				}
@@ -499,8 +501,8 @@ var Parser = (function (scope) {
 					if ((expected & PRIMARY) === 0) {
 						this.error_parsing(this.pos, "unexpected string");
 					}
-					var token = new Token(TNUMBER, 0, 0, this.tokennumber);
-					tokenstack.push(token);
+					var token2 = new Token(TNUMBER, 0, 0, this.tokennumber);
+					tokenstack.push(token2);
 
 					expected = (OPERATOR | RPAREN | COMMA);
 				}
@@ -520,8 +522,8 @@ var Parser = (function (scope) {
 				}
 				else if (this.isRightParenth()) {
 				    if (expected & NULLARY_CALL) {
-						var token = new Token(TNUMBER, 0, 0, []);
-						tokenstack.push(token);
+						var token3 = new Token(TNUMBER, 0, 0, []);
+						tokenstack.push(token3);
 					}
 					else if ((expected & RPAREN) === 0) {
 						this.error_parsing(this.pos, "unexpected \")\"");
@@ -923,6 +925,5 @@ var Parser = (function (scope) {
 		}
 	};
 
-	scope.Parser = Parser;
-	return Parser
-})(typeof exports === 'undefined' ? {} : exports);
+	return Parser;
+});

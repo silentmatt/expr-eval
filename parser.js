@@ -165,8 +165,7 @@ define([],function(){
 				}
 			}
 
-			var ret = new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
-			return ret;
+		        this.tokens = newexpression;
 		},
 
 		evaluate: function (values) {

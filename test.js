@@ -1,3 +1,4 @@
+/* global require, exports */
 var assert = require("assert");
 var {Parser} = require("./parser");
 
@@ -15,8 +16,8 @@ exports.testParser = {
 
     testSubstitute: function() {
         var expr = Parser.parse("2 * x + 1");
-        var expr2 = expr.substitute("x", "4 * x"); // ((2*(4*x))+1)
-        assert.strictEqual(expr2.evaluate({ x: 3}), 25);
+        expr.substitute("x", "4 * x"); // ((2*(4*x))+1)
+        assert.strictEqual(expr.evaluate({ x: 3}), 25);
     },
 
     testSimplify: function() {

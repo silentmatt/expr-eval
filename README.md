@@ -41,7 +41,7 @@ exception.
         })
 
 * `substitute({variable: string}, {expr: Expression, string, or number})`:
-Create a new expression with the specified variable replaced with another
+Modifies an expression with the specified variable replaced with another
 expression (essentially, function composition).
 
         require(["./parser"], function(Parser){

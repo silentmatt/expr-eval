@@ -235,7 +235,6 @@ define([],function(){
 			var n1;
 			var n2;
 	                var wrap = function(x, expr){
-			    console.log("    wrap: ", expr);
 		            return (verbose && expr.prio>0) || x<expr.prio?'('+expr.text+')': expr.text;
                         };
 	       	        // Ranking based on http://en.wikipedia.org/wiki/Order_of_operations
@@ -262,7 +261,6 @@ define([],function(){
 					    nstack.push({text: "Math.pow(" + n1.text + "," + n2.text + ")", prio: 0});
 					} else {
 				            nonAssociative = naOps[f]?1:0;
-				            console.log("binary operator "+f, prio2[f]);
 					    nstack.push({text: wrap(prio2[f],n1) + f + wrap(prio2[f]-nonAssociative,n2), prio: prio2[f]});
 					}
 				}

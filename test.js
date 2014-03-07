@@ -1,4 +1,4 @@
-/* global require, exports */
+/* global require, exports, module, system */
 var assert = require("assert");
 var {Parser} = require("./parser");
 
@@ -41,19 +41,20 @@ exports.testParser = {
     },
 
     testFunctions: function() {
-        /*sin(x)
-        cos(x)
-        tan(x)
-        asin(x)
-        acos(x)
-        atan(x)
-        sqrt(x)
-        log(x)
-        abs(x)
-        ceil(x)
-        floor(x)
-        round(x)
-        exp(x)
+        /*
+	 sin(x)
+         cos(x)
+         tan(x)
+         asin(x)
+         acos(x)
+         atan(x)
+         sqrt(x)
+         log(x)
+         abs(x)
+         ceil(x)
+         floor(x)
+         round(x)
+         exp(x)
         */
     },
 };

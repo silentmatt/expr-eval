@@ -8,9 +8,11 @@
         console.log("parser loaded", Parser);
         submit = function(){
             var expr = document.getElementById('fName').value;
-            var output = document.getElementById('output');
+            var verboseOutput = document.getElementById('verboseOutput');
+            var prettyOutput = document.getElementById('prettyOutput');
             var parse = Parser.parse(expr);
-            output.innerHTML = " parse is:  " + parse.toString();
+            verboseOutput.innerHTML = "verbose parse is:  " + parse.toString(true);
+            prettyOutput.innerHTML = "pretty parse is:  " + parse.toString();
         };
     });
 //});
@@ -24,7 +26,8 @@
     Input math expression:<br>
     <input class="textBox" id="fName" type="text" maxlength="30" required/> &nbsp; &nbsp; 
     <input type="button" class="loginButtons" value="Parse" onclick="submit();"/>
-    <p> <span id='output'></span>
+    <div id='verboseOutput'>verbose here</div>
+    <div id='prettyOutput'>pretty here</div>
 
 </body>
 </html>

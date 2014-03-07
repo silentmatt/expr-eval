@@ -230,48 +230,59 @@ define([],function(){
 			return nstack[0];
 		},
 
-		toString: function (toJS) {
+		toString: function (verbose, toJS) {
 			var nstack = [];
 			var n1;
 			var n2;
+	                var wrap = function(x, expr){
+			    console.log("    wrap: ", expr);
+		            return (verbose && expr.prio>0) || x<expr.prio?'('+expr.text+')': expr.text;
+                        };
+	       	        // Ranking based on http://en.wikipedia.org/wiki/Order_of_operations
+		        // Treat concat as low priority
+		        var prio2 = {'*': 3, '/': 3, '%': 3, '+': 4, '-': 4, '^': 1, ',': 6, '||': 5};
+		        var prio1 = 2;  // most unary operators.
+		        var naOps = {'/': 1, '^': 1, '-': 1}; // List of non-associative operators
 			var f;
 			var L = this.tokens.length;
 			var item;
+		        var nonAssociative;
 			var i = 0;
 			for (i = 0; i < L; i++) {
 				item = this.tokens[i];
 				var type_ = item.type_;
 				if (type_ === TNUMBER) {
-					nstack.push(escapeValue(item.number_));
+					nstack.push({text: escapeValue(item.number_), prio: 0});
 				}
 				else if (type_ === TOP2) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
 					if (toJS && f == "^") {
-						nstack.push("Math.pow(" + n1 + "," + n2 + ")");
-					}
-					else {
-						nstack.push("(" + n1 + f + n2 + ")");
+					    nstack.push({text: "Math.pow(" + n1.text + "," + n2.text + ")", prio: 0});
+					} else {
+				            nonAssociative = naOps[f]?1:0;
+				            console.log("binary operator "+f, prio2[f]);
+					    nstack.push({text: wrap(prio2[f],n1) + f + wrap(prio2[f]-nonAssociative,n2), prio: prio2[f]});
 					}
 				}
 				else if (type_ === TVAR) {
-					nstack.push(item.index_);
+					nstack.push({text: item.index_, prio: 0});
 				}
 				else if (type_ === TOP1) {
 					n1 = nstack.pop();
 					f = item.index_;
-					if (f === "-") {
-						nstack.push("(" + f + n1 + ")");
-					}
-					else {
-						nstack.push(f + "(" + n1 + ")");
-					}
+				    if(f == '-' || f == '+'){
+					nstack.push({text: f + wrap(prio1, n1), prio: prio1});
+				    } else {
+					// Always wrap arguments of functions
+					nstack.push({text: f + '(' + n1.text + ')', prio: 0});
+				    }
 				}
 				else if (type_ === TFUNCALL) {
 					n1 = nstack.pop();
 					f = nstack.pop();
-					nstack.push(f + "(" + n1 + ")");
+					nstack.push({text: f.text + "(" + n1.text + ")", prio: 0});
 				}
 				else {
 					throw new Error("invalid Expression");
@@ -280,7 +291,7 @@ define([],function(){
 			if (nstack.length > 1) {
 				throw new Error("invalid Expression (parity)");
 			}
-			return nstack[0];
+			return nstack[0].text;
 		},
 
 		variables: function () {
@@ -297,7 +308,7 @@ define([],function(){
 		},
 
 		toJSFunction: function (param, variables) {
-			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
+			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true, true) + "; }");
 			return f;
 		}
 	};

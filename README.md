@@ -77,9 +77,9 @@ Get an array of the unbound variables in the expression.
             console.log(expr.simplify({ y: 4 }).variables());  // x
         })
 
-* `toString()`: Convert the expression to a string. toString() surrounds every sub-expression
-with parentheses (except literal values, variables, and function calls), so
-it’s useful for debugging precidence errors.
+* `toString({verbose: boolean})`: Convert the expression to a string.  Setting verbose to true
+will print all parentheses, allowing one to see the parse structure
+and more easily debug operator precedence errors.
 
 * `toJSFunction({parameters: Array} [, {variables: object}])`:
 Convert an Expression object into a callable JavaScript function. You need to
@@ -96,8 +96,8 @@ constants into scope and return the result of the expression).
 The parser accepts a pretty basic grammar. Operators have the normal precidence
 — f(x,y,z) (function calls), ^ (exponentiation), \*, /, and % (multiplication,
 division, and remainder), and finally +, -, and || (addition, subtraction, and
-string concatenation) — and bind from left to right (yes, even exponentiation…
-it’s simpler that way).
+string concatenation) — and bind from left to right.
+Exponentiation is also left to right associative; see **Bugs** below.
 
 There’s also a “,” (comma) operator that concatenates values into an array.
 It’s mostly useful for passing arguments to functions, since it doesn’t always
@@ -105,7 +105,8 @@ behave like you would think with regards to multi-dimensional arrays. If the
 left value is an array, it pushes the right value onto the end of the array,
 otherwise, it creates a new array “[left, right]“. This makes it impossible to
 create an array with another array as it’s first element.
-Function operators
+
+### Function operators ###
 
 The parser has several built-in “functions” that are actually operators. The
 only difference from an outside point of view, is that they cannot be called
@@ -139,3 +140,14 @@ These are not evaluated by simplify.
 	pyt(a, b) 	Pythagorean function, i.e. the c in “c2 = a2 + b2“
 	pow(x, y)  Returns “x^y”. It’s just provided since it’s in the Math object from JavaScript
 	atan2(y, x)  Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+
+
+## Bugs ##
+
+
+Here are some bugs:
+
+* Powers `^` should be right-to-left associative:  `a^b^c` should parse as `a^(b^c)`, not `(a^b)^c`.
+
+* The expression `a^-b` gives an error.  Should parse as `a^(-b)`.
+

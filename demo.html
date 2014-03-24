@@ -10,6 +10,8 @@
             var expr = document.getElementById('fName').value;
             var verboseOutput = document.getElementById('verboseOutput');
             var prettyOutput = document.getElementById('prettyOutput');
+            var isVariable = document.getElementById('isVariable');
+            isVariable.innerHTML = "Is" + (Parser.isVarible(expr)?"":" not") + " a variable.";
             var parse = Parser.parse(expr);
             verboseOutput.innerHTML = "verbose parse is:  " + parse.toString(true);
             prettyOutput.innerHTML = "pretty parse is:  " + parse.toString();
@@ -28,6 +30,7 @@
     <input type="button" class="loginButtons" value="Parse" onclick="submit();"/>
     <div id='verboseOutput'>verbose here</div>
     <div id='prettyOutput'>pretty here</div>
+    <div id='isVariable'>variable test here</div>
 
 </body>
 </html>

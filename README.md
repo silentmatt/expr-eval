@@ -22,6 +22,9 @@ and immediately evaluate an expression using the values/functions from
 the {variables} object. `evaluate(expr, vars)` is equivalent to calling
 `parse(expr).evaluate(vars)`. In fact, that’s exactly what it does.
 
+* `isVariable({expression: string})`:  Tests whether an expression
+  parses as a single variable.
+
 ### Expression Object ###
 
 `parse()`  returns an Expression object. Expression objects are similar to

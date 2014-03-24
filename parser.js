@@ -424,6 +424,10 @@ define([],function(){
 		return Parser.parse(expr).evaluate(variables);
 	};
 
+        Parser.isVarible = function(expr){
+	       return new Parser().isVariable(expr);
+	};
+
 	Parser.Expression = Expression;
 
 	Parser.values = {
@@ -615,6 +619,14 @@ define([],function(){
 			this.success = false;
 			this.errormsg = "parse error [column " + (column) + "]: " + msg;
 			throw new Error(this.errormsg);
+		},
+
+	        isVariable: function(expr){
+		        this.errormsg = "";
+			this.expression = expr.trim();
+		        this.pos = 0;
+		        // Since this bypasses general parser, unparsable expressions do not throw an error.
+		        return this.isVar() && this.pos == this.expression.length;
 		},
 
 //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\

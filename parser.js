@@ -308,6 +308,34 @@ define([],function(){
 		toJSFunction: function (param, variables) {
 			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true, true) + "; }");
 			return f;
+		},
+
+		operators: function () {
+			var L = this.tokens.length;
+			var counts = {};
+		        function inc(name){
+			    counts[name] = counts[name]?counts[name]+1:1;
+			};
+			for (var i = 0; i < L; i++) {
+			    var item = this.tokens[i];
+			    switch (item.type_) {
+			        case TNUMBER:
+				    inc("number");
+                                    break;
+			        case TVAR:
+				    inc("variable");
+                                    break;
+			        case TOP1:
+			        case TOP2:
+			        case TFUNCALL:
+				    inc(this.tokens[i].index_);
+				    break;
+			        default:
+				     throw new Error("Invalid token");
+				     break;
+			    }
+			}
+			return counts;
 		}
 	};
 

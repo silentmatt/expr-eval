@@ -94,6 +94,11 @@ provided), converting it to a string, and passing the string to the Function
 constructor (with some of its own code to bring built-in functions and
 constants into scope and return the result of the expression).
 
+* `operators()`: Returns an object containing a count of the operators
+  in the expression as well as  a tally of the number of variables and
+  numbers.  Note that this does not distinguish between unary and
+  binary minus.
+
 ### Expression Syntax ###
 
 The parser accepts a pretty basic grammar. Operators have the normal precidence

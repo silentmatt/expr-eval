@@ -654,7 +654,7 @@ define([],function(){
 			this.expression = expr.trim();
 		        this.pos = 0;
 		        // Since this bypasses general parser, unparsable expressions do not throw an error.
-		        return this.isVar() && this.pos == this.expression.length;
+		        return !this.isOp1() && this.isVar() && this.pos == this.expression.length;
 		},
 
 //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\

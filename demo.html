@@ -11,7 +11,7 @@
             var verboseOutput = document.getElementById('verboseOutput');
             var prettyOutput = document.getElementById('prettyOutput');
             var isVariable = document.getElementById('isVariable');
-            isVariable.innerHTML = "Is" + (Parser.isVarible(expr)?"":" not") + " a variable.";
+            isVariable.innerHTML = "Is" + (Parser.isVariable(expr)?"":" not") + " a variable.";
             var parse = Parser.parse(expr);
             console.log("Parsed expression: ", parse);
             console.log("Operator content: ", parse.operators());

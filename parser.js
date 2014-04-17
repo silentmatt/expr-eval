@@ -452,7 +452,7 @@ define([],function(){
 		return Parser.parse(expr).evaluate(variables);
 	};
 
-        Parser.isVarible = function(expr){
+        Parser.isVariable = function(expr){
 	       return new Parser().isVariable(expr);
 	};
 

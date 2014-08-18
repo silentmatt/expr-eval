@@ -10,6 +10,7 @@
             var expr = document.getElementById('fName').value;
             var verboseOutput = document.getElementById('verboseOutput');
             var prettyOutput = document.getElementById('prettyOutput');
+            var variables = document.getElementById('variables');
             var isVariable = document.getElementById('isVariable');
             isVariable.innerHTML = "Is" + (Parser.isVariable(expr)?"":" not") + " a variable.";
             var parse = Parser.parse(expr);
@@ -17,6 +18,11 @@
             console.log("Operator content: ", parse.operators());
             verboseOutput.innerHTML = "verbose parse is:  " + parse.toString(true);
             prettyOutput.innerHTML = "pretty parse is:  " + parse.toString();
+            variables.innerHTML = "variables:  "
+            Array.forEach(parse.variables(), function(x){
+                variables.innerHTML += x;
+                variables.innerHTML += " ";
+            });
         };
     });
 //});
@@ -32,6 +38,7 @@
     <input type="button" class="loginButtons" value="Parse" onclick="submit();"/>
     <div id='verboseOutput'>verbose here</div>
     <div id='prettyOutput'>pretty here</div>
+    <div id='variables'>variable list here</div>
     <div id='isVariable'>variable test here</div>
 
 </body>

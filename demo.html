@@ -6,24 +6,41 @@
 <script type="text/javascript">
     require(["./parser.js"],function(Parser){
         console.log("parser loaded", Parser);
+	var parse;
+	var count;
         submit = function(){
             var expr = document.getElementById('fName').value;
             var verboseOutput = document.getElementById('verboseOutput');
             var prettyOutput = document.getElementById('prettyOutput');
             var variables = document.getElementById('variables');
             var isVariable = document.getElementById('isVariable');
+	    var evaluateDiv = document.getElementById('evaluateDiv');
             isVariable.innerHTML = "Is" + (Parser.isVariable(expr)?"":" not") + " a variable.";
-            var parse = Parser.parse(expr);
+            parse = Parser.parse(expr);
             console.log("Parsed expression: ", parse);
             console.log("Operator content: ", parse.operators());
             verboseOutput.innerHTML = "verbose parse is:  " + parse.toString(true);
             prettyOutput.innerHTML = "pretty parse is:  " + parse.toString();
-            variables.innerHTML = "variables:  "
+            variables.innerHTML = "variables are  </br>";
+	    count=0;
             parse.variables().forEach(function(x){
-                variables.innerHTML += x;
+		++count;
+                variables.innerHTML += x + ' : <input type="textBox" id="input'+count+'"/></br>';
                 variables.innerHTML += " ";
             });
+	    evaluateDiv.innerHTML = '<input type="button" class="loginButtons" value="Evaluate" onclick="evaluateFun();">';	   
         };
+	var vars;
+	evaluateFun = function(){
+	   count=0 ;
+	   vars = {};
+	   parse.variables().forEach(function(x){
+		++count;
+		vars[x]=document.getElementById('input'+count).value;	
+	   });
+	   evaluateDiv.innerHTML+='</br>'+parse.evaluate(vars);
+	};
+
     });
 //});
 
@@ -34,12 +51,13 @@
     <h1>Test math parser</h1>
 
     Input math expression:<br>
-    <input class="textBox" id="fName" type="text" maxlength="30" required/> &nbsp; &nbsp; 
+    <input class="textBox" id="fName" type="text" maxlength="30" required/> &nbsp; &nbsp;
+        
     <input type="button" class="loginButtons" value="Parse" onclick="submit();"/>
     <div id='verboseOutput'>verbose here</div>
     <div id='prettyOutput'>pretty here</div>
     <div id='variables'>variable list here</div>
+    <div id="evaluateDiv">Evaluation: </br></div>
     <div id='isVariable'>variable test here</div>
-
 </body>
 </html>

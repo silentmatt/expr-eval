@@ -294,15 +294,16 @@ define([],function(){
 
 		variables: function () {
 			var L = this.tokens.length;
-			var vars = [];
-			for (var i = 0; i < L; i++) {
-				var item = this.tokens[i];
-				if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1)) {
-					vars.push(item.index_);
-				}
-			}
+                        var functions = [ "random","fac","min","max","pyt","pow","atan2"];
+                        var vars = [];
+                        for (var i = 0; i < L; i++) {
+                                var item = this.tokens[i];
+                                if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && functions.indexOf(item.index_)==-1)) {
+                                        vars.push(item.index_);
+                                }
+                        }
 
-			return vars;
+                        return vars;
 		},
 
 		toJSFunction: function (param, variables) {

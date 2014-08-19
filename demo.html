@@ -19,7 +19,7 @@
             verboseOutput.innerHTML = "verbose parse is:  " + parse.toString(true);
             prettyOutput.innerHTML = "pretty parse is:  " + parse.toString();
             variables.innerHTML = "variables:  "
-            Array.forEach(parse.variables(), function(x){
+            parse.variables().forEach(function(x){
                 variables.innerHTML += x;
                 variables.innerHTML += " ";
             });

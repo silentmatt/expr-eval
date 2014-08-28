@@ -294,11 +294,10 @@ define([],function(){
 
 		variables: function () {
 			var L = this.tokens.length;
-                        var functions = [ "random","fac","min","max","pyt","pow","atan2"];
                         var vars = [];
                         for (var i = 0; i < L; i++) {
                                 var item = this.tokens[i];
-                                if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && functions.indexOf(item.index_)==-1)) {
+                                if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && !this.functions[item.index_])) {
                                         vars.push(item.index_);
                                 }
                         }
@@ -374,7 +373,11 @@ define([],function(){
 		}
 		return b;
 	}
-
+	function positive(a){
+		if(a > 0) return 1;
+		else return 0;
+	}
+	
 	// TODO: use hypot that doesn't overflow
 	function pyt(a, b) {
 		return Math.sqrt(a * a + b * b);
@@ -436,7 +439,8 @@ define([],function(){
 			"max": Math.max,
 			"pyt": pyt,
 			"pow": Math.pow,
-			"atan2": Math.atan2
+			"atan2": Math.atan2,
+			"positive": positive
 		};
 
 		this.consts = {
@@ -474,6 +478,7 @@ define([],function(){
 		round: Math.round,
 		random: random,
 		fac: fac,
+		positive: positive,
 		exp: Math.exp,
 		min: Math.min,
 		max: Math.max,

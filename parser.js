@@ -402,7 +402,7 @@ var Parser = (function (scope) {
 		};
 
 		this.consts = {
-			"E": Math.E,
+			"_E": Math.E,
 			"PI": Math.PI
 		};
 	}

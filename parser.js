@@ -320,6 +320,9 @@ var Parser = (function (scope) {
 		return "" + a + b;
 	}
 
+	function log10(a) {
+	      return Math.log(a) * Math.LOG10E;
+	}
 	function neg(a) {
 		return -a;
 	}
@@ -371,6 +374,8 @@ var Parser = (function (scope) {
 			"atan": Math.atan,
 			"sqrt": Math.sqrt,
 			"log": Math.log,
+			"lg" : log10,
+			"log10" : log10,
 			"abs": Math.abs,
 			"ceil": Math.ceil,
 			"floor": Math.floor,
@@ -425,6 +430,8 @@ var Parser = (function (scope) {
 		atan: Math.atan,
 		sqrt: Math.sqrt,
 		log: Math.log,
+		lg: log10,
+		log10: log10,
 		abs: Math.abs,
 		ceil: Math.ceil,
 		floor: Math.floor,

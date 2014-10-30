@@ -762,7 +762,7 @@ var Parser = (function (scope) {
 					return false;
 				}
 			}
-			else if (code === 42) { // *
+			else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
 				this.tokenprio = 1;
 				this.tokenindex = "*";
 			}
@@ -795,7 +795,7 @@ var Parser = (function (scope) {
 
 		isPositiveSign: function () {
 			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 43) { // -
+			if (code === 43) { // +
 				return true;
 			}
 			return false;

@@ -168,7 +168,7 @@ define([],function(){
 		        this.tokens = newexpression;
 		},
 
-		evaluate: function (values) {
+		evaluate: function (values, time) {
 			values = values || {};
 			var nstack = [];
 			var n1;
@@ -207,12 +207,18 @@ define([],function(){
 				}
 				else if (type_ === TFUNCALL) {
 					n1 = nstack.pop();
-					f = nstack.pop();
+					f = nstack.pop();					
 					if (f.apply && f.call) {
+						if(f === pulse || f === pulsetrain)
+						{
+							n1.push(time);
+						}
 						if (Object.prototype.toString.call(n1) == "[object Array]") {
 							nstack.push(f.apply(undefined, n1));
 						}
+
 						else {
+
 							nstack.push(f.call(undefined, n1));
 						}
 					}
@@ -294,10 +300,11 @@ define([],function(){
 
 		variables: function () {
 			var L = this.tokens.length;
+                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain"];
                         var vars = [];
                         for (var i = 0; i < L; i++) {
                                 var item = this.tokens[i];
-                                if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && !this.functions[item.index_])) {
+                                if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && functions.indexOf(item.index_)==-1)) {
                                         vars.push(item.index_);
                                 }
                         }
@@ -373,10 +380,28 @@ define([],function(){
 		}
 		return b;
 	}
-	function positive(a){
-		if(a > 0) return 1;
-		else return 0;
+ 
+	function pulse(a,b,c){
+		if(c > a && c < b)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
 	}
+
+	function pulsetrain(a,b,c,d)
+	{
+		if(d < a)
+			return 0;
+		if(d % (b+c) < b)
+			return 1;
+		else
+			return 0;
+	}
+
 	
 	// TODO: use hypot that doesn't overflow
 	function pyt(a, b) {
@@ -440,11 +465,12 @@ define([],function(){
 			"pyt": pyt,
 			"pow": Math.pow,
 			"atan2": Math.atan2,
-			"positive": positive
+			"pulse": pulse,
+			"pulsetrain": pulsetrain
 		};
 
 		this.consts = {
-			"_E": Math.E,
+			"E": Math.E,
 			"PI": Math.PI
 		};
 	}
@@ -478,7 +504,6 @@ define([],function(){
 		round: Math.round,
 		random: random,
 		fac: fac,
-		positive: positive,
 		exp: Math.exp,
 		min: Math.min,
 		max: Math.max,

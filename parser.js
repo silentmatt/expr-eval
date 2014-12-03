@@ -10,7 +10,7 @@
  but don't feel like you have to let me know or ask permission.
 */
 
-define([],function(){
+define(['./seedrandom'],function(seedrandom){
 
 //  Added by stlsmiths 6/13/2011
 //  re-define Array.indexOf, because IE doesn't know it ...
@@ -32,7 +32,7 @@ define([],function(){
 		F.prototype = o;
 		return new F();
 	}
-
+	var seed = 0;
 	var TNUMBER = 0;
 	var TOP1 = 1;
 	var TOP2 = 2;
@@ -168,7 +168,7 @@ define([],function(){
 		        this.tokens = newexpression;
 		},
 
-		evaluate: function (values, time) {
+		evaluate: function (values, time, seed) {
 			values = values || {};
 			var nstack = [];
 			var n1;
@@ -177,62 +177,67 @@ define([],function(){
 			var L = this.tokens.length;
 			var item;
 			var i = 0;
-			for (i = 0; i < L; i++) {
-				item = this.tokens[i];
-				var type_ = item.type_;
-				if (type_ === TNUMBER) {
-					nstack.push(item.number_);
-				}
-				else if (type_ === TOP2) {
-					n2 = nstack.pop();
-					n1 = nstack.pop();
-					f = this.ops2[item.index_];
-					nstack.push(f(n1, n2));
-				}
-				else if (type_ === TVAR) {
-					if (item.index_ in values) {
-						nstack.push(values[item.index_]);
+				for (i = 0; i < L; i++) {
+					item = this.tokens[i];
+					var type_ = item.type_;
+					if (type_ === TNUMBER) {
+						nstack.push(item.number_);
 					}
-					else if (item.index_ in this.functions) {
-						nstack.push(this.functions[item.index_]);
+					else if (type_ === TOP2) {
+						n2 = nstack.pop();
+						n1 = nstack.pop();
+						f = this.ops2[item.index_];
+						nstack.push(f(n1, n2));
 					}
-					else {
-						throw new Error("undefined variable: " + item.index_);
-					}
-				}
-				else if (type_ === TOP1) {
-					n1 = nstack.pop();
-					f = this.ops1[item.index_];
-					nstack.push(f(n1));
-				}
-				else if (type_ === TFUNCALL) {
-					n1 = nstack.pop();
-					f = nstack.pop();					
-					if (f.apply && f.call) {
-						if(f === pulse || f === pulsetrain)
-						{
-							n1.push(time);
+					else if (type_ === TVAR) {
+						if (item.index_ in values) {
+							nstack.push(values[item.index_]);
 						}
-						if (Object.prototype.toString.call(n1) == "[object Array]") {
-							nstack.push(f.apply(undefined, n1));
+						else if (item.index_ in this.functions) {
+							nstack.push(this.functions[item.index_]);
 						}
-
 						else {
+							throw new Error("undefined variable: " + item.index_);
+						}
+					}
+					else if (type_ === TOP1) {
+						n1 = nstack.pop();
+						f = this.ops1[item.index_];
+						nstack.push(f(n1));
+					}
+					else if (type_ === TFUNCALL) {
+						n1 = nstack.pop();
+						f = nstack.pop();					
+						if (f.apply && f.call) {
+							if(f === pulse || f === pulsetrain)
+							{
+								n1.push(time);
+							}
+							if(f === random)
+							{
+								n1 = [n1];
+								n1.push(seed);
+							}
+							if (Object.prototype.toString.call(n1) == "[object Array]") {
+								nstack.push(f.apply(undefined, n1));
+							}
 
-							nstack.push(f.call(undefined, n1));
+							else {
+
+								nstack.push(f.call(undefined, n1));
+							}
+						}
+						else {
+							throw new Error(f + " is not a function");
 						}
 					}
 					else {
-						throw new Error(f + " is not a function");
+						throw new Error("invalid Expression");
 					}
 				}
-				else {
-					throw new Error("invalid Expression");
+				if (nstack.length > 1) {
+					throw new Error("invalid Expression (parity)");
 				}
-			}
-			if (nstack.length > 1) {
-				throw new Error("invalid Expression (parity)");
-			}
 			return nstack[0];
 		},
 
@@ -245,7 +250,7 @@ define([],function(){
                         };
 	       	        // Ranking based on http://en.wikipedia.org/wiki/Order_of_operations
 		        // Treat concat as low priority
-		        var prio2 = {'*': 3, '/': 3, '%': 3, '+': 4, '-': 4, '^': 1, ',': 6, '||': 5};
+		        var prio2 = {'*': 3, '/': 3, '%': 3, '+': 4, '-': 4, '^': 1, ',': 6, '||': 5, '<': 6, '>': 6, '==':6};
 		        var prio1 = 2;  // most unary operators.
 		        var naOps = {'/': 1, '^': 1, '-': 1}; // List of non-associative operators
 			var f;
@@ -369,8 +374,52 @@ define([],function(){
 		return -a;
 	}
 
-	function random(a) {
-		return Math.random() * (a || 1);
+	function less(a,b){
+		if (a < b)
+			return 1;
+		else
+			return 0;
+	}
+
+	function greater(a,b){
+		if (a > b)
+			return 1;
+		else
+			return 0;
+	}
+
+	function equal(a,b){
+		if (a == b)
+			return 1;
+		else
+			return 0;
+	}
+
+	function lessorequal(a,b){
+		if (a <= b)
+			return 1;
+		else
+			return 0;
+	}
+
+	function greaterorequal(a,b){
+		if (a >= b)
+			return 1;
+		else
+			return 0;
+	}
+
+
+	function random(a, seed) {
+		if(!seed)
+		{
+			var d = new Date();
+			seed = d.getTime();
+		}
+		Math.seedrandom(seed);
+		var result = Math.random() * (a || 1);
+		console.log(result);
+		return result;
 	}
 	function fac(a) { //a!
 		a = Math.floor(a);
@@ -454,7 +503,12 @@ define([],function(){
 			"%": mod,
 			"^": Math.pow,
 			",": append,
-			"||": concat
+			"||": concat,
+			"<": less,
+			">": greater,
+			"==": equal,
+			"<=": lessorequal,
+			">=": greaterorequal
 		};
 
 		this.functions = {
@@ -525,7 +579,8 @@ define([],function(){
 	var NULLARY_CALL = 1 << 8;
 
 	Parser.prototype = {
-		parse: function (expr) {
+		parse: function (expr, seed) {
+			this.seed = (seed || 0);
 			this.errormsg = "";
 			this.success = true;
 			var operstack = [];
@@ -825,6 +880,39 @@ define([],function(){
 			else if (code === 45) { // -
 				this.tokenprio = 0;
 				this.tokenindex = "-";
+			}
+			else if(code === 62){
+				if(this.expression.charCodeAt(this.pos + 1) === 61){
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = ">=";
+				}
+				else{
+					this.tokenprio = 0;
+					this.tokenindex = ">";
+				}
+			}
+			else if(code === 60){
+				if(this.expression.charCodeAt(this.pos + 1) === 61){
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = "<=";
+				}
+				else{
+					this.tokenprio = 0;
+					this.tokenindex = "<";
+				}
+			}
+			else if(code === 61){
+				if(this.expression.charCodeAt(this.pos + 1) === 61){
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = "=="
+				}
+				else{
+					return false;
+				}
+
 			}
 			else if (code === 124) { // |
 				if (this.expression.charCodeAt(this.pos + 1) === 124) {

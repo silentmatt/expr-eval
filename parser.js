@@ -416,8 +416,13 @@ define(['./seedrandom'],function(seedrandom){
 			var d = new Date();
 			seed = d.getTime();
 		}
-		Math.seedrandom(seed);
-		var result = Math.random() * (a || 1);
+		/*
+		 Tested seedrandom for bug 2435, If we use our custom seed, 
+		 most of the times random value is either min or max
+		 Math.seedrandom(seed); */ 
+		var min = a[0];
+		var max = a[1] || 1; 
+		var result = Math.floor(Math.random() * (max - min + 1)) + min;
 		console.log(result);
 		return result;
 	}

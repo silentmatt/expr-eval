@@ -8,7 +8,7 @@ This library is a modified version of Raphael Graf’s ActionScript Expression
 Parser. When I wrote the JavaScript Function Plotter, I wanted a better
 alternative to using JavaScript’s eval function. There’s no security risk
 currently, because you can only run code in your own browser, but it’s not as
-convenient for math (Math.pow(2^x) instead of 2^x, etc.).
+convenient for math `(Math.pow(2, x)` instead of `2^x`, etc.).
 
 Documentation (incomplete, of course)
 -------------------------------------

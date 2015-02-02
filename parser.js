@@ -209,7 +209,7 @@ define(['./seedrandom'],function(seedrandom){
 						n1 = nstack.pop();
 						f = nstack.pop();					
 						if (f.apply && f.call) {
-							if(f === pulse || f === pulsetrain)
+							if(f === pulse || f === pulsetrain || f === sinewave)
 							{
 								n1.push(time);
 							}
@@ -305,7 +305,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		variables: function () {
 			var L = this.tokens.length;
-                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain"];
+                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain", "sinewave"];
                         var vars = [];
                         for (var i = 0; i < L; i++) {
                                 var item = this.tokens[i];
@@ -451,6 +451,10 @@ define(['./seedrandom'],function(seedrandom){
 			return 0;
 	}
 
+	function sinewave(a,b,c)
+	{
+		return Math.sin(2*Math.PI*a*c + b);
+	}	
 	
 	// TODO: use hypot that doesn't overflow
 	function pyt(a, b) {
@@ -520,7 +524,8 @@ define(['./seedrandom'],function(seedrandom){
 			"pow": Math.pow,
 			"atan2": Math.atan2,
 			"pulse": pulse,
-			"pulsetrain": pulsetrain
+			"pulsetrain": pulsetrain,
+			"sinewave" : sinewave
 		};
 
 		this.consts = {

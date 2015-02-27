@@ -420,10 +420,9 @@ define(['./seedrandom'],function(seedrandom){
 		 Tested seedrandom for bug 2435, If we use our custom seed, 
 		 most of the times random value is either min or max
 		 Math.seedrandom(seed); */ 
-		var min = a[0];
-		var max = a[1] || 1; 
+		var min = 0;
+		var max = a || 1; 
 		var result = Math.floor(Math.random() * (max - min + 1)) + min;
-		console.log(result);
 		return result;
 	}
 	function fac(a) { //a!

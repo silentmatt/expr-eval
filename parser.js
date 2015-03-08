@@ -611,6 +611,7 @@ var Parser = (function (scope) {
 		error_parsing: function (column, msg) {
 			this.success = false;
 			this.errormsg = "parse error [column " + (column) + "]: " + msg;
+			this.column = column;
 			throw new Error(this.errormsg);
 		},
 

@@ -142,6 +142,12 @@ arguments are constant.
 	asin(x)   Arc sine of x (in radians)
 	acos(x)   Arc cosine of x (in radians)
 	atan(x)   Arc tangent of x (in radians)
+	sinh(x)   Hyperbolic sine of x (x is in radians)
+	cosh(x)   Hyperbolic cosine of x (x is in radians)
+	tanh(x)   Hyperbolic tangent of x (x is… well, you know)
+	asinh(x)  Hyperbolic arc sine of x (in radians)
+	acosh(x)  Hyperbolic arc cosine of x (in radians)
+	atanh(x)  Hyperbolic arc tangent of x (in radians)
 	sqrt(x)   Square root of x. Result is NaN (Not a Number) if x is negative.
 	log(x)    Natural logarithm of x (not base-10). It’s log instead of ln because that’s what JavaScript calls it.
 	abs(x)    Absolute value (magnatude) of x

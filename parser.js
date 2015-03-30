@@ -319,7 +319,29 @@ var Parser = (function (scope) {
 	function concat(a, b) {
 		return "" + a + b;
 	}
-
+	function sinh(a) {
+		return Math.sinh ? Math.sinh(a) : ((Math.exp(a) - Math.exp(-a)) / 2);
+	}
+	function cosh(a) {
+		return Math.cosh ? Math.cosh(a) : ((Math.exp(a) + Math.exp(-a)) / 2);
+	}
+	function tanh(a) {
+		if (Math.tanh) return Math.tanh(a);
+		if(a === Infinity) return 1;
+		if(a === -Infinity) return -1;
+		return (Math.exp(a) - Math.exp(-a)) / (Math.exp(a) + Math.exp(-a));
+	}
+	function asinh(a) {
+		if (Math.asinh) return Math.asinh(a);
+		if(a === -Infinity) return a;
+		return Math.log(a + Math.sqrt(a * a + 1));
+	}
+	function acosh(a) {
+		return Math.acosh ? Math.acosh(a) : Math.log(a + Math.sqrt(a * a - 1));
+	}
+	function atanh(a) {
+		return Math.atanh ? Math.atanh(a) : (Math.log((1+a)/(1-a)) / 2);
+	}
 	function log10(a) {
 	      return Math.log(a) * Math.LOG10E;
 	}
@@ -372,6 +394,12 @@ var Parser = (function (scope) {
 			"asin": Math.asin,
 			"acos": Math.acos,
 			"atan": Math.atan,
+			"sinh": sinh,
+			"cosh": cosh,
+			"atanh": atanh,
+			"asinh": asinh,
+			"acosh": acosh,
+			"atanh": atanh,
 			"sqrt": Math.sqrt,
 			"log": Math.log,
 			"lg" : log10,
@@ -428,6 +456,12 @@ var Parser = (function (scope) {
 		asin: Math.asin,
 		acos: Math.acos,
 		atan: Math.atan,
+		sinh: sinh,
+		cosh: cosh,
+		tanh: tanh,
+		asinh: asinh,
+		acosh: acosh,
+		atanh: atanh,
 		sqrt: Math.sqrt,
 		log: Math.log,
 		lg: log10,

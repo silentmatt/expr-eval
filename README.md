@@ -161,4 +161,5 @@ These are not evaluated by simplify.
 	max(a,b,…) 	Get the largest (“maximum”) number in the list
 	pyt(a, b) 	Pythagorean function, i.e. the c in “c2 = a2 + b2“
 	pow(x, y) 	xy. This is exactly the same as “x^y”. It’s just provided since it’s in the Math object from JavaScript
-	atan2(y, x) 	arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+	hypot(a,b)  The square root of the sum of squares of its arguments.

@@ -340,8 +340,17 @@ var Parser = (function (scope) {
 	}
 
 	// TODO: use hypot that doesn't overflow
-	function pyt(a, b) {
-		return Math.sqrt(a * a + b * b);
+	function hypot() {
+		if(Math.hypot) return Math.hypot.apply(this, arguments);
+		var y = 0;
+		var length = arguments.length;
+		for (var i = 0; i < length; i++) {
+			if (arguments[i] === Infinity || arguments[i] === -Infinity) {
+				return Infinity;
+			}
+			y += arguments[i] * arguments[i];
+		}
+		return Math.sqrt(y);
 	}
 
 	function append(a, b) {
@@ -400,7 +409,8 @@ var Parser = (function (scope) {
 			"fac": fac,
 			"min": Math.min,
 			"max": Math.max,
-			"pyt": pyt,
+			"hypot": hypot,
+			"pyt": hypot, // backward compat
 			"pow": Math.pow,
 			"atan2": Math.atan2
 		};
@@ -441,7 +451,8 @@ var Parser = (function (scope) {
 		exp: Math.exp,
 		min: Math.min,
 		max: Math.max,
-		pyt: pyt,
+		hypot: hypot,
+		pyt: hypot, // backward compat
 		pow: Math.pow,
 		atan2: Math.atan2,
 		E: Math.E,

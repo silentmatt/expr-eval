@@ -152,8 +152,9 @@ arguments are constant.
 	log(x)    Natural logarithm of x (not base-10). It’s log instead of ln because that’s what JavaScript calls it.
 	abs(x)    Absolute value (magnatude) of x
 	ceil(x)   Ceiling of x — the smallest integer that’s >= x.
-	floor(x)  Floor of x — the largest integer that’s <= x
+	floor(x)  Floor of x — the largest integer that’s <= x.
 	round(x)  X, rounded to the nearest integer, using “gradeschool rounding”.
+	trunc(x)  Integral part of a X, looks like floor(x) unless for negative number.
 	exp(x)    ex (exponential/antilogarithm function with base e) Pre-defined functions
 
 Besides the “operator” functions, there are several pre-defined functions. You

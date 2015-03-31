@@ -348,7 +348,10 @@ var Parser = (function (scope) {
 	function neg(a) {
 		return -a;
 	}
-
+	function trunc(a) {
+		if(Math.trunc) return Math.trunc(a);
+		else return x < 0 ? Math.ceil(x) : Math.floor(x);
+	}
 	function random(a) {
 		return Math.random() * (a || 1);
 	}
@@ -408,6 +411,7 @@ var Parser = (function (scope) {
 			"ceil": Math.ceil,
 			"floor": Math.floor,
 			"round": Math.round,
+			"trunc": trunc,
 			"-": neg,
 			"exp": Math.exp
 		};
@@ -470,6 +474,7 @@ var Parser = (function (scope) {
 		ceil: Math.ceil,
 		floor: Math.floor,
 		round: Math.round,
+		trunc: trunc,
 		random: random,
 		fac: fac,
 		exp: Math.exp,

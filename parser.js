@@ -678,9 +678,24 @@ define(['./seedrandom'],function(seedrandom){
 					if ((expected & PRIMARY) === 0) {
 						this.error_parsing(this.pos, "unexpected constant");
 					}
-					var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
-					tokenstack.push(consttoken);
-					expected = (OPERATOR | RPAREN | COMMA);
+					var temp = this.pos;
+					this.pos--;
+					if(this.isVar() && this.checkAfterConst())
+					{
+						if ((expected & PRIMARY) === 0) {
+						this.error_parsing(this.pos, "unexpected variable");
+						}
+						var vartoken = new Token(TVAR, this.tokenindex, 0, 0);
+						tokenstack.push(vartoken);
+						expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
+					}
+					else
+					{
+						var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
+						tokenstack.push(consttoken);
+						expected = (OPERATOR | RPAREN | COMMA);
+						this.pos = temp;
+					}
 				}
 				else if (this.isOp2()) {
 					if ((expected & FUNCTION) === 0) {
@@ -705,7 +720,7 @@ define(['./seedrandom'],function(seedrandom){
 					var vartoken = new Token(TVAR, this.tokenindex, 0, 0);
 					tokenstack.push(vartoken);
 
-					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | CALL);
 				}
 				else if (this.isWhite()) {
 				}
@@ -765,6 +780,16 @@ define(['./seedrandom'],function(seedrandom){
 				}
 			}
 			operstack.push(operator);
+		},
+
+		checkAfterConst: function() {
+			var r = true;
+			var str = "";
+			var code = this.expression.charCodeAt(this.pos);
+			if ((code >= 41 && code <= 57) || code === 37 || code === 94 || code === 124 || (code>=60 && code <=62)) {
+				r = false;
+			}
+			return r;
 		},
 
 		isNumber: function () {

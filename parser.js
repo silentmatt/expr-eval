@@ -408,7 +408,7 @@ var Parser = (function (scope) {
 			"atan": Math.atan,
 			"sinh": sinh,
 			"cosh": cosh,
-			"atanh": atanh,
+			"tanh": tanh,
 			"asinh": asinh,
 			"acosh": acosh,
 			"atanh": atanh,

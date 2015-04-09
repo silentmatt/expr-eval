@@ -599,6 +599,7 @@ define(['./seedrandom'],function(seedrandom){
 			var noperators = 0;
 			this.expression = expr;
 			this.pos = 0;
+			this.prev = 0;
 
 			while (this.pos < this.expression.length) {
 				if (this.isOperator()) {
@@ -644,6 +645,11 @@ define(['./seedrandom'],function(seedrandom){
 				else if (this.isLeftParenth()) {
 					if ((expected & LPAREN) === 0) {
 						this.error_parsing(this.pos, "unexpected \"(\"");
+					}
+
+					if((this.prev & PRIMARY) === 0)
+					{
+						console.log("hello");
 					}
 
 					if (expected & CALL) {
@@ -720,7 +726,7 @@ define(['./seedrandom'],function(seedrandom){
 					var vartoken = new Token(TVAR, this.tokenindex, 0, 0);
 					tokenstack.push(vartoken);
 
-					expected = (OPERATOR | RPAREN | COMMA | CALL);
+					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
 				}
 				else if (this.isWhite()) {
 				}

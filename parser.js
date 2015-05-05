@@ -599,7 +599,7 @@ define(['./seedrandom'],function(seedrandom){
 			var noperators = 0;
 			this.expression = expr;
 			this.pos = 0;
-			this.prev = 0;
+			var prev = 1 << 0;
 
 			while (this.pos < this.expression.length) {
 				if (this.isOperator()) {
@@ -647,7 +647,7 @@ define(['./seedrandom'],function(seedrandom){
 						this.error_parsing(this.pos, "unexpected \"(\"");
 					}
 
-					if((this.prev & PRIMARY) === 0)
+					if((prev & PRIMARY) === 0)
 					{
 						console.log("hello");
 					}
@@ -787,7 +787,14 @@ define(['./seedrandom'],function(seedrandom){
 			}
 			operstack.push(operator);
 		},
-
+		/**************************
+		Character codes:
+		41-57: ),*,+,,,-,.,/,0,1,2,3,4,5,6,7,8,9
+		37: %
+		94: ^
+		124: |
+		60-62: <,=,>
+		***************************/
 		checkAfterConst: function() {
 			var r = true;
 			var str = "";
@@ -797,7 +804,11 @@ define(['./seedrandom'],function(seedrandom){
 			}
 			return r;
 		},
-
+		/**************************
+		Character codes:
+		48-57: 0,1,2,3,4,5,6,7,8,9
+		46: .
+		***************************/
 		isNumber: function () {
 			var r = false;
 			var str = "";
@@ -911,6 +922,7 @@ define(['./seedrandom'],function(seedrandom){
 			return false;
 		},
 
+
 		isOperator: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 43) { // +
@@ -921,8 +933,8 @@ define(['./seedrandom'],function(seedrandom){
 				this.tokenprio = 0;
 				this.tokenindex = "-";
 			}
-			else if(code === 62){
-				if(this.expression.charCodeAt(this.pos + 1) === 61){
+			else if(code === 62){ //>
+				if(this.expression.charCodeAt(this.pos + 1) === 61){ //=
 					this.pos++;
 					this.tokenprio = 0;
 					this.tokenindex = ">=";
@@ -932,8 +944,8 @@ define(['./seedrandom'],function(seedrandom){
 					this.tokenindex = ">";
 				}
 			}
-			else if(code === 60){
-				if(this.expression.charCodeAt(this.pos + 1) === 61){
+			else if(code === 60){ //<
+				if(this.expression.charCodeAt(this.pos + 1) === 61){ //=
 					this.pos++;
 					this.tokenprio = 0;
 					this.tokenindex = "<=";
@@ -943,8 +955,8 @@ define(['./seedrandom'],function(seedrandom){
 					this.tokenindex = "<";
 				}
 			}
-			else if(code === 61){
-				if(this.expression.charCodeAt(this.pos + 1) === 61){
+			else if(code === 61){ //=
+				if(this.expression.charCodeAt(this.pos + 1) === 61){ //=
 					this.pos++;
 					this.tokenprio = 0;
 					this.tokenindex = "=="
@@ -989,7 +1001,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		isSign: function () {
 			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45 || code === 43) { // -
+			if (code === 45 || code === 43) { // - , +
 				return true;
 			}
 			return false;
@@ -1005,7 +1017,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		isNegativeSign: function () {
 			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45) { // -
+			if (code === 45) { // +
 				return true;
 			}
 			return false;
@@ -1042,6 +1054,13 @@ define(['./seedrandom'],function(seedrandom){
 			return false;
 		},
 
+		/**************************
+		Character codes:
+		32: (space)
+		9: (tab)
+		10: (line feed)
+		13: (return)
+		***************************/
 		isWhite: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 32 || code === 9 || code === 10 || code === 13) {
@@ -1091,6 +1110,13 @@ define(['./seedrandom'],function(seedrandom){
 			return false;
 		},
 
+		/**************************
+		Character codes:
+		32: (space)
+		9: (tab)
+		10: (line feed)
+		13: (return)
+		***************************/
 		isVar: function () {
 			var str = "";
 			for (var i = this.pos; i < this.expression.length; i++) {
@@ -1121,7 +1147,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		isComment: function () {
 			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 47 && this.expression.charCodeAt(this.pos) === 42) {
+			if (code === 47 && this.expression.charCodeAt(this.pos) === 42) { // /, *
 				this.pos = this.expression.indexOf("*/", this.pos) + 2;
 				if (this.pos === 1) {
 					this.pos = this.expression.length;

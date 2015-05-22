@@ -122,6 +122,18 @@ division, and remainder), and finally +, -, and || (addition, subtraction, and
 string concatenation) — and bind from left to right (yes, even exponentiation…
 it’s simpler that way).
 
+Inside the first argument of the if function can be used these operators to compare expressions:
+	==		Equal
+	!=		Not equal
+	>		Greater than
+	>=		Greater or equal than
+	<		Less than
+	<=		Less or equal than
+	and		Logical AND operator
+	or		Logical OR operator
+
+Example of if function: `if(1 and 2 <= 4, 2, 0) + 2` = 4
+
 There’s also a “,” (comma) operator that concatenates values into an array.
 It’s mostly useful for passing arguments to functions, since it doesn’t always
 behave like you would think with regards to multi-dimensional arrays. If the
@@ -170,3 +182,4 @@ These are not evaluated by simplify.
 	pow(x, y) 	xy. This is exactly the same as “x^y”. It’s just provided since it’s in the Math object from JavaScript
 	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 	hypot(a,b)  The square root of the sum of squares of its arguments.
+	if(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false

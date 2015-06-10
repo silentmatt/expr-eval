@@ -305,7 +305,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		variables: function () {
 			var L = this.tokens.length;
-                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain", "sinewave"];
+                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain", "sinewave", "if"];
                         var vars = [];
                         for (var i = 0; i < L; i++) {
                                 var item = this.tokens[i];
@@ -455,6 +455,18 @@ define(['./seedrandom'],function(seedrandom){
 			return 0;
 	}
 
+	function conditional(a,b,c)
+	{
+		if(a === 1)
+		{
+			return b;
+		}
+		else
+		{
+			return c;
+		}
+	}
+
 	function sinewave(a,b,c)
 	{
 		return Math.sin(2*Math.PI*a*c + b);
@@ -528,6 +540,7 @@ define(['./seedrandom'],function(seedrandom){
 			"pow": Math.pow,
 			"atan2": Math.atan2,
 			"pulse": pulse,
+			"if": conditional,
 			"pulsetrain": pulsetrain,
 			"sinewave" : sinewave
 		};

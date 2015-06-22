@@ -546,7 +546,7 @@ define(['./seedrandom'],function(seedrandom){
 		};
 
 		this.consts = {
-			"E": Math.E,
+			//"E": Math.E,
 			"PI": Math.PI
 		};
 	}

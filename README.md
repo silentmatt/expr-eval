@@ -76,10 +76,10 @@ variables. Function calls are not evaluated (except the built-in operator
 functions), since they may not be deterministic.
 
 Simplify is pretty simple (see what I did there?). It doesn’t know that
-addition and multiplication are associative, so “((2*(4*x))+1)” from the
-previous example cannot be simplified unless you provide a value for x. “2*4*x
-+ 1″ can however, because it’s parsed as “(((2*4)*x)+1)”, so the “(2*4)”
-sub-expression will be replaced with “8″, resulting in “((8*x)+1)”.
+addition and multiplication are associative, so `((2*(4*x))+1)` from the
+previous example cannot be simplified unless you provide a value for x. 
+`2*4*x+1` can however, because it’s parsed as `(((2*4)*x)+1)`, so the `(2*4)`
+sub-expression will be replaced with “8″, resulting in `((8*x)+1)`.
 
     js> expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4 });
     (x*3.141592653589793)

@@ -469,7 +469,7 @@ define(['./seedrandom'],function(seedrandom){
 
 	function sinewave(a,b,c)
 	{
-		return Math.sin(2*Math.PI*a*c + b);
+		return Math.sin(1/(2*Math.PI*a*c) + b);
 	}	
 	
 	// TODO: use hypot that doesn't overflow

@@ -187,6 +187,7 @@ These are not evaluated by simplify.
 ### Tests ###
 
 To run tests, you need:
+
 1. [Install NodeJS](https://github.com/nodejs/node)
 2. Install Mocha `npm install -g mocha`
 3. Install Chai `npm install chai`

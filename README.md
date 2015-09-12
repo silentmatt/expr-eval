@@ -67,7 +67,7 @@ expression (essentially, function composition).
     js> expr2.evaluate({ x: 3});
     25
 
-**simplify({variables: object>)** 
+**simplify({variables: object>)**
 
 Simplify constant sub-expressions and replace
 variable references with literal values. This is basically a partial
@@ -183,3 +183,11 @@ These are not evaluated by simplify.
 	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 	hypot(a,b)  The square root of the sum of squares of its arguments.
 	if(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false
+
+### Tests ###
+
+To run tests, you need:
+1. [Install NodeJS](https://github.com/nodejs/node)
+2. Install Mocha `npm install -g mocha`
+3. Install Chai `npm install chai`
+4. Execute `mocha`

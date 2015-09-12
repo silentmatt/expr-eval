@@ -305,7 +305,7 @@ var Parser = (function (scope) {
 		return Number(a) + Number(b);
 	}
 	function sub(a, b) {
-		return a - b; 
+		return a - b;
 	}
 	function mul(a, b) {
 		return a * b;
@@ -338,10 +338,10 @@ var Parser = (function (scope) {
 		return a <= b;
 	}
 	function andOperator(a, b) {
-		return a && b;
+		return Boolean(a && b);
 	}
 	function orOperator(a, b) {
-		return a || b;
+		return Boolean(a || b);
 	}
 	function sinh(a) {
 		return Math.sinh ? Math.sinh(a) : ((Math.exp(a) - Math.exp(-a)) / 2);
@@ -743,7 +743,7 @@ var Parser = (function (scope) {
 
 			for (var i = 0; i < v.length; i++) {
 				var c = v.charAt(i);
-	
+
 				if (escaping) {
 					switch (c) {
 					case "'":
@@ -788,7 +788,7 @@ var Parser = (function (scope) {
 					}
 				}
 			}
-	
+
 			return buffer.join('');
 		},
 
@@ -834,37 +834,37 @@ var Parser = (function (scope) {
 		isOperator: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 43) { // +
-				this.tokenprio = 0;
+				this.tokenprio = 2;
 				this.tokenindex = "+";
 			}
 			else if (code === 45) { // -
-				this.tokenprio = 0;
+				this.tokenprio = 2;
 				this.tokenindex = "-";
 			}
 			else if (code === 62) { // >
 				if (this.expression.charCodeAt(this.pos + 1) === 61) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = ">=";
 				} else {
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = ">";
 				}
 			}
 			else if (code === 60) { // <
 				if (this.expression.charCodeAt(this.pos + 1) === 61) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "<=";
 				} else {
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "<";
 				}
 			}
 			else if (code === 124) { // |
 				if (this.expression.charCodeAt(this.pos + 1) === 124) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "||";
 				}
 				else {
@@ -874,7 +874,7 @@ var Parser = (function (scope) {
 			else if (code === 61) { // =
 				if (this.expression.charCodeAt(this.pos + 1) === 61) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "==";
 				}
 				else {
@@ -884,7 +884,7 @@ var Parser = (function (scope) {
 			else if (code === 33) { // !
 				if (this.expression.charCodeAt(this.pos + 1) === 61) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "!=";
 				}
 				else {
@@ -913,19 +913,19 @@ var Parser = (function (scope) {
 				}
 			}
 			else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
-				this.tokenprio = 1;
+				this.tokenprio = 3;
 				this.tokenindex = "*";
 			}
 			else if (code === 47) { // /
-				this.tokenprio = 2;
+				this.tokenprio = 4;
 				this.tokenindex = "/";
 			}
 			else if (code === 37) { // %
-				this.tokenprio = 2;
+				this.tokenprio = 4;
 				this.tokenindex = "%";
 			}
 			else if (code === 94) { // ^
-				this.tokenprio = 3;
+				this.tokenprio = 5;
 				this.tokenindex = "^";
 			}
 			else {

@@ -305,7 +305,7 @@ var Parser = (function (scope) {
 		return Number(a) + Number(b);
 	}
 	function sub(a, b) {
-		return a - b; 
+		return a - b;
 	}
 	function mul(a, b) {
 		return a * b;
@@ -318,6 +318,30 @@ var Parser = (function (scope) {
 	}
 	function concat(a, b) {
 		return "" + a + b;
+	}
+	function equal(a, b) {
+		return a == b;
+	}
+	function notEqual(a, b) {
+		return a != b;
+	}
+	function greaterThan(a, b) {
+		return a > b;
+	}
+	function lessThan(a, b) {
+		return a < b;
+	}
+	function greaterThanEqual(a, b) {
+		return a >= b;
+	}
+	function lessThanEqual(a, b) {
+		return a <= b;
+	}
+	function andOperator(a, b) {
+		return Boolean(a && b);
+	}
+	function orOperator(a, b) {
+		return Boolean(a || b);
 	}
 	function sinh(a) {
 		return Math.sinh ? Math.sinh(a) : ((Math.exp(a) - Math.exp(-a)) / 2);
@@ -378,6 +402,10 @@ var Parser = (function (scope) {
 		return Math.sqrt(y);
 	}
 
+	function condition(cond, yep, nope) {
+		return cond ? yep : nope;
+	}
+
 	function append(a, b) {
 		if (Object.prototype.toString.call(a) != "[object Array]") {
 			return [a, b];
@@ -433,7 +461,15 @@ var Parser = (function (scope) {
 			"%": mod,
 			"^": Math.pow,
 			",": append,
-			"||": concat
+			"||": concat,
+			"==": equal,
+			"!=": notEqual,
+			">": greaterThan,
+			"<": lessThan,
+			">=": greaterThanEqual,
+			"<=": lessThanEqual,
+			"and": andOperator,
+			"or": orOperator
 		};
 
 		this.functions = {
@@ -444,7 +480,8 @@ var Parser = (function (scope) {
 			"hypot": hypot,
 			"pyt": hypot, // backward compat
 			"pow": Math.pow,
-			"atan2": Math.atan2
+			"atan2": Math.atan2,
+			"if": condition
 		};
 
 		this.consts = {
@@ -494,6 +531,7 @@ var Parser = (function (scope) {
 		pyt: hypot, // backward compat
 		pow: Math.pow,
 		atan2: Math.atan2,
+		if: condition,
 		E: Math.E,
 		PI: Math.PI
 	};
@@ -705,7 +743,7 @@ var Parser = (function (scope) {
 
 			for (var i = 0; i < v.length; i++) {
 				var c = v.charAt(i);
-	
+
 				if (escaping) {
 					switch (c) {
 					case "'":
@@ -750,7 +788,7 @@ var Parser = (function (scope) {
 					}
 				}
 			}
-	
+
 			return buffer.join('');
 		},
 
@@ -796,37 +834,98 @@ var Parser = (function (scope) {
 		isOperator: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 43) { // +
-				this.tokenprio = 0;
+				this.tokenprio = 2;
 				this.tokenindex = "+";
 			}
 			else if (code === 45) { // -
-				this.tokenprio = 0;
+				this.tokenprio = 2;
 				this.tokenindex = "-";
+			}
+			else if (code === 62) { // >
+				if (this.expression.charCodeAt(this.pos + 1) === 61) {
+					this.pos++;
+					this.tokenprio = 1;
+					this.tokenindex = ">=";
+				} else {
+					this.tokenprio = 1;
+					this.tokenindex = ">";
+				}
+			}
+			else if (code === 60) { // <
+				if (this.expression.charCodeAt(this.pos + 1) === 61) {
+					this.pos++;
+					this.tokenprio = 1;
+					this.tokenindex = "<=";
+				} else {
+					this.tokenprio = 1;
+					this.tokenindex = "<";
+				}
 			}
 			else if (code === 124) { // |
 				if (this.expression.charCodeAt(this.pos + 1) === 124) {
 					this.pos++;
-					this.tokenprio = 0;
+					this.tokenprio = 1;
 					this.tokenindex = "||";
 				}
 				else {
 					return false;
 				}
 			}
+			else if (code === 61) { // =
+				if (this.expression.charCodeAt(this.pos + 1) === 61) {
+					this.pos++;
+					this.tokenprio = 1;
+					this.tokenindex = "==";
+				}
+				else {
+					return false;
+				}
+			}
+			else if (code === 33) { // !
+				if (this.expression.charCodeAt(this.pos + 1) === 61) {
+					this.pos++;
+					this.tokenprio = 1;
+					this.tokenindex = "!=";
+				}
+				else {
+					return false;
+				}
+			}
+			else if (code === 97) { // a
+				if (this.expression.charCodeAt(this.pos + 1) === 110 && this.expression.charCodeAt(this.pos + 2) === 100) { // n && d
+					this.pos++;
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = "and";
+				}
+				else {
+					return false;
+				}
+			}
+			else if (code === 111) { // o
+				if (this.expression.charCodeAt(this.pos + 1) === 114) { // r
+					this.pos++;
+					this.tokenprio = 0;
+					this.tokenindex = "or";
+				}
+				else {
+					return false;
+				}
+			}
 			else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
-				this.tokenprio = 1;
+				this.tokenprio = 3;
 				this.tokenindex = "*";
 			}
 			else if (code === 47) { // /
-				this.tokenprio = 2;
+				this.tokenprio = 4;
 				this.tokenindex = "/";
 			}
 			else if (code === 37) { // %
-				this.tokenprio = 2;
+				this.tokenprio = 4;
 				this.tokenindex = "%";
 			}
 			else if (code === 94) { // ^
-				this.tokenprio = 3;
+				this.tokenprio = 5;
 				this.tokenindex = "^";
 			}
 			else {

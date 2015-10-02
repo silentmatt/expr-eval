@@ -168,65 +168,90 @@ var Parser = (function (scope) {
 		},
 
 		evaluate: function (values) {
+			var self = this;
 			values = values || {};
 			var nstack = [];
 			var n1;
 			var n2;
 			var f;
 			var L = this.tokens.length;
-			var item;
-			var i = 0;
-			for (i = 0; i < L; i++) {
-				item = this.tokens[i];
-				var type_ = item.type_;
-				if (type_ === TNUMBER) {
-					nstack.push(item.number_);
-				}
-				else if (type_ === TOP2) {
-					n2 = nstack.pop();
-					n1 = nstack.pop();
-					f = this.ops2[item.index_];
-					nstack.push(f(n1, n2));
-				}
-				else if (type_ === TVAR) {
-					if (item.index_ in values) {
-						nstack.push(values[item.index_]);
-					}
-					else if (item.index_ in this.functions) {
-						nstack.push(this.functions[item.index_]);
-					}
-					else {
-						throw new Error("undefined variable: " + item.index_);
-					}
-				}
-				else if (type_ === TOP1) {
-					n1 = nstack.pop();
-					f = this.ops1[item.index_];
-					nstack.push(f(n1));
-				}
-				else if (type_ === TFUNCALL) {
-					n1 = nstack.pop();
-					f = nstack.pop();
-					if (f.apply && f.call) {
-						if (Object.prototype.toString.call(n1) == "[object Array]") {
-							nstack.push(f.apply(undefined, n1));
+
+			var promiseResolveTokens = Q(1);
+			self.tokens.forEach(function(item){
+				promiseResolveTokens = promiseResolveTokens
+					.then(function() {
+						var type_ = item.type_;
+						if (type_ === TNUMBER) {
+							nstack.push(item.number_);
+						}
+						else if (type_ === TOP2) {
+							n2 = nstack.pop();
+							n1 = nstack.pop();
+							f = self.ops2[item.index_];
+							nstack.push(f(n1, n2));
+						}
+						else if (type_ === TVAR) {
+							if (item.index_ in values) {
+								if ((typeof values[item.index_] !== 'function') || item.willBeCalled) {
+									nstack.push(values[item.index_]);
+								}
+								else {
+									var val = values[item.index_].apply(undefined, []);
+									if (!val.then)
+										nstack.push(val);
+									else
+									   return val.then(function(v){
+										   nstack.push(v);
+									   });
+								}
+							}
+							else if (item.index_ in self.functions) {
+								nstack.push(self.functions[item.index_]);
+							}
+							else {
+								throw new Error("undefined variable: " + item.index_);
+							}
+						}
+						else if (type_ === TOP1) {
+							n1 = nstack.pop();
+							f = self.ops1[item.index_];
+							nstack.push(f(n1));
+						}
+						else if (type_ === TFUNCALL) {
+							n1 = nstack.pop();
+							f = nstack.pop();
+							if (f.apply && f.call) {
+								var res;
+								if (Object.prototype.toString.call(n1) == "[object Array]")
+									res = f.apply(undefined, n1);
+								else
+									res = f.call(undefined, n1);
+								if ( (res != null) && res.then )
+									return res.then(function(v){
+										nstack.push(v);
+									});
+								else
+									nstack.push(res);
+
+							}
+							else {
+								throw new Error(f + " is not a function");
+							}
 						}
 						else {
-							nstack.push(f.call(undefined, n1));
+							throw new Error("invalid Expression");
 						}
-					}
-					else {
-						throw new Error(f + " is not a function");
-					}
+					});
+			});
+
+
+			return promiseResolveTokens.then(function(){
+				if (nstack.length > 1) {
+					throw new Error("invalid Expression (parity)");
 				}
-				else {
-					throw new Error("invalid Expression");
-				}
-			}
-			if (nstack.length > 1) {
-				throw new Error("invalid Expression (parity)");
-			}
-			return nstack[0];
+				else
+					return nstack[0];
+			});
 		},
 
 		toString: function (toJS) {
@@ -520,6 +545,7 @@ var Parser = (function (scope) {
 						noperators += 2;
 						this.tokenprio = -2;
 						this.tokenindex = -1;
+						tokenstack[tokenstack.length-1].willBeCalled = true;
 						this.addfunc(tokenstack, operstack, TFUNCALL);
 					}
 

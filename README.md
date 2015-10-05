@@ -1,6 +1,7 @@
 JavaScript Expression Evaluator
 ===============================
 
+
 Description
 -----------
 
@@ -9,6 +10,14 @@ Parser. When I wrote the JavaScript Function Plotter, I wanted a better
 alternative to using JavaScript’s eval function. There’s no security risk
 currently, because you can only run code in your own browser, but it’s not as
 convenient for math (`Math.pow(2, x)` instead of `2^x`, etc.).
+
+Async functions and variables support
+-------------------------------------
+
+This fork has enabled async processing of expression, only breaking diferrence 
+from original lib is that Parser.evaluate returns a promise that is resolved 
+to result of expression and any variable or function registered on expression 
+scope can be an async function, was added a dependency on Q
 
 Documentation (incomplete, of course)
 -------------------------------------

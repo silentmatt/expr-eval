@@ -1,0 +1,23 @@
+{
+  "name": "js-expression-eval-async",
+  "version": "1.0.0",
+  "private": false,
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^3.3.0",
+    "chai-as-promised" : "^5.1.0",
+    "mocha": "^2.3.3",
+    "q": "^2.0.2"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unicorpinformatica/js-expression-eval-async"
+  },
+  "author": "Unicorp Informática Industrial LTDA and silentmatt",
+  "license": "Todos os direitos reservados"
+}

@@ -123,6 +123,7 @@ string concatenation) — and bind from left to right (yes, even exponentiation�
 it’s simpler that way).
 
 Inside the first argument of the if function can be used these operators to compare expressions:
+
 	==		Equal
 	!=		Not equal
 	>		Greater than
@@ -147,27 +148,27 @@ only difference from an outside point of view, is that they cannot be called
 with multiple arguments and they are evaluated by the simplify method if their
 arguments are constant.
 
-	Function  Description
-	sin(x)    Sine of x (x is in radians)
-	cos(x)    Cosine of x (x is in radians)
-	tan(x)    Tangent of x (x is… well, you know)
-	asin(x)   Arc sine of x (in radians)
-	acos(x)   Arc cosine of x (in radians)
-	atan(x)   Arc tangent of x (in radians)
-	sinh(x)   Hyperbolic sine of x (x is in radians)
-	cosh(x)   Hyperbolic cosine of x (x is in radians)
-	tanh(x)   Hyperbolic tangent of x (x is… well, you know)
-	asinh(x)  Hyperbolic arc sine of x (in radians)
-	acosh(x)  Hyperbolic arc cosine of x (in radians)
-	atanh(x)  Hyperbolic arc tangent of x (in radians)
-	sqrt(x)   Square root of x. Result is NaN (Not a Number) if x is negative.
-	log(x)    Natural logarithm of x (not base-10). It’s log instead of ln because that’s what JavaScript calls it.
-	abs(x)    Absolute value (magnatude) of x
-	ceil(x)   Ceiling of x — the smallest integer that’s >= x.
-	floor(x)  Floor of x — the largest integer that’s <= x.
-	round(x)  X, rounded to the nearest integer, using “gradeschool rounding”.
-	trunc(x)  Integral part of a X, looks like floor(x) unless for negative number.
-	exp(x)    ex (exponential/antilogarithm function with base e) Pre-defined functions
+	Function       Description
+	sin(x)         Sine of x (x is in radians)
+	cos(x)         Cosine of x (x is in radians)
+	tan(x)         Tangent of x (x is… well, you know)
+	asin(x)        Arc sine of x (in radians)
+	acos(x)        Arc cosine of x (in radians)
+	atan(x)        Arc tangent of x (in radians)
+	sinh(x)        Hyperbolic sine of x (x is in radians)
+	cosh(x)        Hyperbolic cosine of x (x is in radians)
+	tanh(x)        Hyperbolic tangent of x (x is… well, you know)
+	asinh(x)       Hyperbolic arc sine of x (in radians)
+	acosh(x)       Hyperbolic arc cosine of x (in radians)
+	atanh(x)       Hyperbolic arc tangent of x (in radians)
+	sqrt(x)        Square root of x. Result is NaN (Not a Number) if x is negative.
+	log(x)         Natural logarithm of x (not base-10). It’s log instead of ln because that’s what JavaScript calls it.
+	abs(x)         Absolute value (magnatude) of x
+	ceil(x)        Ceiling of x — the smallest integer that’s >= x.
+	floor(x)       Floor of x — the largest integer that’s <= x.
+	round(x, n)    X, rounded to the nearest integer or to n decimal places, using “gradeschool rounding”.
+	trunc(x)       Integral part of a X, looks like floor(x) unless for negative number.
+	exp(x)         ex (exponential/antilogarithm function with base e) Pre-defined functions
 
 Besides the “operator” functions, there are several pre-defined functions. You
 can provide your own, by binding variables to normal JavaScript functions.
@@ -183,6 +184,7 @@ These are not evaluated by simplify.
 	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 	hypot(a,b)  The square root of the sum of squares of its arguments.
 	if(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false
+    len(n)      The character length of n. i.e. len(123) = 3
 
 ### Tests ###
 

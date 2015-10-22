@@ -177,6 +177,45 @@ describe("Parser", function() {
             expect(Parser.evaluate("if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)")).to.equal(2.4);
         });
     });
+
+    describe("#len()", function() {
+        it("len(1)", function() {
+            expect(Parser.evaluate("len(1)")).to.equal(1);
+        });
+        it("len(0)", function() {
+            expect(Parser.evaluate("len(0)")).to.equal(1);
+        });
+        it("len()", function() {
+            expect(Parser.evaluate("len()")).to.equal(0);
+        });
+        it("len(12345)", function() {
+            expect(Parser.evaluate("len(12345)")).to.equal(5);
+        });
+        it("len('string')", function() {
+            expect(Parser.evaluate("len('string')")).to.equal(6);
+        });
+    });
+
+    describe("#round()", function() {
+        it("round(663)", function() {
+            expect(Parser.evaluate("round(663)")).to.equal(663);
+        });
+        it("round(663, 0)", function() {
+            expect(Parser.evaluate("round(663, 0)")).to.equal(663);
+        });
+        it("round(662.79)", function() {
+            expect(Parser.evaluate("round(662.79)")).to.equal(663);
+        });
+        it("round(662.79, 1)", function() {
+            expect(Parser.evaluate("round(662.79, 1)")).to.equal(662.8);
+        });
+        it("round(54.1, -1)", function() {
+            expect(Parser.evaluate("round(54.1, -1)")).to.equal(50);
+        });
+        it("round(-23.67, 1)", function() {
+            expect(Parser.evaluate("round(-23.67, 1)")).to.equal(-23.7);
+        });
+    });
 });
 
 /* @todo

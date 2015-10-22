@@ -177,6 +177,24 @@ describe("Parser", function() {
             expect(Parser.evaluate("if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)")).to.equal(2.4);
         });
     });
+
+    describe("#len()", function() {
+        it("len(1)", function() {
+            expect(Parser.evaluate("len(1)")).to.equal(1);
+        });
+        it("len(0)", function() {
+            expect(Parser.evaluate("len(0)")).to.equal(1);
+        });
+        it("len()", function() {
+            expect(Parser.evaluate("len()")).to.equal(0);
+        });
+        it("len(12345)", function() {
+            expect(Parser.evaluate("len(12345)")).to.equal(5);
+        });
+        it("len('string')", function() {
+            expect(Parser.evaluate("len('string')")).to.equal(6);
+        });
+    });
 });
 
 /* @todo

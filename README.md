@@ -184,6 +184,7 @@ These are not evaluated by simplify.
 	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 	hypot(a,b)  The square root of the sum of squares of its arguments.
 	if(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false
+    len(n)      The character length of n. i.e. len(123) = 3
 
 ### Tests ###
 

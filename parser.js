@@ -406,6 +406,11 @@ var Parser = (function (scope) {
 		return cond ? yep : nope;
 	}
 
+	function len(val) {
+		if (typeof val === 'undefined') val = '';
+		return val.toString().length;
+	}
+
 	function append(a, b) {
 		if (Object.prototype.toString.call(a) != "[object Array]") {
 			return [a, b];
@@ -481,7 +486,8 @@ var Parser = (function (scope) {
 			"pyt": hypot, // backward compat
 			"pow": Math.pow,
 			"atan2": Math.atan2,
-			"if": condition
+			"if": condition,
+			"len": len
 		};
 
 		this.consts = {
@@ -532,6 +538,7 @@ var Parser = (function (scope) {
 		pow: Math.pow,
 		atan2: Math.atan2,
 		if: condition,
+		len: len,
 		E: Math.E,
 		PI: Math.PI
 	};

@@ -123,6 +123,7 @@ string concatenation) — and bind from left to right (yes, even exponentiation�
 it’s simpler that way).
 
 Inside the first argument of the if function can be used these operators to compare expressions:
+
 	==		Equal
 	!=		Not equal
 	>		Greater than

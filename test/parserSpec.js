@@ -195,6 +195,27 @@ describe("Parser", function() {
             expect(Parser.evaluate("len('string')")).to.equal(6);
         });
     });
+
+    describe("#round()", function() {
+        it("round(663)", function() {
+            expect(Parser.evaluate("round(663)")).to.equal(663);
+        });
+        it("round(663, 0)", function() {
+            expect(Parser.evaluate("round(663, 0)")).to.equal(663);
+        });
+        it("round(662.79)", function() {
+            expect(Parser.evaluate("round(662.79)")).to.equal(663);
+        });
+        it("round(662.79, 1)", function() {
+            expect(Parser.evaluate("round(662.79, 1)")).to.equal(662.8);
+        });
+        it("round(54.1, -1)", function() {
+            expect(Parser.evaluate("round(54.1, -1)")).to.equal(50);
+        });
+        it("round(-23.67, 1)", function() {
+            expect(Parser.evaluate("round(-23.67, 1)")).to.equal(-23.7);
+        });
+    });
 });
 
 /* @todo

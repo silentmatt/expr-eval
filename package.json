@@ -1,0 +1,7 @@
+{
+  "name": "mathparser-js",
+  "description": "Math Psrser Package",
+  "version": "0.1",
+  "main": "parser",
+  "dojoBuild": "parser.profile.js"
+}

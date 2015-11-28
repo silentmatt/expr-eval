@@ -531,7 +531,7 @@ var Parser = (function (scope) {
 		pyt: hypot, // backward compat
 		pow: Math.pow,
 		atan2: Math.atan2,
-		if: condition,
+		"if": condition,
 		E: Math.E,
 		PI: Math.PI
 	};

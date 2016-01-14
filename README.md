@@ -15,17 +15,16 @@ Documentation (incomplete, of course)
 
 ### Quick start ###
 
-**installation**
+**Installation**
 
 ```bash
 npm install js-expression
 ```
 
-**usage**
+**Usage**
 
 ```javascript
 var Parser = require('js-expression').Parser;
-var parser = new Parser();
 
 function Complex(r, i){
   this.r = r;

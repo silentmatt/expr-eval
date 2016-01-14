@@ -13,6 +13,43 @@ convenient for math (`Math.pow(2, x)` instead of `2^x`, etc.).
 Documentation (incomplete, of course)
 -------------------------------------
 
+### Quick start ###
+
+**installation**
+
+```bash
+npm install js-expression
+```
+
+**usage**
+
+```javascript
+var Parser = require('js-expression').Parser;
+var parser = new Parser();
+
+function Complex(r, i){
+  this.r = r;
+  this.i = i || 0;
+}
+
+Complex.prototype.toString = function(){
+  return this.r + '+' + this.i + 'i';
+}
+
+var parser = new Parser();
+
+parser.overload('+', Complex, function(a, b){
+  return new Complex(a.r + b.r, a.i + b.i);
+});
+
+var c = parser.parse("a + b + 1");
+var a = new Complex(1, 2);
+var b = new Complex(3, 4);
+
+//Complex { r: 5, i: 6 }
+console.log(c.evaluate({a:a, b:b}));
+```
+
 ### Parser ###
 
 Parser is the main class in the library. It has “static” methods for parsing

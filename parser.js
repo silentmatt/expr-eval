@@ -208,12 +208,7 @@ var Parser = (function (scope) {
 					n1 = nstack.pop();
 					f = nstack.pop();
 					if (f.apply && f.call) {
-						if (Object.prototype.toString.call(n1) == "[object Array]") {
-							nstack.push(f.apply(undefined, n1));
-						}
-						else {
-							nstack.push(f.call(undefined, n1));
-						}
+						nstack.push(f.call(undefined, n1));
 					}
 					else {
 						throw new Error(f + " is not a function");
@@ -302,7 +297,7 @@ var Parser = (function (scope) {
 	};
 
 	function add(a, b) {
-		return Number(a) + Number(b);
+		return a + b;
 	}
 	function sub(a, b) {
 		return a - b;
@@ -472,6 +467,25 @@ var Parser = (function (scope) {
 			"or": orOperator
 		};
 
+		this.tokenprio_map = {
+			"," :  0,
+			"or":  0,
+			"and": 0,
+			"||":  1,
+			"==":  1,
+			"!=":  1,
+			">":   1,
+			"<":   1,
+			">=":  1,
+			"<=":  1,
+			"+":   2,
+			"-":   2,
+			"*":   3,
+			"/":   4,
+			"%":   4,
+			"^":   5
+		};
+
 		this.functions = {
 			"random": random,
 			"fac": fac,
@@ -547,6 +561,74 @@ var Parser = (function (scope) {
 	var NULLARY_CALL = 1 << 8;
 
 	Parser.prototype = {
+		overload: function(key, Class, func){
+			this.overload_map = this.overload_map || [];
+			this.overload_map_funcs = this.overload_map_funcs || [];
+			this.overload_map[key]  = this.overload_map[key] || [];
+			this.overload_map_funcs[key] = this.overload_map_funcs[key] || [];
+
+			var overload_map = this.overload_map[key];
+			var overload_map_funcs = this.overload_map_funcs[key];
+			var self = this;
+
+			function overload(op){
+				return function(){
+					var args = [].slice.call(arguments);
+					var matched = false;
+
+					for(var i = 0; i < args.length; i++){
+						var _Class = args[i].constructor;
+						var idx = overload_map.indexOf(_Class);
+
+						if(idx >= 0){
+							matched = true;
+							break;
+						}
+					}
+
+					if(matched){
+						args = args.map(function(o){
+							if(!(o instanceof _Class)){
+								return new _Class(o);
+							}
+							return o;
+						});
+						return overload_map_funcs[idx].apply(this, args);
+					}
+
+					return op.apply(this, args);	
+				}
+			}
+
+			if(overload_map.length <= 0){
+				if(key in this.ops1 && func.length === 1){
+					this.ops1[key] = overload(this.ops1[key]);
+				}else if(key in this.ops2 && func.length === 2){
+					this.ops2[key] = overload(this.ops2[key]);
+				}else if(key in this.functions){
+					this.functions[key] = overload(this.functions[key]);
+				}
+			}
+			overload_map.push(Class);
+			overload_map_funcs.push(func);
+		},
+
+		addOperator: function(name, prio, func){
+			if(func.length === 1){
+				this.ops1[name] = func;
+			}else if(func.length === 2){
+				this.ops2[name] = func;
+				this.tokenprio_map[name] = prio;
+			}
+
+			Parser.values[name] = func;
+		},
+
+		addFunction: function(name, func){
+			this.functions[name] = func;
+			Parser.values[name] = func;
+		},
+
 		parse: function (expr) {
 			this.errormsg = "";
 			this.success = true;
@@ -832,107 +914,27 @@ var Parser = (function (scope) {
 		},
 
 		isOperator: function () {
-			var code = this.expression.charCodeAt(this.pos);
-			if (code === 43) { // +
-				this.tokenprio = 2;
-				this.tokenindex = "+";
-			}
-			else if (code === 45) { // -
-				this.tokenprio = 2;
-				this.tokenindex = "-";
-			}
-			else if (code === 62) { // >
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = ">=";
-				} else {
-					this.tokenprio = 1;
-					this.tokenindex = ">";
+			var rest = this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops2).sort(function(a, b){
+				return b.length - a.length;
+			});
+
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(rest.indexOf(op) == 0){
+					self.pos += (op.length - 1);
+					self.tokenindex = op;
+					return true;
 				}
+			});
+
+			if(res){
+				this.tokenprio = this.tokenprio_map[this.tokenindex];
+				this.pos++;
+				return true;
 			}
-			else if (code === 60) { // <
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "<=";
-				} else {
-					this.tokenprio = 1;
-					this.tokenindex = "<";
-				}
-			}
-			else if (code === 124) { // |
-				if (this.expression.charCodeAt(this.pos + 1) === 124) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "||";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 61) { // =
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "==";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 33) { // !
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "!=";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 97) { // a
-				if (this.expression.charCodeAt(this.pos + 1) === 110 && this.expression.charCodeAt(this.pos + 2) === 100) { // n && d
-					this.pos++;
-					this.pos++;
-					this.tokenprio = 0;
-					this.tokenindex = "and";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 111) { // o
-				if (this.expression.charCodeAt(this.pos + 1) === 114) { // r
-					this.pos++;
-					this.tokenprio = 0;
-					this.tokenindex = "or";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
-				this.tokenprio = 3;
-				this.tokenindex = "*";
-			}
-			else if (code === 47) { // /
-				this.tokenprio = 4;
-				this.tokenindex = "/";
-			}
-			else if (code === 37) { // %
-				this.tokenprio = 4;
-				this.tokenindex = "%";
-			}
-			else if (code === 94) { // ^
-				this.tokenprio = 5;
-				this.tokenindex = "^";
-			}
-			else {
-				return false;
-			}
-			this.pos++;
-			return true;
+			return false;
 		},
 
 		isSign: function () {

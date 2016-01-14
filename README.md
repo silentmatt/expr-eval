@@ -36,6 +36,64 @@ the {variables} object.
 Parser.evaluate(expr, vars) is equivalent to calling
 Parser.parse(expr).evaluate(vars). In fact, that’s exactly what it does.
 
+**addOperator({operator: string}, {priority: number}, {handler: function})**
+
+Add a new operator to evaluate an expression.
+
+```javascript
+var parser = new Parser();
+
+function Vector(x, y){
+  this.x = x;
+  this.y = y;
+}
+
+//vector cross
+parser.addOperator('**', 3, function(a,b){
+  return new Vector(a.x * b.y, -b.x * a.y);
+});
+
+var expr = parser.parse("a ** b");
+
+//Vector { x: 4, y: -6 }
+console.log(expr.evaluate({
+  a: new Vector(1, 2),
+  b: new Vector(3, 4)
+}));
+```
+
+**overload({operator: string}, {Class: constructor}, {handler: function})**
+
+Overload an operator for a new datatype.
+
+```javascript
+var parser = new Parser();
+
+function Vector(x, y){
+  this.x = x;
+  this.y = y;
+}
+
+//vector cross
+parser.addOperator('**', 3, function(a,b){
+  return new Vector(a.x * b.y, -b.x * a.y);
+});
+
+//vector add
+parser.overload('+', Vector, function(a, b){
+  return new Vector(a.x + b.x, a.y + b.y);
+});
+
+var expr = parser.parse("a ** b + c");
+
+console.log(expr.toString()); //((a**b)+c)
+console.log(expr.evaluate({ //Vector { x: 9, y: -7 }
+  a: new Vector(1, 2),
+  b: new Vector(3, 4),
+  c: new Vector(5, -1),
+}));
+```
+
 ### Parser.Expression ###
 
 Parser.parse returns an Expression object. Expression objects are similar to

@@ -334,21 +334,34 @@ var Parser = (function (scope) {
 			return vars;
 		},
 
-		toJSFunction: function(values){
+		toJSFunction: function(param_table, values){
 			var expr = this;
 			if(values) expr = this.simplify(values);
 
 			var vars = expr.variables(true);
 			var self = this;
 
-			return function(params){
-				var args = [];
+			return function(){
+				var args = [].slice.call(arguments);
+				var params = [];
+				//console.log(param_table, args);
 				for(var i = 0; i < vars.length; i++){
-					var v = params[vars[i]] || self.functions[vars[i]];
-					args.push(v);
+					var v, key = vars[i];
+					var idx = param_table.indexOf(key);
+					if(idx >= 0){
+						v = args[idx];
+					}else{
+						var f = self.functions[key];
+						if(f){
+							v = f;
+						}
+					}
+
+					params.push(v);
 				}
+
 				var f = new Function(vars, "return " + expr.toString());
-				return f.apply(undefined, args);
+				return f.apply(undefined, params);
 			}
 		}
 	};

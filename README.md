@@ -212,7 +212,7 @@ Convert the expression to a string. toString() surrounds every sub-expression
 with parentheses (except literal values, variables, and function calls), so
 it’s useful for debugging precidence errors.
 
-**toJSFunction([{variables: object}])**
+**toJSFunction({parameters: Array} [, {variables: object}])**
 
 Convert an Expression object into a callable JavaScript function. You need to
 provide an array of parameter names that should normally be expr.variables().

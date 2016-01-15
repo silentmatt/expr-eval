@@ -1,6 +1,6 @@
 {
   "name": "js-expression",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JavaScript Expression Evaluator",
   "main": "parser.js",
   "directories": {

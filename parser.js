@@ -63,6 +63,9 @@ var Parser = (function (scope) {
 		this.ops1 = ops1;
 		this.ops2 = ops2;
 		this.functions = functions;
+		this.simplify_exclude_functions = [
+			"random"
+		];
 	}
 
 	// Based on http://www.json.org/json2.js
@@ -103,14 +106,28 @@ var Parser = (function (scope) {
 			var L = this.tokens.length;
 			var item;
 			var i = 0;
+
 			for (i = 0; i < L; i++) {
 				item = this.tokens[i];
 				var type_ = item.type_;
 				if (type_ === TNUMBER) {
 					nstack.push(item);
 				}
-				else if (type_ === TVAR && (item.index_ in values)) {
-					item = new Token(TNUMBER, 0, 0, values[item.index_]);
+				else if (type_ === TVAR && 
+					(item.index_ in values || item.index_ in this.functions)) {
+					if(item.index_ in this.functions){
+						var name = item.index_, func = values[name];
+						if(typeof func === 'function'){
+							this.functions[name] = func;
+						}
+						item = new Token(TVAR, name, 0, 0);
+					}else if(typeof values[item.index_] === 'function'){
+						var name = item.index_, func = values[name];
+						this.functions[name] = func;
+						item = new Token(TVAR, name, 0, 0);					
+					}else{
+						item = new Token(TNUMBER, 0, 0, values[item.index_]);	
+					}
 					nstack.push(item);
 				}
 				else if (type_ === TOP2 && nstack.length > 1) {
@@ -125,17 +142,39 @@ var Parser = (function (scope) {
 					f = this.ops1[item.index_];
 					item = new Token(TNUMBER, 0, 0, f(n1.number_));
 					nstack.push(item);
-				}
-				else {
-					while (nstack.length > 0) {
-						newexpression.push(nstack.shift());
+				}else if(type_ === TFUNCALL && nstack.length > 1){
+					n1 = nstack.pop();
+					f = nstack.pop();
+					if(this.simplify_exclude_functions.indexOf(f.index_) < 0){
+						var _f = this.functions[f.index_];
+						if(n1.type_ === TNUMBER && _f.apply && _f.call){
+							n1 = n1.number_;
+							if (Object.prototype.toString.call(n1) == "[object Array]") {
+								item = new Token(TNUMBER, 0, 0, _f.apply(undefined, n1));
+							}
+							else {
+								item = new Token(TNUMBER, 0, 0, _f.call(undefined, n1));
+							}
+							nstack.push(item);
+						}else{
+							nstack.push(f);
+							nstack.push(n1);
+						}
+					}else{
+						nstack.push(f);
+						nstack.push(n1);
+						newexpression.push.apply(newexpression, nstack);
+						newexpression.push(item);
+						nstack = [];
 					}
+				}else {
+					newexpression.push.apply(newexpression, nstack);
 					newexpression.push(item);
+					nstack = [];
 				}
 			}
-			while (nstack.length > 0) {
-				newexpression.push(nstack.shift());
-			}
+			newexpression.push.apply(newexpression, nstack);
+			nstack = [];
 
 			return new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
 		},
@@ -229,7 +268,7 @@ var Parser = (function (scope) {
 			return nstack[0];
 		},
 
-		toString: function (toJS) {
+		toString: function () {
 			var nstack = [];
 			var n1;
 			var n2;
@@ -247,12 +286,7 @@ var Parser = (function (scope) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					if (toJS && f == "^") {
-						nstack.push("Math.pow(" + n1 + "," + n2 + ")");
-					}
-					else {
-						nstack.push("(" + n1 + f + n2 + ")");
-					}
+					nstack.push("(" + n1 + f + n2 + ")");
 				}
 				else if (type_ === TVAR) {
 					nstack.push(item.index_);
@@ -270,7 +304,10 @@ var Parser = (function (scope) {
 				else if (type_ === TFUNCALL) {
 					n1 = nstack.pop();
 					f = nstack.pop();
-					nstack.push(f + "(" + n1 + ")");
+					if(!/^\(.*\)$/.test(n1)){
+						n1 = "(" + n1 + ")";
+					}
+					nstack.push(f + n1);
 				}
 				else {
 					throw new Error("invalid Expression");
@@ -282,12 +319,14 @@ var Parser = (function (scope) {
 			return nstack[0];
 		},
 
-		variables: function () {
+		variables: function (includeSysFunc) {
 			var L = this.tokens.length;
 			var vars = [];
 			for (var i = 0; i < L; i++) {
 				var item = this.tokens[i];
-				if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1)) {
+				if (item.type_ === TVAR 
+					&& (includeSysFunc || !(item.index_ in this.functions))
+					&& (vars.indexOf(item.index_) == -1)) {
 					vars.push(item.index_);
 				}
 			}
@@ -295,9 +334,22 @@ var Parser = (function (scope) {
 			return vars;
 		},
 
-		toJSFunction: function (param, variables) {
-			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
-			return f;
+		toJSFunction: function(values){
+			var expr = this;
+			if(values) expr = this.simplify(values);
+
+			var vars = expr.variables(true);
+			var self = this;
+
+			return function(params){
+				var args = [];
+				for(var i = 0; i < vars.length; i++){
+					var v = params[vars[i]] || self.functions[vars[i]];
+					args.push(v);
+				}
+				var f = new Function(vars, "return " + expr.toString());
+				return f.apply(undefined, args);
+			}
 		}
 	};
 
@@ -524,42 +576,6 @@ var Parser = (function (scope) {
 
 	Parser.Expression = Expression;
 
-	Parser.values = {
-		sin: Math.sin,
-		cos: Math.cos,
-		tan: Math.tan,
-		asin: Math.asin,
-		acos: Math.acos,
-		atan: Math.atan,
-		sinh: sinh,
-		cosh: cosh,
-		tanh: tanh,
-		asinh: asinh,
-		acosh: acosh,
-		atanh: atanh,
-		sqrt: Math.sqrt,
-		log: Math.log,
-		lg: log10,
-		log10: log10,
-		abs: Math.abs,
-		ceil: Math.ceil,
-		floor: Math.floor,
-		round: Math.round,
-		trunc: trunc,
-		random: random,
-		fac: fac,
-		exp: Math.exp,
-		min: Math.min,
-		max: Math.max,
-		hypot: hypot,
-		pyt: hypot, // backward compat
-		pow: Math.pow,
-		atan2: Math.atan2,
-		"if": condition,
-		E: Math.E,
-		PI: Math.PI
-	};
-
 	var PRIMARY      = 1 << 0;
 	var OPERATOR     = 1 << 1;
 	var FUNCTION     = 1 << 2;
@@ -630,13 +646,6 @@ var Parser = (function (scope) {
 				this.ops2[name] = func;
 				this.tokenprio_map[name] = prio;
 			}
-
-			Parser.values[name] = func;
-		},
-
-		addFunction: function(name, func){
-			this.functions[name] = func;
-			Parser.values[name] = func;
 		},
 
 		parse: function (expr) {
@@ -652,9 +661,9 @@ var Parser = (function (scope) {
 
 			while (this.pos < this.expression.length) {
 				if (this.isOp1() && (expected & FUNCTION) !== 0) {
-					this.tokenprio = 6;
-					this.pos += this.tokenindex.length;
+					this.tokenprio = 2;
 					noperators++;
+					this.pos += this.tokenindex.length;
 					this.addfunc(tokenstack, operstack, TOP1);
 					expected = (PRIMARY | LPAREN | FUNCTION);
 				}

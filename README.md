@@ -130,6 +130,21 @@ console.log(expr.evaluate({ //Vector { x: 9, y: -7 }
 }));
 ```
 
+Another example:
+
+```javascript
+var parser = new Parser();
+
+parser.overload('+', Array, function(a, b){
+  return a.concat(b);
+});
+
+var expr3 = parser.parse("(1,2,3) + (4,5,6)");
+
+//got [1,2,3,4,5,6]
+console.log(expr3.evaluate());
+```
+
 ### Parser.Expression ###
 
 Parser.parse returns an Expression object. Expression objects are similar to

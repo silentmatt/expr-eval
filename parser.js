@@ -208,7 +208,12 @@ var Parser = (function (scope) {
 					n1 = nstack.pop();
 					f = nstack.pop();
 					if (f.apply && f.call) {
-						nstack.push(f.call(undefined, n1));
+						if (Object.prototype.toString.call(n1) == "[object Array]") {
+							nstack.push(f.apply(undefined, n1));
+						}
+						else {
+							nstack.push(f.call(undefined, n1));
+						}
 					}
 					else {
 						throw new Error(f + " is not a function");

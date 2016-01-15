@@ -344,7 +344,7 @@ var Parser = (function (scope) {
 			return function(){
 				var args = [].slice.call(arguments);
 				var params = [];
-				//console.log(param_table, args);
+
 				for(var i = 0; i < vars.length; i++){
 					var v, key = vars[i];
 					var idx = param_table.indexOf(key);

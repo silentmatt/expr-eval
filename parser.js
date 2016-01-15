@@ -255,7 +255,7 @@ var Parser = (function (scope) {
 				else if (type_ === TOP1) {
 					n1 = nstack.pop();
 					f = item.index_;
-					if (f === "-") {
+					if (this.ops1[f]) {
 						nstack.push("(" + f + n1 + ")");
 					}
 					else {
@@ -367,6 +367,9 @@ var Parser = (function (scope) {
 	function neg(a) {
 		return -a;
 	}
+	function positive(a){
+		return a;
+	}
 	function trunc(a) {
 		if(Math.trunc) return Math.trunc(a);
 		else return a < 0 ? Math.ceil(a) : Math.floor(a);
@@ -423,29 +426,8 @@ var Parser = (function (scope) {
 		this.tmpprio = 0;
 
 		this.ops1 = {
-			"sin": Math.sin,
-			"cos": Math.cos,
-			"tan": Math.tan,
-			"asin": Math.asin,
-			"acos": Math.acos,
-			"atan": Math.atan,
-			"sinh": sinh,
-			"cosh": cosh,
-			"tanh": tanh,
-			"asinh": asinh,
-			"acosh": acosh,
-			"atanh": atanh,
-			"sqrt": Math.sqrt,
-			"log": Math.log,
-			"lg" : log10,
-			"log10" : log10,
-			"abs": Math.abs,
-			"ceil": Math.ceil,
-			"floor": Math.floor,
-			"round": Math.round,
-			"trunc": trunc,
 			"-": neg,
-			"exp": Math.exp
+			"+": positive
 		};
 
 		this.ops2 = {
@@ -495,7 +477,30 @@ var Parser = (function (scope) {
 			"pyt": hypot, // backward compat
 			"pow": Math.pow,
 			"atan2": Math.atan2,
-			"if": condition
+			"if": condition,
+
+			"sin": Math.sin,
+			"cos": Math.cos,
+			"tan": Math.tan,
+			"asin": Math.asin,
+			"acos": Math.acos,
+			"atan": Math.atan,
+			"sinh": sinh,
+			"cosh": cosh,
+			"tanh": tanh,
+			"asinh": asinh,
+			"acosh": acosh,
+			"atanh": atanh,
+			"sqrt": Math.sqrt,
+			"log": Math.log,
+			"lg" : log10,
+			"log10" : log10,
+			"abs": Math.abs,
+			"ceil": Math.ceil,
+			"floor": Math.floor,
+			"round": Math.round,
+			"trunc": trunc,
+			"exp": Math.exp
 		};
 
 		this.consts = {
@@ -556,7 +561,7 @@ var Parser = (function (scope) {
 	var LPAREN       = 1 << 3;
 	var RPAREN       = 1 << 4;
 	var COMMA        = 1 << 5;
-	var SIGN         = 1 << 6;
+	//var SIGN         = 1 << 6;
 	var CALL         = 1 << 7;
 	var NULLARY_CALL = 1 << 8;
 
@@ -635,23 +640,23 @@ var Parser = (function (scope) {
 			var operstack = [];
 			var tokenstack = [];
 			this.tmpprio = 0;
-			var expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+			var expected = (PRIMARY | LPAREN | FUNCTION);
 			var noperators = 0;
 			this.expression = expr;
 			this.pos = 0;
 
 			while (this.pos < this.expression.length) {
-				if (this.isOperator()) {
-					if (this.isSign() && (expected & SIGN)) {
-						if (this.isNegativeSign()) {
-							this.tokenprio = 2;
-							this.tokenindex = "-";
-							noperators++;
-							this.addfunc(tokenstack, operstack, TOP1);
-						}
-						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
-					}
-					else if (this.isComment()) {
+				if (this.isOp1() && (expected & FUNCTION) !== 0) {
+					this.tokenprio = 6;
+					this.pos += this.tokenindex.length;
+					noperators++;
+					this.addfunc(tokenstack, operstack, TOP1);
+					expected = (PRIMARY | LPAREN | FUNCTION);
+				}
+				else if (this.isOp2()) {
+					this.tokenprio = this.tokenprio_map[this.tokenindex];
+					this.pos += this.tokenindex.length;
+					if (this.isComment()) {
 
 					}
 					else {
@@ -660,7 +665,7 @@ var Parser = (function (scope) {
 						}
 						noperators += 2;
 						this.addfunc(tokenstack, operstack, TOP2);
-						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+						expected = (PRIMARY | LPAREN | FUNCTION);
 					}
 				}
 				else if (this.isNumber()) {
@@ -693,7 +698,7 @@ var Parser = (function (scope) {
 						this.addfunc(tokenstack, operstack, TFUNCALL);
 					}
 
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN | NULLARY_CALL);
+					expected = (PRIMARY | LPAREN | FUNCTION | NULLARY_CALL);
 				}
 				else if (this.isRightParenth()) {
 				    if (expected & NULLARY_CALL) {
@@ -712,7 +717,7 @@ var Parser = (function (scope) {
 					}
 					this.addfunc(tokenstack, operstack, TOP2);
 					noperators += 2;
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+					expected = (PRIMARY | LPAREN | FUNCTION);
 				}
 				else if (this.isConst()) {
 					if ((expected & PRIMARY) === 0) {
@@ -721,22 +726,6 @@ var Parser = (function (scope) {
 					var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(consttoken);
 					expected = (OPERATOR | RPAREN | COMMA);
-				}
-				else if (this.isOp2()) {
-					if ((expected & FUNCTION) === 0) {
-						this.error_parsing(this.pos, "unexpected function");
-					}
-					this.addfunc(tokenstack, operstack, TOP2);
-					noperators += 2;
-					expected = (LPAREN);
-				}
-				else if (this.isOp1()) {
-					if ((expected & FUNCTION) === 0) {
-						this.error_parsing(this.pos, "unexpected function");
-					}
-					this.addfunc(tokenstack, operstack, TOP1);
-					noperators++;
-					expected = (LPAREN);
 				}
 				else if (this.isVar()) {
 					if ((expected & PRIMARY) === 0) {
@@ -800,24 +789,6 @@ var Parser = (function (scope) {
 			operstack.push(operator);
 		},
 
-		isNumber: function () {
-			var r = false;
-			var str = "";
-			while (this.pos < this.expression.length) {
-				var code = this.expression.charCodeAt(this.pos);
-				if ((code >= 48 && code <= 57) || code === 46) {
-					str += this.expression.charAt(this.pos);
-					this.pos++;
-					this.tokennumber = parseFloat(str);
-					r = true;
-				}
-				else {
-					break;
-				}
-			}
-			return r;
-		},
-
 		// Ported from the yajjl JSON parser at http://code.google.com/p/yajjl/
 		unescape: function(v, pos) {
 			var buffer = [];
@@ -874,6 +845,24 @@ var Parser = (function (scope) {
 			return buffer.join('');
 		},
 
+		isNumber: function () {
+			var r = false;
+			var str = "";
+			while (this.pos < this.expression.length) {
+				var code = this.expression.charCodeAt(this.pos);
+				if ((code >= 48 && code <= 57) || code === 46) {
+					str += this.expression.charAt(this.pos);
+					this.pos++;
+					this.tokennumber = parseFloat(str);
+					r = true;
+				}
+				else {
+					break;
+				}
+			}
+			return r;
+		},
+
 		isString: function () {
 			var r = false;
 			var str = "";
@@ -909,54 +898,6 @@ var Parser = (function (scope) {
 						return true;
 					}
 				}
-			}
-			return false;
-		},
-
-		isOperator: function () {
-			var rest = this.expression.slice(this.pos);
-			var ops = Object.keys(this.ops2).sort(function(a, b){
-				return b.length - a.length;
-			});
-
-			var self = this;
-
-			var res = ops.some(function(op){
-				if(rest.indexOf(op) == 0){
-					self.pos += (op.length - 1);
-					self.tokenindex = op;
-					return true;
-				}
-			});
-
-			if(res){
-				this.tokenprio = this.tokenprio_map[this.tokenindex];
-				this.pos++;
-				return true;
-			}
-			return false;
-		},
-
-		isSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45 || code === 43) { // -
-				return true;
-			}
-			return false;
-		},
-
-		isPositiveSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 43) { // +
-				return true;
-			}
-			return false;
-		},
-
-		isNegativeSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45) { // -
-				return true;
 			}
 			return false;
 		},
@@ -1002,43 +943,38 @@ var Parser = (function (scope) {
 		},
 
 		isOp1: function () {
-			var str = "";
-			for (var i = this.pos; i < this.expression.length; i++) {
-				var c = this.expression.charAt(i);
-				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
-						break;
-					}
+			var rest = this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops1).sort(function(a, b){
+				return b.length - a.length;
+			});
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
 				}
-				str += c;
-			}
-			if (str.length > 0 && (str in this.ops1)) {
-				this.tokenindex = str;
-				this.tokenprio = 5;
-				this.pos += str.length;
-				return true;
-			}
-			return false;
+			});
+
+			return res;
 		},
 
 		isOp2: function () {
-			var str = "";
-			for (var i = this.pos; i < this.expression.length; i++) {
-				var c = this.expression.charAt(i);
-				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
-						break;
-					}
+			var rest = this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops2).sort(function(a, b){
+				return b.length - a.length;
+			});
+
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
 				}
-				str += c;
-			}
-			if (str.length > 0 && (str in this.ops2)) {
-				this.tokenindex = str;
-				this.tokenprio = 5;
-				this.pos += str.length;
-				return true;
-			}
-			return false;
+			});
+
+			return res;
 		},
 
 		isVar: function () {

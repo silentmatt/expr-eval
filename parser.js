@@ -477,12 +477,16 @@ var Parser = (function (scope) {
 		return Math.random() * (a || 1);
 	}
 	function fac(a) { //a!
-		a = Math.floor(a);
-		var b = a;
-		while (a > 1) {
-			b = b * (--a);
+		a = 0 | a;
+		if(a === 0) return 1;
+		else if(a < 0) return NaN;
+		else {
+			var b = a;
+			while (a > 1) {
+				b = b * (--a);
+			}
+			return b;
 		}
-		return b;
 	}
 
 	// TODO: use hypot that doesn't overflow
@@ -526,7 +530,8 @@ var Parser = (function (scope) {
 
 		this.ops1 = {
 			"-": neg,
-			"+": positive
+			"+": positive,
+			"~!": fac 			//Suffix operator: begin with ~
 		};
 
 		this.ops2 = {
@@ -549,7 +554,7 @@ var Parser = (function (scope) {
 		};
 
 		this.overload_ops1 = {
-
+			"~!": fac
 		};
 
 		this.overload_ops2 = {
@@ -558,7 +563,8 @@ var Parser = (function (scope) {
 
 		this.tokenprio_map1 = {
 			"-": 4,
-			"+": 4
+			"+": 4,
+			"~!": 4,
 		};
 
 		this.tokenprio_map2 = {
@@ -731,6 +737,13 @@ var Parser = (function (scope) {
 					this.addfunc(tokenstack, operstack, TOP1);
 					expected = (PRIMARY | LPAREN | FUNCTION);
 				}
+				else if (this.isSuffixOp()){
+					this.tokenprio = this.tokenprio_map1[this.tokenindex];
+					this.pos += this.tokenindex.length;
+					noperators++;
+					this.addfunc(tokenstack, operstack, TOP1);
+					expected = (OPERATOR | RPAREN | COMMA);
+				}
 				else if (this.isOp2()) {
 					this.tokenprio = this.tokenprio_map2[this.tokenindex];
 					this.pos += this.tokenindex.length;
@@ -765,6 +778,9 @@ var Parser = (function (scope) {
 					expected = (OPERATOR | RPAREN | COMMA);
 				}
 				else if (this.isLeftParenth()) {
+					this.pos++;
+					this.tmpprio += 10;
+					
 					if ((expected & LPAREN) === 0) {
 						this.error_parsing(this.pos, "unexpected \"(\"");
 					}
@@ -779,7 +795,9 @@ var Parser = (function (scope) {
 					expected = (PRIMARY | LPAREN | FUNCTION | NULLARY_CALL);
 				}
 				else if (this.isRightParenth()) {
-				    if (expected & NULLARY_CALL) {
+					this.pos++;
+					this.tmpprio -= 10;
+				  if (expected & NULLARY_CALL) {
 						var token = new Token(TNUMBER, 0, 0, []);
 						tokenstack.push(token);
 					}
@@ -790,6 +808,9 @@ var Parser = (function (scope) {
 					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
 				}
 				else if (this.isComma()) {
+					this.pos++;
+					this.tokenprio = -1;
+
 					if ((expected & COMMA) === 0) {
 						this.error_parsing(this.pos, "unexpected \",\"");
 					}
@@ -992,29 +1013,17 @@ var Parser = (function (scope) {
 
 		isLeftParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 40) { // (
-				this.pos++;
-				this.tmpprio += 10;
-				return true;
-			}
-			return false;
+			return code === 40;
 		},
 
 		isRightParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 41) { // )
-				this.pos++;
-				this.tmpprio -= 10;
-				return true;
-			}
-			return false;
+			return code === 41;
 		},
 
 		isComma: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 44) { // ,
-				this.pos++;
-				this.tokenprio = -1;
 				this.tokenindex = ",";
 				return true;
 			}
@@ -1063,6 +1072,40 @@ var Parser = (function (scope) {
 			});
 
 			return res;
+		},
+
+		isSuffixOp: function() {
+			var rest = '~' + this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops1).sort(function(a, b){
+				return b.length - a.length;
+			});
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(op !== '~' && rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
+				}
+			});
+
+			var len = this.tokenindex.length;
+			var tokenindex = this.tokenindex;
+			if(res){
+				this.pos += len;
+
+				if(this.pos >= this.expression.length
+					|| this.isRightParenth() || this.isOp2() || this.isComma()){
+					//look up forward to check if this operator is suffix operator or 2-target operator
+					this.tokenindex = tokenindex;
+					this.pos -= len;
+					return true;
+				}else{
+					this.pos -= len;
+					return false;
+				}
+			}
+
+			return res;			
 		},
 
 		isVar: function () {

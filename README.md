@@ -98,6 +98,23 @@ console.log(expr.evaluate({
 }));
 ```
 
+**suffix operator**
+
+You can add an operator with a prefix `~` to make it be a suffix operator.
+
+```javascript
+var parser = new Parser();
+
+parser.addOperator('~%', 4, function(a){
+  return a / 100;
+});
+
+var expr1 = parser.parse("((300% % 2)*10)!");
+
+//3628800
+console.log(expr1.evaluate());
+```
+
 **overload({operator: string}, {Class: constructor}, {handler: function})**
 
 Overload an operator for a new datatype.

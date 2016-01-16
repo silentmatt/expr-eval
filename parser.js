@@ -58,11 +58,14 @@ var Parser = (function (scope) {
 		};
 	}
 
-	function Expression(tokens, ops1, ops2, functions) {
+	function Expression(tokens, ops1, ops2, functions, overload_ops1, overload_ops2) {
 		this.tokens = tokens;
 		this.ops1 = ops1;
 		this.ops2 = ops2;
 		this.functions = functions;
+		this.overload_ops1 = overload_ops1;
+		this.overload_ops2 = overload_ops2;
+
 		this.simplify_exclude_functions = [
 			"random"
 		];
@@ -176,7 +179,13 @@ var Parser = (function (scope) {
 			newexpression.push.apply(newexpression, nstack);
 			nstack = [];
 
-			return new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
+			return new Expression(
+				newexpression, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2);
 		},
 
 		substitute: function (variable, expr) {
@@ -202,7 +211,14 @@ var Parser = (function (scope) {
 				}
 			}
 
-			var ret = new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
+			var ret = new Expression(
+				newexpression, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2);
+
 			return ret;
 		},
 
@@ -268,7 +284,7 @@ var Parser = (function (scope) {
 			return nstack[0];
 		},
 
-		toString: function () {
+		toString: function (overload_1, overload_2) {
 			var nstack = [];
 			var n1;
 			var n2;
@@ -276,6 +292,7 @@ var Parser = (function (scope) {
 			var L = this.tokens.length;
 			var item;
 			var i = 0;
+
 			for (i = 0; i < L; i++) {
 				item = this.tokens[i];
 				var type_ = item.type_;
@@ -286,7 +303,11 @@ var Parser = (function (scope) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					nstack.push("(" + n1 + f + n2 + ")");
+					if (overload_2 && (f in this.overload_ops2)) {
+						nstack.push(overload_2 + "['" + f + "'](" + n1 + "," + n2 + ")");
+					}else{
+						nstack.push("(" + n1 + f + n2 + ")");
+					}
 				}
 				else if (type_ === TVAR) {
 					nstack.push(item.index_);
@@ -295,7 +316,11 @@ var Parser = (function (scope) {
 					n1 = nstack.pop();
 					f = item.index_;
 					if (this.ops1[f]) {
-						nstack.push("(" + f + n1 + ")");
+						if(overload_1 && (f in this.overload_ops1)){
+							nstack.push(overload_1 + "['" + f + "'](" + n1 + ")");
+						}else{
+							nstack.push("(" + f + n1 + ")");
+						}
 					}
 					else {
 						nstack.push(f + "(" + n1 + ")");
@@ -360,8 +385,12 @@ var Parser = (function (scope) {
 					params.push(v);
 				}
 
-				var f = new Function(vars, "return " + expr.toString());
-				return f.apply(undefined, params);
+				var overload1 = 'overload_' + (Math.random() + '').slice(2);
+				var overload2 = 'overload_' + (Math.random() + '').slice(2);
+				
+				var f = new Function(vars.concat(overload1, overload2), "return " + expr.toString(overload1, overload2));
+				return f.apply(undefined, 
+					params.concat(self.overload_ops1, self.overload_ops2));
 			}
 		}
 	};
@@ -519,7 +548,20 @@ var Parser = (function (scope) {
 			"or": orOperator
 		};
 
-		this.tokenprio_map = {
+		this.overload_ops1 = {
+
+		};
+
+		this.overload_ops2 = {
+			"^": Math.pow
+		};
+
+		this.tokenprio_map1 = {
+			"-": 4,
+			"+": 4
+		};
+
+		this.tokenprio_map2 = {
 			"," :  0,
 			"or":  0,
 			"and": 0,
@@ -601,6 +643,9 @@ var Parser = (function (scope) {
 
 	Parser.prototype = {
 		overload: function(key, Class, func){
+			if(func.length !== 1 && func.length !== 2){
+				throw new Error('Invalid number of arguments, expected 1 or 2.')
+			}
 			this.overload_map = this.overload_map || [];
 			this.overload_map_funcs = this.overload_map_funcs || [];
 			this.overload_map[key]  = this.overload_map[key] || [];
@@ -611,6 +656,9 @@ var Parser = (function (scope) {
 			var self = this;
 
 			function overload(op){
+				op = op || function(){
+					throw new Error('function ' + op + ' not defined.');
+				};
 				return function(){
 					var args = [].slice.call(arguments);
 					var matched = false;
@@ -641,9 +689,9 @@ var Parser = (function (scope) {
 
 			if(overload_map.length <= 0){
 				if(key in this.ops1 && func.length === 1){
-					this.ops1[key] = overload(this.ops1[key]);
+					this.overload_ops1[key] = this.ops1[key] = overload(this.ops1[key]);
 				}else if(key in this.ops2 && func.length === 2){
-					this.ops2[key] = overload(this.ops2[key]);
+					this.overload_ops2[key] = this.ops2[key] = overload(this.ops2[key]);
 				}else if(key in this.functions){
 					this.functions[key] = overload(this.functions[key]);
 				}
@@ -654,10 +702,13 @@ var Parser = (function (scope) {
 
 		addOperator: function(name, prio, func){
 			if(func.length === 1){
-				this.ops1[name] = func;
+				this.overload_ops1[name] = this.ops1[name] = func;
+				this.tokenprio_map1[name] = prio;
 			}else if(func.length === 2){
-				this.ops2[name] = func;
-				this.tokenprio_map[name] = prio;
+				this.overload_ops2[name] = this.ops2[name] = func;
+				this.tokenprio_map2[name] = prio;
+			}else{
+				throw new Error('Invalid number of arguments, expected 1 or 2.')
 			}
 		},
 
@@ -674,14 +725,14 @@ var Parser = (function (scope) {
 
 			while (this.pos < this.expression.length) {
 				if (this.isOp1() && (expected & FUNCTION) !== 0) {
-					this.tokenprio = 2;
+					this.tokenprio = this.tokenprio_map1[this.tokenindex];
 					noperators++;
 					this.pos += this.tokenindex.length;
 					this.addfunc(tokenstack, operstack, TOP1);
 					expected = (PRIMARY | LPAREN | FUNCTION);
 				}
 				else if (this.isOp2()) {
-					this.tokenprio = this.tokenprio_map[this.tokenindex];
+					this.tokenprio = this.tokenprio_map2[this.tokenindex];
 					this.pos += this.tokenindex.length;
 					if (this.isComment()) {
 
@@ -787,7 +838,13 @@ var Parser = (function (scope) {
 				this.error_parsing(this.pos, "parity");
 			}
 
-			return new Expression(tokenstack, object(this.ops1), object(this.ops2), object(this.functions));
+			return new Expression(
+				tokenstack, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2);
 		},
 
 		evaluate: function (expr, variables) {
@@ -806,7 +863,11 @@ var Parser = (function (scope) {
 		addfunc: function (tokenstack, operstack, type_) {
 			var operator = new Token(type_, this.tokenindex, this.tokenprio + this.tmpprio, 0);
 			while (operstack.length > 0) {
-				if (operator.prio_ <= operstack[operstack.length - 1].prio_) {
+				if(type_ === TOP1 && operstack[operstack.length - 1].type_ === TOP2){
+					//Signal target operator's priority should always be higher than the operator before it.
+					break;
+				}
+				else if (operator.prio_ <= operstack[operstack.length - 1].prio_) {
 					tokenstack.push(operstack.pop());
 				}
 				else {

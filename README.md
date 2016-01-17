@@ -98,6 +98,32 @@ console.log(expr.evaluate({
 }));
 ```
 
+**addFunction({name: string}, {handler: function}[, {can_simplify: boolean} = true])**
+
+Add a new function to evaluate an expression.
+
+```javascript
+var parser = new Parser();
+
+parser.addFunction('time', function(){
+  return Date.now();
+},false);
+
+
+var expr = parser.parse("'abc?t='+time()");
+
+console.log(expr.evaluate());
+
+parser.addFunction('xor', function(a, b){
+    return a ^ b;
+});
+
+var expr = parser.parse("xor(5, 7) + x + 1");
+
+//((2+x)+1)
+console.log(expr.simplify().toString());
+```
+
 **suffix operator**
 
 You can add an operator with a prefix `~` to make it be a suffix operator.

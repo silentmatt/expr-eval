@@ -58,17 +58,16 @@ var Parser = (function (scope) {
 		};
 	}
 
-	function Expression(tokens, ops1, ops2, functions, overload_ops1, overload_ops2) {
+	function Expression(tokens, ops1, ops2, functions, 
+		overload_ops1, overload_ops2, simplify_exclude_functions) {
+
 		this.tokens = tokens;
 		this.ops1 = ops1;
 		this.ops2 = ops2;
 		this.functions = functions;
 		this.overload_ops1 = overload_ops1;
 		this.overload_ops2 = overload_ops2;
-
-		this.simplify_exclude_functions = [
-			"random"
-		];
+		this.simplify_exclude_functions = simplify_exclude_functions;
 
 		this.js_expr_str = this.toString('$_EXPR_OPS_$1', '$_EXPR_OPS_$2');
 		this.evaluate = this.toEvalFunction();
@@ -138,12 +137,23 @@ var Parser = (function (scope) {
 					}
 					nstack.push(item);
 				}
-				else if (type_ === TOP2 && index_ !== ',' && nstack.length > 1) {
-					n2 = nstack.pop();
-					n1 = nstack.pop();
-					f = this.ops2[index_];
-					item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
-					nstack.push(item);
+				else if (type_ === TOP2 && nstack.length > 1) {
+					//comma expr cannot be simplified
+					if(index_ !== ','){
+						n2 = nstack.pop();
+						n1 = nstack.pop();
+						f = this.ops2[index_];
+						item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
+						nstack.push(item);
+					}else{
+						n2 = nstack.pop();
+						n1 = nstack.pop();
+						f = this.ops2[index_];
+						var arr = append(n1.list_||n1.number_, n2.number_);
+						item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
+						item.list_ = arr;
+						nstack.push(item);						
+					}
 				}
 				else if (type_ === TOP1 && nstack.length > 0) {
 					n1 = nstack.pop();
@@ -156,7 +166,7 @@ var Parser = (function (scope) {
 					if(this.simplify_exclude_functions.indexOf(f.index_) < 0){
 						var _f = this.functions[f.index_];
 						if(n1.type_ === TNUMBER && _f.apply && _f.call){
-							n1 = n1.number_;
+							n1 = n1.list_ || n1.number_;
 							if (Object.prototype.toString.call(n1) == "[object Array]") {
 								item = new Token(TNUMBER, 0, 0, _f.apply(undefined, n1));
 							}
@@ -165,12 +175,10 @@ var Parser = (function (scope) {
 							}
 							nstack.push(item);
 						}else{
-							nstack.push(f);
-							nstack.push(n1);
+							nstack.push(f, n1);
 						}
 					}else{
-						nstack.push(f);
-						nstack.push(n1);
+						nstack.push(f, n1);
 						newexpression.push.apply(newexpression, nstack);
 						newexpression.push(item);
 						nstack = [];
@@ -184,13 +192,21 @@ var Parser = (function (scope) {
 			newexpression.push.apply(newexpression, nstack);
 			nstack = [];
 
+			newexpression = newexpression.map(function(o){
+				if(o.list_){
+					delete o.list_;
+				}
+				return o;
+			});
+
 			return new Expression(
 				newexpression, 
 				this.ops1, 
 				this.ops2, 
 				this.functions,
 				this.overload_ops1,
-				this.overload_ops2);
+				this.overload_ops2,
+				this.simplify_exclude_functions);
 		},
 
 		substitute: function (variable, expr) {
@@ -222,7 +238,8 @@ var Parser = (function (scope) {
 				this.ops2, 
 				this.functions,
 				this.overload_ops1,
-				this.overload_ops2);
+				this.overload_ops2,
+				this.simplify_exclude_functions);
 
 			return ret;
 		},
@@ -305,6 +322,9 @@ var Parser = (function (scope) {
 						n1 = "(" + n1 + ")";
 					}
 					if(prev.index_ === ','){
+						n1 = "(" + n1 + ")";
+					}
+					if(!/^\(.*\)$/.test(n1)){
 						n1 = "(" + n1 + ")";
 					}
 					nstack.push(f + n1);
@@ -513,6 +533,15 @@ var Parser = (function (scope) {
 	function condition(cond, yep, nope) {
 		return cond ? yep : nope;
 	}
+	
+	function append(a, b) {
+		if (Object.prototype.toString.call(a) != "[object Array]") {
+			return [a, b];
+		}
+		a = a.slice();
+		a.push(b);
+		return a;
+	}
 
 	function list(){
 		return [].slice.call(arguments);
@@ -627,6 +656,10 @@ var Parser = (function (scope) {
 			"trunc": trunc,
 			"exp": Math.exp
 		};
+		
+		this.simplify_exclude_functions = [
+			"random"
+		];
 
 		this.consts = {
 			"E": Math.E,
@@ -726,6 +759,13 @@ var Parser = (function (scope) {
 				this.tokenprio_map2[name] = prio;
 			}else{
 				throw new Error('Invalid number of arguments, expected 1 or 2.')
+			}
+		},
+
+		addFunction: function(name, func, can_simplify){
+			this.functions[name] = func;
+			if(can_simplify === false){
+				this.simplify_exclude_functions.push(name);
 			}
 		},
 
@@ -877,7 +917,8 @@ var Parser = (function (scope) {
 				this.ops2, 
 				this.functions,
 				this.overload_ops1,
-				this.overload_ops2);
+				this.overload_ops2,
+				this.simplify_exclude_functions);
 		},
 
 		evaluate: function (expr, variables) {

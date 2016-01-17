@@ -274,12 +274,35 @@ describe("Parser", function() {
     });
     describe("toJSFunction", function(){
         it("toJSFunction", function(){
-            var parser = Parser.parse("x ^ 2 + y ^ 2 + 1");
-            var func1 = parser.toJSFunction(['x', 'y']);
-            var func2 = parser.toJSFunction(['x'], {y: 2});
+            var expr = Parser.parse("x ^ 2 + y ^ 2 + 1");
+            var func1 = expr.toJSFunction(['x', 'y']);
+            var func2 = expr.toJSFunction(['x'], {y: 2});
 
             expect(func1(1, 1)).to.equal(3);
             expect(func2(2)).to.equal(9);
+        });
+    });
+    describe("addFunction", function(){
+        var parser = new Parser();
+        parser.addFunction('time', function(){
+          return Date.now();
+        },false);
+
+        it("time function", function(){
+            var expr = parser.parse("'abc?t='+time()");
+            expect(expr.evaluate().length).to.equal(19);
+            var expr2 = expr.simplify();
+            expect(expr2.toString()).to.equal("('abc?t='+time())");
+        });
+
+        parser.addFunction('xor', function(a, b){
+            return a ^ b;
+        });
+
+        it("xor(5, 7) + x + 1", function(){
+            var expr = parser.parse("xor(5, 7) + x + 1");
+            expect(expr.simplify().toString()).to.equal("((2+x)+1)");
+            expect(expr.toJSFunction(['x'])(2)).to.equal(5);
         });
     });
 });

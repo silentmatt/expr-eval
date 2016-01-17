@@ -339,13 +339,13 @@ var Parser = (function (scope) {
 			return nstack[0].toString();
 		},
 
-		variables: function (includeSysFunc) {
+		variables: function (include_functions) {
 			var L = this.tokens.length;
 			var vars = [];
 			for (var i = 0; i < L; i++) {
 				var item = this.tokens[i];
 				if (item.type_ === TVAR 
-					&& (includeSysFunc || !(item.index_ in this.functions))
+					&& (include_functions || !(item.index_ in this.functions))
 					&& (vars.indexOf(item.index_) == -1)) {
 					vars.push(item.index_);
 				}

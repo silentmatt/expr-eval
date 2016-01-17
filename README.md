@@ -202,22 +202,28 @@ unbound variable in the expression is bound to the corresponding member of the
 {variables} object. If there are unbound variables, evaluate will throw an
 exception.
 
-    js> expr = Parser.parse("2 ^ x");
-    (2^x)
-    js> expr.evaluate({ x: 3 });
-    8
+```javascript
+var expr = Parser.parse("2 ^ x");
+
+//8
+expr.evaluate({ x: 3 });
+```
 
 **substitute({variable: string}, {expr: Expression, string, or number})**
 
 Create a new expression with the specified variable replaced with another
 expression (essentially, function composition).
 
-    js> expr = Parser.parse("2 * x + 1");
-    ((2*x)+1)
-    js> expr.substitute("x", "4 * x");
-    ((2*(4*x))+1)
-    js> expr2.evaluate({ x: 3});
-    25
+```javascript
+var expr = Parser.parse("2 * x + 1");
+//((2*x)+1)
+
+expr.substitute("x", "4 * x");
+//((2*(4*x))+1)
+
+expr2.evaluate({ x: 3});
+//25
+```
 
 **simplify({variables: object})**
 
@@ -233,21 +239,40 @@ previous example cannot be simplified unless you provide a value for x.
 `2*4*x+1` can however, because it’s parsed as `(((2*4)*x)+1)`, so the `(2*4)`
 sub-expression will be replaced with “8″, resulting in `((8*x)+1)`.
 
-    js> expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4 });
-    (x*3.141592653589793)
-    js> expr.evaluate({ x: 2 });
-    6.283185307179586
+```javascript
+var expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4 });
+//(x*3.141592653589793)
 
-**variables()**
+var expr.evaluate({ x: 2 });
+//6.283185307179586
+```
 
-    Get an array of the unbound variables in the expression.
+**simplify_exclude_functions**
 
-    js> expr = Parser.parse("x * (y * atan(1))");
-    (x*(y*atan(1)))
-    js> expr.variables();
-    x,y
-    js> expr.simplify({ y: 4 }).variables();
-    x
+Some of the functions are not the pure functions. It means you may get a different value during each call, such as `random`. These functions cannot be simplified.
+
+```javascript
+var expr = Parser.parse("1 + random()").simplify();
+//(1+random())
+```
+
+**variables([{include_functions: boolean}])**
+
+```javascript
+//Get an array of the unbound variables in the expression.
+
+var expr = Parser.parse("x * (y * atan(1))");
+//(x*(y*atan(1)))
+
+expr.variables();
+//x,y
+
+expr.variables(true);
+//x,y,atan
+
+expr.simplify({ y: 4 }).variables();
+//x
+```
 
 **toString()**
 
@@ -266,6 +291,18 @@ provided), converting it to a string, and passing the string to the Function
 constructor (with some of its own code to bring built-in functions and
 constants into scope and return the result of the expression).
 
+```javascript
+var expr = Parser.parse("x ^ 2 + y ^ 2 + 1");
+var func1 = expr.toJSFunction(['x', 'y']);
+var func2 = expr.toJSFunction(['x'], {y: 2});
+
+func1(1, 1);
+//3
+
+func2(2);
+//9
+```
+
 ### Expression Syntax ###
 
 The parser accepts a pretty basic grammar. Operators have the normal precidence
@@ -274,7 +311,7 @@ division, and remainder), and finally +, -, and || (addition, subtraction, and
 string concatenation) — and bind from left to right (yes, even exponentiation…
 it’s simpler that way).
 
-Inside the first argument of the if function can be used these operators to compare expressions:
+Inside the first argument of the cond function can be used these operators to compare expressions:
 	==		Equal
 	!=		Not equal
 	>		Greater than
@@ -284,14 +321,8 @@ Inside the first argument of the if function can be used these operators to comp
 	and		Logical AND operator
 	or		Logical OR operator
 
-Example of if function: `if(1 and 2 <= 4, 2, 0) + 2` = 4
+Example of cond function: `cond(1 and 2 <= 4, 2, 0) + 2` = 4
 
-There’s also a “,” (comma) operator that concatenates values into an array.
-It’s mostly useful for passing arguments to functions, since it doesn’t always
-behave like you would think with regards to multi-dimensional arrays. If the
-left value is an array, it pushes the right value onto the end of the array,
-otherwise, it creates a new array “[left, right]“. This makes it impossible to
-create an array with another array as it’s first element.
 Function operators
 
 The parser has several built-in “functions” that are actually operators. The
@@ -334,7 +365,7 @@ These are not evaluated by simplify.
 	pow(x, y) 	xy. This is exactly the same as “x^y”. It’s just provided since it’s in the Math object from JavaScript
 	atan2(y, x) Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 	hypot(a,b)  The square root of the sum of squares of its arguments.
-	if(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false
+	cond(c, a, b) The condition function where c is condition, a is result if c is true, b is result if c is false
 
 ### Tests ###
 

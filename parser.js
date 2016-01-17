@@ -13,16 +13,16 @@
 //  re-define Array.indexOf, because IE doesn't know it ...
 //
 //  from http://stellapower.net/content/javascript-support-and-arrayindexof-ie
-	if (!Array.indexOf) {
-		Array.prototype.indexOf = function (obj, start) {
-			for (var i = (start || 0); i < this.length; i++) {
-				if (this[i] === obj) {
-					return i;
-				}
+if (!Array.indexOf) {
+	Array.prototype.indexOf = function (obj, start) {
+		for (var i = (start || 0); i < this.length; i++) {
+			if (this[i] === obj) {
+				return i;
 			}
-			return -1;
 		}
+		return -1;
 	}
+}
 
 var Parser = (function (scope) {
 	function object(o) {
@@ -58,25 +58,33 @@ var Parser = (function (scope) {
 		};
 	}
 
-	function Expression(tokens, ops1, ops2, functions) {
+	function Expression(tokens, ops1, ops2, functions, 
+		overload_ops1, overload_ops2, simplify_exclude_functions) {
+
 		this.tokens = tokens;
 		this.ops1 = ops1;
 		this.ops2 = ops2;
 		this.functions = functions;
+		this.overload_ops1 = overload_ops1;
+		this.overload_ops2 = overload_ops2;
+		this.simplify_exclude_functions = simplify_exclude_functions;
+
+		this.js_expr_str = this.toString('$_EXPR_OPS_$1', '$_EXPR_OPS_$2');
+		this.evaluate = this.toEvalFunction();
 	}
 
 	// Based on http://www.json.org/json2.js
-    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        meta = {    // table of character substitutions
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            "'" : "\\'",
-            '\\': '\\\\'
-        };
+  var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+      escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+      meta = {    // table of character substitutions
+          '\b': '\\b',
+          '\t': '\\t',
+          '\n': '\\n',
+          '\f': '\\f',
+          '\r': '\\r',
+          "'" : "\\'",
+          '\\': '\\\\'
+      };
 
 	function escapeValue(v) {
 		if (typeof v === "string") {
@@ -103,41 +111,102 @@ var Parser = (function (scope) {
 			var L = this.tokens.length;
 			var item;
 			var i = 0;
+
 			for (i = 0; i < L; i++) {
 				item = this.tokens[i];
 				var type_ = item.type_;
+				var index_ = item.index_;
+
 				if (type_ === TNUMBER) {
 					nstack.push(item);
 				}
-				else if (type_ === TVAR && (item.index_ in values)) {
-					item = new Token(TNUMBER, 0, 0, values[item.index_]);
+				else if (type_ === TVAR && 
+					(index_ in values || index_ in this.functions)) {
+					if(index_ in this.functions){
+						var name = index_, func = values[name];
+						if(typeof func === 'function'){
+							this.functions[name] = func;
+						}
+						item = new Token(TVAR, name, 0, 0);
+					}else if(typeof values[index_] === 'function'){
+						var func = values[index_];
+						this.functions[index_] = func;
+						item = new Token(TVAR, index_, 0, 0);					
+					}else{
+						item = new Token(TNUMBER, 0, 0, values[index_]);	
+					}
 					nstack.push(item);
 				}
 				else if (type_ === TOP2 && nstack.length > 1) {
-					n2 = nstack.pop();
-					n1 = nstack.pop();
-					f = this.ops2[item.index_];
-					item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
-					nstack.push(item);
+					//comma expr cannot be simplified
+					if(index_ !== ','){
+						n2 = nstack.pop();
+						n1 = nstack.pop();
+						f = this.ops2[index_];
+						item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
+						nstack.push(item);
+					}else{
+						n2 = nstack.pop();
+						n1 = nstack.pop();
+						f = this.ops2[index_];
+						var arr = append(n1.list_||n1.number_, n2.number_);
+						item = new Token(TNUMBER, 0, 0, f(n1.number_, n2.number_));
+						item.list_ = arr;
+						nstack.push(item);						
+					}
 				}
 				else if (type_ === TOP1 && nstack.length > 0) {
 					n1 = nstack.pop();
-					f = this.ops1[item.index_];
+					f = this.ops1[index_];
 					item = new Token(TNUMBER, 0, 0, f(n1.number_));
 					nstack.push(item);
-				}
-				else {
-					while (nstack.length > 0) {
-						newexpression.push(nstack.shift());
+				}else if(type_ === TFUNCALL && nstack.length > 1){
+					n1 = nstack.pop();
+					f = nstack.pop();
+					if(this.simplify_exclude_functions.indexOf(f.index_) < 0){
+						var _f = this.functions[f.index_];
+						if(n1.type_ === TNUMBER && _f.apply && _f.call){
+							n1 = n1.list_ || n1.number_;
+							if (Object.prototype.toString.call(n1) == "[object Array]") {
+								item = new Token(TNUMBER, 0, 0, _f.apply(undefined, n1));
+							}
+							else {
+								item = new Token(TNUMBER, 0, 0, _f.call(undefined, n1));
+							}
+							nstack.push(item);
+						}else{
+							nstack.push(f, n1);
+						}
+					}else{
+						nstack.push(f, n1);
+						newexpression.push.apply(newexpression, nstack);
+						newexpression.push(item);
+						nstack = [];
 					}
+				}else {
+					newexpression.push.apply(newexpression, nstack);
 					newexpression.push(item);
+					nstack = [];
 				}
 			}
-			while (nstack.length > 0) {
-				newexpression.push(nstack.shift());
-			}
+			newexpression.push.apply(newexpression, nstack);
+			nstack = [];
 
-			return new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
+			newexpression = newexpression.map(function(o){
+				if(o.list_){
+					delete o.list_;
+				}
+				return o;
+			});
+
+			return new Expression(
+				newexpression, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2,
+				this.simplify_exclude_functions);
 		},
 
 		substitute: function (variable, expr) {
@@ -163,12 +232,19 @@ var Parser = (function (scope) {
 				}
 			}
 
-			var ret = new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
+			var ret = new Expression(
+				newexpression, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2,
+				this.simplify_exclude_functions);
+
 			return ret;
 		},
 
-		evaluate: function (values) {
-			values = values || {};
+		toString: function (overload_1, overload_2) {
 			var nstack = [];
 			var n1;
 			var n2;
@@ -176,101 +252,82 @@ var Parser = (function (scope) {
 			var L = this.tokens.length;
 			var item;
 			var i = 0;
-			for (i = 0; i < L; i++) {
-				item = this.tokens[i];
-				var type_ = item.type_;
-				if (type_ === TNUMBER) {
-					nstack.push(item.number_);
-				}
-				else if (type_ === TOP2) {
-					n2 = nstack.pop();
-					n1 = nstack.pop();
-					f = this.ops2[item.index_];
-					nstack.push(f(n1, n2));
-				}
-				else if (type_ === TVAR) {
-					if (item.index_ in values) {
-						nstack.push(values[item.index_]);
-					}
-					else if (item.index_ in this.functions) {
-						nstack.push(this.functions[item.index_]);
-					}
-					else {
-						throw new Error("undefined variable: " + item.index_);
-					}
-				}
-				else if (type_ === TOP1) {
-					n1 = nstack.pop();
-					f = this.ops1[item.index_];
-					nstack.push(f(n1));
-				}
-				else if (type_ === TFUNCALL) {
-					n1 = nstack.pop();
-					f = nstack.pop();
-					if (f.apply && f.call) {
-						if (Object.prototype.toString.call(n1) == "[object Array]") {
-							nstack.push(f.apply(undefined, n1));
-						}
-						else {
-							nstack.push(f.call(undefined, n1));
-						}
-					}
-					else {
-						throw new Error(f + " is not a function");
-					}
-				}
-				else {
-					throw new Error("invalid Expression");
-				}
-			}
-			if (nstack.length > 1) {
-				throw new Error("invalid Expression (parity)");
-			}
-			return nstack[0];
-		},
+			var comma_isclosed = true, comma_prio;
 
-		toString: function (toJS) {
-			var nstack = [];
-			var n1;
-			var n2;
-			var f;
-			var L = this.tokens.length;
-			var item;
-			var i = 0;
 			for (i = 0; i < L; i++) {
 				item = this.tokens[i];
 				var type_ = item.type_;
 				if (type_ === TNUMBER) {
 					nstack.push(escapeValue(item.number_));
 				}
+				else if (type_ === TVAR) {
+					nstack.push(item.index_);
+				}
 				else if (type_ === TOP2) {
 					n2 = nstack.pop();
 					n1 = nstack.pop();
 					f = item.index_;
-					if (toJS && f == "^") {
-						nstack.push("Math.pow(" + n1 + "," + n2 + ")");
+					if (overload_2 && (f in this.overload_ops2)) {
+						comma_isclosed = true;
+						nstack.push(overload_2 + "['" + f + "'](" + n1 + "," + n2 + ")");
+					}else{
+						if(f !== ','){
+							if(!comma_isclosed){
+								comma_isclosed = true;
+								if(!/^\(.*\)$/.test(n1)){
+									n1 = "(" + n1 + ")";
+								}								
+								nstack.push("(" + n1 + f + "(" + n2 + "))");
+							}else{
+								nstack.push("(" + n1 + f + n2 + ")");
+							}
+						}else{
+							if(!comma_isclosed && comma_prio != null &&
+								item.prio_ != comma_prio){
+								nstack.push("(" + n1 + ")" + f + "(" + n2 + ")");
+							}else{
+								nstack.push(n1 + f + n2);
+							}
+							comma_isclosed = false;
+							comma_prio = item.prio_;
+						}
 					}
-					else {
-						nstack.push("(" + n1 + f + n2 + ")");
-					}
-				}
-				else if (type_ === TVAR) {
-					nstack.push(item.index_);
 				}
 				else if (type_ === TOP1) {
 					n1 = nstack.pop();
 					f = item.index_;
-					if (f === "-") {
-						nstack.push("(" + f + n1 + ")");
+					if (this.ops1[f]) {
+						if(overload_1 && (f in this.overload_ops1)){
+							comma_isclosed = true;
+							nstack.push(overload_1 + "['" + f + "'](" + n1 + ")");
+						}else{
+							if(!comma_isclosed){
+								comma_isclosed = true;
+								nstack.push("(" + f + "(" + n1 + "))");
+							}else{
+								nstack.push("(" + f + n1 + ")");
+							}
+						}
 					}
 					else {
 						nstack.push(f + "(" + n1 + ")");
 					}
 				}
 				else if (type_ === TFUNCALL) {
+					var prev = this.tokens[i - 1];
+					comma_isclosed = true;
 					n1 = nstack.pop();
 					f = nstack.pop();
-					nstack.push(f + "(" + n1 + ")");
+					if(prev.prio_ - item.prio_ > 10){
+						n1 = "(" + n1 + ")";
+					}
+					if(prev.index_ === ','){
+						n1 = "(" + n1 + ")";
+					}
+					if(!/^\(.*\)$/.test(n1)){
+						n1 = "(" + n1 + ")";
+					}
+					nstack.push(f + n1);
 				}
 				else {
 					throw new Error("invalid Expression");
@@ -279,15 +336,17 @@ var Parser = (function (scope) {
 			if (nstack.length > 1) {
 				throw new Error("invalid Expression (parity)");
 			}
-			return nstack[0];
+			return nstack[0].toString();
 		},
 
-		variables: function () {
+		variables: function (include_functions) {
 			var L = this.tokens.length;
 			var vars = [];
 			for (var i = 0; i < L; i++) {
 				var item = this.tokens[i];
-				if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1)) {
+				if (item.type_ === TVAR 
+					&& (include_functions || !(item.index_ in this.functions))
+					&& (vars.indexOf(item.index_) == -1)) {
 					vars.push(item.index_);
 				}
 			}
@@ -295,14 +354,76 @@ var Parser = (function (scope) {
 			return vars;
 		},
 
-		toJSFunction: function (param, variables) {
-			var f = new Function(param, "with(Parser.values) { return " + this.simplify(variables).toString(true) + "; }");
-			return f;
+		toEvalFunction: function(){
+			var expr = this;
+			var vars = expr.variables(true);
+
+			return function(values){
+				values = values || {};
+				var params = [];
+
+				for(var i = 0; i < vars.length; i++){
+					var v, key = vars[i];
+
+					if(key in values){
+						v = values[key];
+					}else{
+						var f = expr.functions[key];
+						if(f){
+							v = f;
+						}
+					}
+
+					params.push(v);
+				}
+
+				var overload_str = 'overload_' + (Math.random() + '').slice(2);
+				
+				var f = new Function(vars.concat(overload_str + '1', overload_str + '2'), "return " + expr.js_expr_str.replace(/\$_EXPR_OPS_\$/g, overload_str));
+				return f.apply(undefined, 
+					params.concat(expr.overload_ops1, expr.overload_ops2));
+			}
+		},
+
+		toJSFunction: function(param_table, values){
+			var expr = this;
+			if(values) expr = this.simplify(values);
+
+			var vars = expr.variables(true);
+
+			return function(){
+				var args = [].slice.call(arguments);
+				var params = [];
+
+				for(var i = 0; i < vars.length; i++){
+					var v, key = vars[i];
+					var idx = param_table.indexOf(key);
+					if(idx >= 0){
+						v = args[idx];
+					}else{
+						var f = expr.functions[key];
+						if(f){
+							v = f;
+						}
+					}
+
+					params.push(v);
+				}
+
+				var overload_str = 'overload_' + (Math.random() + '').slice(2);
+				
+				var f = new Function(vars.concat(overload_str + '1', overload_str + '2'), "return " + expr.js_expr_str.replace(/\$_EXPR_OPS_\$/g, overload_str));
+				return f.apply(undefined, 
+					params.concat(expr.overload_ops1, expr.overload_ops2));
+			}
 		}
 	};
 
+	function comma(){
+		return arguments[arguments.length - 1];
+	}
 	function add(a, b) {
-		return Number(a) + Number(b);
+		return a + b;
 	}
 	function sub(a, b) {
 		return a - b;
@@ -372,20 +493,27 @@ var Parser = (function (scope) {
 	function neg(a) {
 		return -a;
 	}
+	function positive(a){
+		return a;
+	}
 	function trunc(a) {
 		if(Math.trunc) return Math.trunc(a);
-		else return x < 0 ? Math.ceil(x) : Math.floor(x);
+		else return a < 0 ? Math.ceil(a) : Math.floor(a);
 	}
 	function random(a) {
 		return Math.random() * (a || 1);
 	}
 	function fac(a) { //a!
-		a = Math.floor(a);
-		var b = a;
-		while (a > 1) {
-			b = b * (--a);
+		a = 0 | a;
+		if(a === 0) return 1;
+		else if(a < 0) return NaN;
+		else {
+			var b = a;
+			while (a > 1) {
+				b = b * (--a);
+			}
+			return b;
 		}
-		return b;
 	}
 
 	// TODO: use hypot that doesn't overflow
@@ -405,7 +533,7 @@ var Parser = (function (scope) {
 	function condition(cond, yep, nope) {
 		return cond ? yep : nope;
 	}
-
+	
 	function append(a, b) {
 		if (Object.prototype.toString.call(a) != "[object Array]") {
 			return [a, b];
@@ -413,6 +541,10 @@ var Parser = (function (scope) {
 		a = a.slice();
 		a.push(b);
 		return a;
+	}
+
+	function list(){
+		return [].slice.call(arguments);
 	}
 
 	function Parser() {
@@ -428,6 +560,79 @@ var Parser = (function (scope) {
 		this.tmpprio = 0;
 
 		this.ops1 = {
+			"-": neg,
+			"+": positive,
+			"~!": fac, 			//Suffix operator: begin with ~
+			"~?": comma
+		};
+
+		this.ops2 = {
+			"+": add,
+			"-": sub,
+			"*": mul,
+			"/": div,
+			"%": mod,
+			"^": Math.pow,
+			",": comma,
+			"||": concat,
+			"==": equal,
+			"!=": notEqual,
+			">": greaterThan,
+			"<": lessThan,
+			">=": greaterThanEqual,
+			"<=": lessThanEqual,
+			"and": andOperator,
+			"or": orOperator
+		};
+
+		this.overload_ops1 = {
+			"~!": fac,
+			"~?": comma
+		};
+
+		this.overload_ops2 = {
+			"^": Math.pow,
+			"and": andOperator,
+			"or": orOperator
+		};
+
+		this.tokenprio_map1 = {
+			"-": 4,
+			"+": 4,
+			"~!": 4,
+			"~?": 6
+		};
+
+		this.tokenprio_map2 = {
+			"," :  0,
+			"or":  0,
+			"and": 0,
+			"||":  1,
+			"==":  1,
+			"!=":  1,
+			">":   1,
+			"<":   1,
+			">=":  1,
+			"<=":  1,
+			"+":   2,
+			"-":   2,
+			"*":   3,
+			"/":   4,
+			"%":   4,
+			"^":   5
+		};
+
+		this.functions = {
+			"random": random,
+			"fac": fac,
+			"min": Math.min,
+			"max": Math.max,
+			"hypot": hypot,
+			"pyt": hypot, // backward compat
+			"pow": Math.pow,
+			"atan2": Math.atan2,
+			"cond": condition,
+
 			"sin": Math.sin,
 			"cos": Math.cos,
 			"tan": Math.tan,
@@ -449,40 +654,12 @@ var Parser = (function (scope) {
 			"floor": Math.floor,
 			"round": Math.round,
 			"trunc": trunc,
-			"-": neg,
 			"exp": Math.exp
 		};
-
-		this.ops2 = {
-			"+": add,
-			"-": sub,
-			"*": mul,
-			"/": div,
-			"%": mod,
-			"^": Math.pow,
-			",": append,
-			"||": concat,
-			"==": equal,
-			"!=": notEqual,
-			">": greaterThan,
-			"<": lessThan,
-			">=": greaterThanEqual,
-			"<=": lessThanEqual,
-			"and": andOperator,
-			"or": orOperator
-		};
-
-		this.functions = {
-			"random": random,
-			"fac": fac,
-			"min": Math.min,
-			"max": Math.max,
-			"hypot": hypot,
-			"pyt": hypot, // backward compat
-			"pow": Math.pow,
-			"atan2": Math.atan2,
-			"if": condition
-		};
+		
+		this.simplify_exclude_functions = [
+			"random"
+		];
 
 		this.consts = {
 			"E": Math.E,
@@ -500,76 +677,128 @@ var Parser = (function (scope) {
 
 	Parser.Expression = Expression;
 
-	Parser.values = {
-		sin: Math.sin,
-		cos: Math.cos,
-		tan: Math.tan,
-		asin: Math.asin,
-		acos: Math.acos,
-		atan: Math.atan,
-		sinh: sinh,
-		cosh: cosh,
-		tanh: tanh,
-		asinh: asinh,
-		acosh: acosh,
-		atanh: atanh,
-		sqrt: Math.sqrt,
-		log: Math.log,
-		lg: log10,
-		log10: log10,
-		abs: Math.abs,
-		ceil: Math.ceil,
-		floor: Math.floor,
-		round: Math.round,
-		trunc: trunc,
-		random: random,
-		fac: fac,
-		exp: Math.exp,
-		min: Math.min,
-		max: Math.max,
-		hypot: hypot,
-		pyt: hypot, // backward compat
-		pow: Math.pow,
-		atan2: Math.atan2,
-		if: condition,
-		E: Math.E,
-		PI: Math.PI
-	};
-
 	var PRIMARY      = 1 << 0;
 	var OPERATOR     = 1 << 1;
 	var FUNCTION     = 1 << 2;
 	var LPAREN       = 1 << 3;
 	var RPAREN       = 1 << 4;
 	var COMMA        = 1 << 5;
-	var SIGN         = 1 << 6;
+	//var SIGN         = 1 << 6;
 	var CALL         = 1 << 7;
 	var NULLARY_CALL = 1 << 8;
 
 	Parser.prototype = {
+		overload: function(key, Class, func){
+			if(func.length !== 1 && func.length !== 2){
+				throw new Error('Invalid number of arguments, expected 1 or 2.');
+			}
+			if(!this.ops1[key] && !this.ops2[key]){
+				throw new Error('Invalid operator, use addOperator to add one.');
+			}
+			var type = func.length;
+			
+			this['overload_map' + type] = this['overload_map' + type] || {};
+			this['overload_map_funcs' + type] = this['overload_map_funcs' + type] || {};
+
+			this['overload_map' + type][key]  = this['overload_map' + type][key] || [];
+			this['overload_map_funcs' + type][key] = this['overload_map_funcs' + type][key] || [];
+
+			var overload_map = this['overload_map' + type] [key];
+			var overload_map_funcs = this['overload_map_funcs' + type][key];
+			var self = this;
+
+			function overload(op){
+				op = op || function(){
+					throw new Error('function ' + op + ' not defined.');
+				};
+				return function(){
+					var args = [].slice.call(arguments);
+					var matched = false;
+
+					for(var i = 0; i < args.length; i++){
+						var _Class = args[i].constructor;
+						var idx = overload_map.indexOf(_Class);
+
+						if(idx >= 0){
+							matched = true;
+							break;
+						}
+					}
+
+					if(matched){
+						args = args.map(function(o){
+							if(!(o instanceof _Class)){
+								return new _Class(o);
+							}
+							return o;
+						});
+						return overload_map_funcs[idx].apply(this, args);
+					}
+
+					return op.apply(this, args);	
+				}
+			}
+
+			if(overload_map.length <= 0){
+				if(key in this.ops1 && func.length === 1){
+					this.overload_ops1[key] = this.ops1[key] = overload(this.ops1[key]);
+				}else if(key in this.ops2 && func.length === 2){
+					this.overload_ops2[key] = this.ops2[key] = overload(this.ops2[key]);
+				}
+			}
+			overload_map.push(Class);
+			overload_map_funcs.push(func);
+		},
+
+		addOperator: function(name, prio, func){
+			if(func.length === 1){
+				this.overload_ops1[name] = this.ops1[name] = func;
+				this.tokenprio_map1[name] = prio;
+			}else if(func.length === 2){
+				this.overload_ops2[name] = this.ops2[name] = func;
+				this.tokenprio_map2[name] = prio;
+			}else{
+				throw new Error('Invalid number of arguments, expected 1 or 2.')
+			}
+		},
+
+		addFunction: function(name, func, can_simplify){
+			this.functions[name] = func;
+			if(can_simplify === false){
+				this.simplify_exclude_functions.push(name);
+			}
+		},
+
 		parse: function (expr) {
 			this.errormsg = "";
 			this.success = true;
 			var operstack = [];
 			var tokenstack = [];
 			this.tmpprio = 0;
-			var expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+			var expected = (PRIMARY | LPAREN | FUNCTION);
 			var noperators = 0;
 			this.expression = expr;
 			this.pos = 0;
 
 			while (this.pos < this.expression.length) {
-				if (this.isOperator()) {
-					if (this.isSign() && (expected & SIGN)) {
-						if (this.isNegativeSign()) {
-							this.tokenprio = 2;
-							this.tokenindex = "-";
-							noperators++;
-							this.addfunc(tokenstack, operstack, TOP1);
-						}
-						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
-					}
-					else if (this.isComment()) {
+				if (this.isOp1() && (expected & FUNCTION) !== 0) {
+					this.tokenprio = this.tokenprio_map1[this.tokenindex];
+					noperators++;
+					this.pos += this.tokenindex.length;
+					this.addfunc(tokenstack, operstack, TOP1);
+					expected = (PRIMARY | LPAREN | FUNCTION);
+				}
+				else if (this.isSuffixOp()){
+					this.tokenprio = this.tokenprio_map1[this.tokenindex];
+					this.pos += this.tokenindex.length-1;
+					noperators++;
+					this.addfunc(tokenstack, operstack, TOP1);
+					expected = (OPERATOR | RPAREN | COMMA);
+				}
+				else if (this.isOp2()) {
+					this.tokenprio = this.tokenprio_map2[this.tokenindex];
+					this.pos += this.tokenindex.length;
+					if (this.isComment()) {
 
 					}
 					else {
@@ -578,7 +807,7 @@ var Parser = (function (scope) {
 						}
 						noperators += 2;
 						this.addfunc(tokenstack, operstack, TOP2);
-						expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+						expected = (PRIMARY | LPAREN | FUNCTION);
 					}
 				}
 				else if (this.isNumber()) {
@@ -600,6 +829,9 @@ var Parser = (function (scope) {
 					expected = (OPERATOR | RPAREN | COMMA);
 				}
 				else if (this.isLeftParenth()) {
+					this.pos++;
+					this.tmpprio += 10;
+					
 					if ((expected & LPAREN) === 0) {
 						this.error_parsing(this.pos, "unexpected \"(\"");
 					}
@@ -611,10 +843,12 @@ var Parser = (function (scope) {
 						this.addfunc(tokenstack, operstack, TFUNCALL);
 					}
 
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN | NULLARY_CALL);
+					expected = (PRIMARY | LPAREN | FUNCTION | NULLARY_CALL);
 				}
 				else if (this.isRightParenth()) {
-				    if (expected & NULLARY_CALL) {
+					this.pos++;
+					this.tmpprio -= 10;
+				  if (expected & NULLARY_CALL) {
 						var token = new Token(TNUMBER, 0, 0, []);
 						tokenstack.push(token);
 					}
@@ -625,12 +859,15 @@ var Parser = (function (scope) {
 					expected = (OPERATOR | RPAREN | COMMA | LPAREN | CALL);
 				}
 				else if (this.isComma()) {
+					this.pos++;
+					this.tokenprio = -1;
+
 					if ((expected & COMMA) === 0) {
 						this.error_parsing(this.pos, "unexpected \",\"");
 					}
 					this.addfunc(tokenstack, operstack, TOP2);
 					noperators += 2;
-					expected = (PRIMARY | LPAREN | FUNCTION | SIGN);
+					expected = (PRIMARY | LPAREN | FUNCTION);
 				}
 				else if (this.isConst()) {
 					if ((expected & PRIMARY) === 0) {
@@ -639,22 +876,6 @@ var Parser = (function (scope) {
 					var consttoken = new Token(TNUMBER, 0, 0, this.tokennumber);
 					tokenstack.push(consttoken);
 					expected = (OPERATOR | RPAREN | COMMA);
-				}
-				else if (this.isOp2()) {
-					if ((expected & FUNCTION) === 0) {
-						this.error_parsing(this.pos, "unexpected function");
-					}
-					this.addfunc(tokenstack, operstack, TOP2);
-					noperators += 2;
-					expected = (LPAREN);
-				}
-				else if (this.isOp1()) {
-					if ((expected & FUNCTION) === 0) {
-						this.error_parsing(this.pos, "unexpected function");
-					}
-					this.addfunc(tokenstack, operstack, TOP1);
-					noperators++;
-					expected = (LPAREN);
 				}
 				else if (this.isVar()) {
 					if ((expected & PRIMARY) === 0) {
@@ -683,13 +904,21 @@ var Parser = (function (scope) {
 				var tmp = operstack.pop();
 				tokenstack.push(tmp);
 			}
+
 			if (noperators + 1 !== tokenstack.length) {
 				//print(noperators + 1);
 				//print(tokenstack);
 				this.error_parsing(this.pos, "parity");
 			}
 
-			return new Expression(tokenstack, object(this.ops1), object(this.ops2), object(this.functions));
+			return new Expression(
+				tokenstack, 
+				this.ops1, 
+				this.ops2, 
+				this.functions,
+				this.overload_ops1,
+				this.overload_ops2,
+				this.simplify_exclude_functions);
 		},
 
 		evaluate: function (expr, variables) {
@@ -716,24 +945,6 @@ var Parser = (function (scope) {
 				}
 			}
 			operstack.push(operator);
-		},
-
-		isNumber: function () {
-			var r = false;
-			var str = "";
-			while (this.pos < this.expression.length) {
-				var code = this.expression.charCodeAt(this.pos);
-				if ((code >= 48 && code <= 57) || code === 46) {
-					str += this.expression.charAt(this.pos);
-					this.pos++;
-					this.tokennumber = parseFloat(str);
-					r = true;
-				}
-				else {
-					break;
-				}
-			}
-			return r;
 		},
 
 		// Ported from the yajjl JSON parser at http://code.google.com/p/yajjl/
@@ -792,6 +1003,24 @@ var Parser = (function (scope) {
 			return buffer.join('');
 		},
 
+		isNumber: function () {
+			var r = false;
+			var str = "";
+			while (this.pos < this.expression.length) {
+				var code = this.expression.charCodeAt(this.pos);
+				if ((code >= 48 && code <= 57) || code === 46) {
+					str += this.expression.charAt(this.pos);
+					this.pos++;
+					this.tokennumber = parseFloat(str);
+					r = true;
+				}
+				else {
+					break;
+				}
+			}
+			return r;
+		},
+
 		isString: function () {
 			var r = false;
 			var str = "";
@@ -831,159 +1060,19 @@ var Parser = (function (scope) {
 			return false;
 		},
 
-		isOperator: function () {
-			var code = this.expression.charCodeAt(this.pos);
-			if (code === 43) { // +
-				this.tokenprio = 2;
-				this.tokenindex = "+";
-			}
-			else if (code === 45) { // -
-				this.tokenprio = 2;
-				this.tokenindex = "-";
-			}
-			else if (code === 62) { // >
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = ">=";
-				} else {
-					this.tokenprio = 1;
-					this.tokenindex = ">";
-				}
-			}
-			else if (code === 60) { // <
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "<=";
-				} else {
-					this.tokenprio = 1;
-					this.tokenindex = "<";
-				}
-			}
-			else if (code === 124) { // |
-				if (this.expression.charCodeAt(this.pos + 1) === 124) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "||";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 61) { // =
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "==";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 33) { // !
-				if (this.expression.charCodeAt(this.pos + 1) === 61) {
-					this.pos++;
-					this.tokenprio = 1;
-					this.tokenindex = "!=";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 97) { // a
-				if (this.expression.charCodeAt(this.pos + 1) === 110 && this.expression.charCodeAt(this.pos + 2) === 100) { // n && d
-					this.pos++;
-					this.pos++;
-					this.tokenprio = 0;
-					this.tokenindex = "and";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 111) { // o
-				if (this.expression.charCodeAt(this.pos + 1) === 114) { // r
-					this.pos++;
-					this.tokenprio = 0;
-					this.tokenindex = "or";
-				}
-				else {
-					return false;
-				}
-			}
-			else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
-				this.tokenprio = 3;
-				this.tokenindex = "*";
-			}
-			else if (code === 47) { // /
-				this.tokenprio = 4;
-				this.tokenindex = "/";
-			}
-			else if (code === 37) { // %
-				this.tokenprio = 4;
-				this.tokenindex = "%";
-			}
-			else if (code === 94) { // ^
-				this.tokenprio = 5;
-				this.tokenindex = "^";
-			}
-			else {
-				return false;
-			}
-			this.pos++;
-			return true;
-		},
-
-		isSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45 || code === 43) { // -
-				return true;
-			}
-			return false;
-		},
-
-		isPositiveSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 43) { // +
-				return true;
-			}
-			return false;
-		},
-
-		isNegativeSign: function () {
-			var code = this.expression.charCodeAt(this.pos - 1);
-			if (code === 45) { // -
-				return true;
-			}
-			return false;
-		},
-
 		isLeftParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 40) { // (
-				this.pos++;
-				this.tmpprio += 10;
-				return true;
-			}
-			return false;
+			return code === 40;
 		},
 
 		isRightParenth: function () {
 			var code = this.expression.charCodeAt(this.pos);
-			if (code === 41) { // )
-				this.pos++;
-				this.tmpprio -= 10;
-				return true;
-			}
-			return false;
+			return code === 41;
 		},
 
 		isComma: function () {
 			var code = this.expression.charCodeAt(this.pos);
 			if (code === 44) { // ,
-				this.pos++;
-				this.tokenprio = -1;
 				this.tokenindex = ",";
 				return true;
 			}
@@ -1000,43 +1089,75 @@ var Parser = (function (scope) {
 		},
 
 		isOp1: function () {
-			var str = "";
-			for (var i = this.pos; i < this.expression.length; i++) {
-				var c = this.expression.charAt(i);
-				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
-						break;
-					}
+			var rest = this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops1).sort(function(a, b){
+				return b.length - a.length;
+			});
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
 				}
-				str += c;
-			}
-			if (str.length > 0 && (str in this.ops1)) {
-				this.tokenindex = str;
-				this.tokenprio = 5;
-				this.pos += str.length;
-				return true;
-			}
-			return false;
+			});
+
+			return res;
 		},
 
 		isOp2: function () {
-			var str = "";
-			for (var i = this.pos; i < this.expression.length; i++) {
-				var c = this.expression.charAt(i);
-				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
-						break;
-					}
+			var rest = this.expression.slice(this.pos);
+			var ops = Object.keys(this.ops2).sort(function(a, b){
+				return b.length - a.length;
+			});
+
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
 				}
-				str += c;
+			});
+
+			return res;
+		},
+
+		isSuffixOp: function() {
+			var _r = this.expression.slice(this.pos);
+			var rest = '~' + _r;
+			var ops = Object.keys(this.ops1).sort(function(a, b){
+				return b.length - a.length;
+			});
+			var self = this;
+
+			var res = ops.some(function(op){
+				if(op !== '~' && rest.indexOf(op) == 0){
+					self.tokenindex = op;
+					return true;
+				}
+			});
+			
+			if(res){
+				var tokenindex = this.tokenindex;
+				var len = this.tokenindex.length - 1;
+				len += _r.slice(len).length - _r.slice(len).trimLeft().length;
+
+				this.pos += len;
+
+				if(this.pos >= this.expression.length
+					|| this.isRightParenth() || this.isOp2() || this.isComma()){
+					//look up forward to check if this operator is suffix operator or 2-target operator
+					this.tokenindex = tokenindex;
+					this.pos -= len;
+					return true;
+				}else{
+					this.pos -= len;
+					return false;
+				}
 			}
-			if (str.length > 0 && (str in this.ops2)) {
-				this.tokenindex = str;
-				this.tokenprio = 5;
-				this.pos += str.length;
-				return true;
-			}
-			return false;
+
+			return res;			
 		},
 
 		isVar: function () {

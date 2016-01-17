@@ -161,43 +161,125 @@ describe("Parser", function() {
         });
     });
     describe("#condition()", function() {
-        it("if(1, 1, 0)", function() {
-            expect(Parser.evaluate("if(1, 1, 0)")).to.equal(1);
+        it("cond(1, 1, 0)", function() {
+            expect(Parser.evaluate("cond(1, 1, 0)")).to.equal(1);
         });
-        it("if(0, 1, 0)", function() {
-            expect(Parser.evaluate("if(0, 1, 0)")).to.equal(0);
+        it("cond(0, 1, 0)", function() {
+            expect(Parser.evaluate("cond(0, 1, 0)")).to.equal(0);
         });
-        it("if(1==1 or 2==1, 39, 0)", function() {
-            expect(Parser.evaluate("if(1==1 or 2==1, 39, 0)")).to.equal(39);
+        it("cond(1==1 or 2==1, 39, 0)", function() {
+            expect(Parser.evaluate("cond(1==1 or 2==1, 39, 0)")).to.equal(39);
         });
-        it("if(1==1 or 1==2, -4 + 8, 0)", function() {
-            expect(Parser.evaluate("if(1==1 or 1==2, -4 + 8, 0)")).to.equal(4);
+        it("cond(1==1 or 1==2, -4 + 8, 0)", function() {
+            expect(Parser.evaluate("cond(1==1 or 1==2, -4 + 8, 0)")).to.equal(4);
         });
-        it("if(3 && 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)", function() {
-            expect(Parser.evaluate("if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)")).to.equal(2.4);
+        it("cond(3 && 6, cond(45 > 5 * 11, 3 * 3, 2.4), 0)", function() {
+            expect(Parser.evaluate("cond(3 and 6, cond(45 > 5 * 11, 3 * 3, 2.4), 0)")).to.equal(2.4);
+        });
+    });
+    describe("#suffix operator", function(){
+        it("5!", function(){
+            expect(Parser.evaluate("5!")).to.equal(120);
+        });
+        it("(3!)!", function(){
+            expect(Parser.evaluate("(3!)!")).to.equal(720);
+        });
+        it("percentage", function(){
+            var parser = new Parser();
+            parser.addOperator("~%", 4, function(a){
+                return a / 100;
+            });
+            expect(parser.evaluate("5%")).to.equal(0.05);
+            expect(parser.evaluate("2^5%")).to.equal(0.32);
+            expect(parser.evaluate("x+y%", {x:1, y:2})).to.equal(1.02);
+        });
+    });
+    describe("commas", function(){
+        it("(1,2)+(3,4)", function(){
+            expect(Parser.evaluate("(1,2)+(3,4)")).to.equal(6);
+        });
+        it("max(1,(2,4),3)", function(){
+            expect(Parser.evaluate("max(1,(2,4),3)")).to.equal(4);
+        });
+        it("max((1,(2,4),3))", function(){
+            expect(Parser.evaluate("max((1,(2,4),3))")).to.equal(3);
+        });
+    });
+    describe("operator overloading", function(){
+        function Complex(r, i){
+            this.r = r;
+            this.i = i || 0;
+        }
+        function Vector(x, y){
+            this.x = x;
+            this.y = y;
+        }
+        var parser = new Parser();
+        parser.overload("+", Complex, function(a, b){
+            return new Complex(a.r + b.r, a.i + b.i);
+        });
+        parser.overload("-", Complex, function(a,b){ 
+            return new Complex(a.r-b.r, a.i-b.i);
+        });
+
+        parser.overload("-", Complex, function(a){ 
+            return new Complex(-a.r, -a.i);
+        });
+
+        parser.addOperator("**", 4, function(a, b){ //vector cross
+            return new Vector(a.x * b.y, - a.y * b.x);
+        });
+
+        it("Complex + Complex", function(){
+            var a = new Complex(1, 2);
+            var b = new Complex(3, 4);
+            expect(parser.evaluate("a + b", {a:a, b:b})).to.deep.equal({
+                r: 4,
+                i: 6
+            });
+        });
+        it("Complex + Real + Complex", function(){
+            var a = new Complex(1, 2);
+            var b = new Complex(3, 4);
+            expect(parser.evaluate("a + 1 + b", {a:a, b:b})).to.deep.equal({
+                r: 5,
+                i: 6
+            });
+        });
+        it("Complex + (Real + Complex)", function(){
+            var a = new Complex(1, 2);
+            var b = new Complex(3, 4);
+            expect(parser.evaluate("a + (1 + b)", {a:a, b:b})).to.deep.equal({
+                r: 5,
+                i: 6
+            });
+        });
+        it("-Complex + Complex - Real", function(){
+            var expr = parser.parse("-a + b - 1");
+            var a = new Complex(1, 2);
+            var b = new Complex(3, 4);
+            expect(expr.evaluate({a:a, b:b})).to.deep.equal({
+                r: 1,
+                i: 2
+            });
+        });
+        it("Vector cross", function(){
+            var a = new Vector(1, 2);
+            var b = new Vector(3, 4);
+            expect(parser.evaluate("a ** b", {a:a, b:b})).to.deep.equal({
+                x: 4,
+                y: -6
+            });            
+        });
+    });
+    describe("toJSFunction", function(){
+        it("toJSFunction", function(){
+            var parser = Parser.parse("x ^ 2 + y ^ 2 + 1");
+            var func1 = parser.toJSFunction(['x', 'y']);
+            var func2 = parser.toJSFunction(['x'], {y: 2});
+
+            expect(func1(1, 1)).to.equal(3);
+            expect(func2(2)).to.equal(9);
         });
     });
 });
-
-/* @todo
-testToJSFunction: function() {
-    var expr = Parser.parse("x * (y * atan(1))");
-    var fn = expr.toJSFunction(['x', 'y']);
-    assert.strictEqual(fn(2, 4), 6.283185307179586);
-    fn = expr.toJSFunction(['y']);
-    assert.throws(function() { return fn(4); });
-}
-sin(x)
-cos(x)
-tan(x)
-asin(x)
-acos(x)
-atan(x)
-sqrt(x)
-log(x)
-abs(x)
-ceil(x)
-floor(x)
-round(x)
-exp(x)
-*/

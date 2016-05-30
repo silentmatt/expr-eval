@@ -92,6 +92,29 @@ var Parser = (function (scope) {
 		return v;
 	}
 
+	function hasValue(values, index) {
+		var parts = index.split(/\./);
+		var value = values;
+		var part;
+		while (part = parts.shift()) {
+			if (!(part in value)) {
+				return false;
+			}
+			value = value[part];
+		}
+		return true;
+	}
+
+	function getValue(values, index) {
+		var parts = index.split(/\./);
+		var value = values;
+		var part;
+		while (part = parts.shift()) {
+			value = value[part];
+		}
+		return value;
+	}
+
 	Expression.prototype = {
 		simplify: function (values) {
 			values = values || {};
@@ -109,8 +132,8 @@ var Parser = (function (scope) {
 				if (type_ === TNUMBER) {
 					nstack.push(item);
 				}
-				else if (type_ === TVAR && (item.index_ in values)) {
-					item = new Token(TNUMBER, 0, 0, values[item.index_]);
+				else if (type_ === TVAR && hasValue(values, item.index_)) {
+					item = new Token(TNUMBER, 0, 0, getValue(values, item.index_));
 					nstack.push(item);
 				}
 				else if (type_ === TOP2 && nstack.length > 1) {
@@ -189,11 +212,11 @@ var Parser = (function (scope) {
 					nstack.push(f(n1, n2));
 				}
 				else if (type_ === TVAR) {
-					if (item.index_ in values) {
-						nstack.push(values[item.index_]);
+					if (hasValue(values, item.index_)) {
+						nstack.push(getValue(values, item.index_));
 					}
-					else if (item.index_ in this.functions) {
-						nstack.push(this.functions[item.index_]);
+					else if (hasValue(this.functions, item.index_)) {
+						nstack.push(getValue(this.functions, item.index_));
 					}
 					else {
 						throw new Error("undefined variable: " + item.index_);
@@ -1044,7 +1067,7 @@ var Parser = (function (scope) {
 			for (var i = this.pos; i < this.expression.length; i++) {
 				var c = this.expression.charAt(i);
 				if (c.toUpperCase() === c.toLowerCase()) {
-					if (i === this.pos || (c != '_' && (c < '0' || c > '9'))) {
+					if (i === this.pos || (c != '_' && c != '.' && (c < '0' || c > '9'))) {
 						break;
 					}
 				}

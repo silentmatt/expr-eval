@@ -28,12 +28,35 @@ describe("Parser", function() {
         it("(-3)^x", function() {
             expect(Parser.evaluate("(-3)^x", {x: 4})).to.equal(81);
         });
+        it("2 ^ x.y", function() {
+            expect(Parser.evaluate("2^x.y", {x: { y: 3} })).to.equal(8);
+        });
+        it("2 + 3 * foo.bar.baz", function() {
+            expect(Parser.evaluate("2 + 3 * foo.bar.baz", {foo: {bar: {baz: 4}}})).to.equal(14);
+        });
     });
     describe("#substitute()", function() {
         var expr = Parser.parse("2 * x + 1");
         var expr2 = expr.substitute("x", "4 * x");
         it("((2*(4*x))+1)", function() {
             expect(expr2.evaluate({ x: 3})).to.equal(25);
+        });
+
+        var expr3 = Parser.parse("2 * x.y.z + 1");
+        var expr4 = expr3.substitute("x.y.z", "4 * x");
+        it("((2*(4*x))+1)", function() {
+            expect(expr4.evaluate({ x: 3 })).to.equal(25);
+        });
+
+        var expr5 = Parser.parse("2 * x.y.z + 1");
+        var expr6 = expr5.substitute("x.y.z", "4 * x.y.z");
+        it("((2*(4*x.y.z))+1)", function() {
+            expect(expr6.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
+        });
+
+        var expr7 = expr.substitute("x", "4 * x.y.z");
+        it("((2*(4*x.y.z))+1)", function() {
+            expect(expr7.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
         });
     });
     describe("#simplify()", function() {
@@ -46,12 +69,15 @@ describe("Parser", function() {
         });
     });
     describe("#variables()", function() {
-        var expr = Parser.parse("x * (y * atan(1))");
-        it("['x', 'y']", function() {
-            expect(expr.variables()).to.have.same.members(['x', 'y']);
+        var expr = Parser.parse("x * (y * atan(1)) + z.y.x");
+        it("['x', 'y', 'z.y.x']", function() {
+            expect(expr.variables()).to.have.same.members(['x', 'y', 'z.y.x']);
+        });
+        it("['x', 'z.y.x']", function() {
+            expect(expr.simplify({y: 4}).variables()).to.have.same.members(['x', 'z.y.x']);
         });
         it("['x']", function() {
-            expect(expr.simplify({y: 4}).variables()).to.have.same.members(['x']);
+            expect(expr.simplify({y: 4, z: { y: { x: 5 } } }).variables()).to.have.same.members(['x']);
         });
     });
     describe("#equal()", function() {

@@ -374,7 +374,7 @@ var Parser = (function (scope) {
 	}
 	function trunc(a) {
 		if(Math.trunc) return Math.trunc(a);
-		else return x < 0 ? Math.ceil(x) : Math.floor(x);
+		else return a < 0 ? Math.ceil(a) : Math.floor(a);
 	}
 	function random(a) {
 		return Math.random() * (a || 1);

@@ -585,7 +585,7 @@ var Parser = (function (scope) {
 				if (this.isOperator()) {
 					if (this.isSign() && (expected & SIGN)) {
 						if (this.isNegativeSign()) {
-							this.tokenprio = 2;
+							this.tokenprio = 5;
 							this.tokenindex = "-";
 							noperators++;
 							this.addfunc(tokenstack, operstack, TOP1);

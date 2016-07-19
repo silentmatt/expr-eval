@@ -34,6 +34,38 @@ describe("Parser", function() {
         it("2 + 3 * foo.bar.baz", function() {
             expect(Parser.evaluate("2 + 3 * foo.bar.baz", {foo: {bar: {baz: 4}}})).to.equal(14);
         });
+
+        it('10/-1', function () {
+          expect(Parser.evaluate('10/-1')).to.equal(-10);
+        });
+
+        it('10*-1', function () {
+          expect(Parser.evaluate('10*-1')).to.equal(-10);
+        });
+
+        it('10*-x', function () {
+          expect(Parser.evaluate('10*-x', {x: 1})).to.equal(-10);
+        });
+
+        it('10+-1', function () {
+          expect(Parser.evaluate('10+-1')).to.equal(9);
+        });
+
+        it('10/+1', function () {
+          expect(Parser.evaluate('10/+1')).to.equal(10);
+        });
+
+        it('10*+1', function () {
+          expect(Parser.evaluate('10*+1')).to.equal(10);
+        });
+
+        it('10*+x', function () {
+          expect(Parser.evaluate('10*+x', {x: 1})).to.equal(10);
+        });
+
+        it('10+ +1', function () {
+          expect(Parser.evaluate('10+ +1')).to.equal(11);
+        });
     });
     describe("#substitute()", function() {
         var expr = Parser.parse("2 * x + 1");

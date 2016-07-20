@@ -7,30 +7,39 @@ describe("Parser", function() {
         it("2 ^ x", function() {
             expect(Parser.evaluate("2 ^ x", {x: 3})).to.equal(8);
         });
+
         it("2 * x + 1", function() {
             expect(Parser.evaluate("2 * x + 1", {x: 3})).to.equal(7);
         });
+
         it("2 + 3 * x", function() {
             expect(Parser.evaluate("2 + 3 * x", {x: 4})).to.equal(14);
         });
+
         it("(2 + 3) * x", function() {
             expect(Parser.evaluate("(2 + 3) * x", {x: 4})).to.equal(20);
         });
+
         it("2-3^x", function() {
             expect(Parser.evaluate("2-3^x", {x: 4})).to.equal(-79);
         });
+
         it("-2-3^x", function() {
             expect(Parser.evaluate("-2-3^x", {x: 4})).to.equal(-83);
         });
+
         it("-3^x", function() {
             expect(Parser.evaluate("-3^x", {x: 4})).to.equal(-81);
         });
+
         it("(-3)^x", function() {
             expect(Parser.evaluate("(-3)^x", {x: 4})).to.equal(81);
         });
+
         it("2 ^ x.y", function() {
             expect(Parser.evaluate("2^x.y", {x: { y: 3} })).to.equal(8);
         });
+
         it("2 + 3 * foo.bar.baz", function() {
             expect(Parser.evaluate("2 + 3 * foo.bar.baz", {foo: {bar: {baz: 4}}})).to.equal(14);
         });

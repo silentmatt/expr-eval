@@ -702,6 +702,7 @@ var Parser = (function (scope) {
 			if (this.tmpprio < 0 || this.tmpprio >= 10) {
 				this.error_parsing(this.pos, "unmatched \"()\"");
 			}
+
 			while (operstack.length > 0) {
 				var tmp = operstack.pop();
 				tokenstack.push(tmp);
@@ -948,7 +949,7 @@ var Parser = (function (scope) {
 				this.tokenindex = "%";
 			}
 			else if (code === 94) { // ^
-				this.tokenprio = 5;
+				this.tokenprio = 6;
 				this.tokenindex = "^";
 			}
 			else {
@@ -1035,7 +1036,7 @@ var Parser = (function (scope) {
 			}
 			if (str.length > 0 && (str in this.ops1)) {
 				this.tokenindex = str;
-				this.tokenprio = 5;
+				this.tokenprio = 7;
 				this.pos += str.length;
 				return true;
 			}
@@ -1055,7 +1056,7 @@ var Parser = (function (scope) {
 			}
 			if (str.length > 0 && (str in this.ops2)) {
 				this.tokenindex = str;
-				this.tokenprio = 5;
+				this.tokenprio = 7;
 				this.pos += str.length;
 				return true;
 			}

@@ -6,10 +6,7 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {
-    "chai": "^3.5.0",
-    "semistandard": "^8.0.0"
-  },
+  "dependencies": { },
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.5.3"

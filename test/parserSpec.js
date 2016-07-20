@@ -1,6 +1,7 @@
+'use strict';
+
 var expect = require("chai").expect;
-var Parser = require("../parser.js");
-Parser = Parser.Parser;
+var Parser = require("../parser").Parser;
 
 describe("Parser", function() {
     describe("#evaluate()", function() {

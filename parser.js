@@ -66,8 +66,7 @@ var Parser = (function (scope) {
 	}
 
 	// Based on http://www.json.org/json2.js
-    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+    var escapable = /[\\\'\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
         meta = {    // table of character substitutions
             '\b': '\\b',
             '\t': '\\t',
@@ -585,7 +584,7 @@ var Parser = (function (scope) {
 				if (this.isOperator()) {
 					if (this.isSign() && (expected & SIGN)) {
 						if (this.isNegativeSign()) {
-							this.tokenprio = 2;
+							this.tokenprio = 5;
 							this.tokenindex = "-";
 							noperators++;
 							this.addfunc(tokenstack, operstack, TOP1);
@@ -702,6 +701,7 @@ var Parser = (function (scope) {
 			if (this.tmpprio < 0 || this.tmpprio >= 10) {
 				this.error_parsing(this.pos, "unmatched \"()\"");
 			}
+
 			while (operstack.length > 0) {
 				var tmp = operstack.pop();
 				tokenstack.push(tmp);
@@ -948,7 +948,7 @@ var Parser = (function (scope) {
 				this.tokenindex = "%";
 			}
 			else if (code === 94) { // ^
-				this.tokenprio = 5;
+				this.tokenprio = 6;
 				this.tokenindex = "^";
 			}
 			else {
@@ -1035,7 +1035,7 @@ var Parser = (function (scope) {
 			}
 			if (str.length > 0 && (str in this.ops1)) {
 				this.tokenindex = str;
-				this.tokenprio = 5;
+				this.tokenprio = 7;
 				this.pos += str.length;
 				return true;
 			}
@@ -1055,7 +1055,7 @@ var Parser = (function (scope) {
 			}
 			if (str.length > 0 && (str in this.ops2)) {
 				this.tokenindex = str;
-				this.tokenprio = 5;
+				this.tokenprio = 7;
 				this.pos += str.length;
 				return true;
 			}

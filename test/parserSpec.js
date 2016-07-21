@@ -1,38 +1,80 @@
+'use strict';
+
 var expect = require("chai").expect;
-var Parser = require("../parser.js");
-Parser = Parser.Parser;
+var Parser = require("../parser").Parser;
 
 describe("Parser", function() {
     describe("#evaluate()", function() {
         it("2 ^ x", function() {
             expect(Parser.evaluate("2 ^ x", {x: 3})).to.equal(8);
         });
+
         it("2 * x + 1", function() {
             expect(Parser.evaluate("2 * x + 1", {x: 3})).to.equal(7);
         });
+
         it("2 + 3 * x", function() {
             expect(Parser.evaluate("2 + 3 * x", {x: 4})).to.equal(14);
         });
+
         it("(2 + 3) * x", function() {
             expect(Parser.evaluate("(2 + 3) * x", {x: 4})).to.equal(20);
         });
+
         it("2-3^x", function() {
             expect(Parser.evaluate("2-3^x", {x: 4})).to.equal(-79);
         });
+
         it("-2-3^x", function() {
             expect(Parser.evaluate("-2-3^x", {x: 4})).to.equal(-83);
         });
+
         it("-3^x", function() {
             expect(Parser.evaluate("-3^x", {x: 4})).to.equal(-81);
         });
+
         it("(-3)^x", function() {
             expect(Parser.evaluate("(-3)^x", {x: 4})).to.equal(81);
         });
+
         it("2 ^ x.y", function() {
             expect(Parser.evaluate("2^x.y", {x: { y: 3} })).to.equal(8);
         });
+
         it("2 + 3 * foo.bar.baz", function() {
             expect(Parser.evaluate("2 + 3 * foo.bar.baz", {foo: {bar: {baz: 4}}})).to.equal(14);
+        });
+
+        it('10/-1', function () {
+          expect(Parser.evaluate('10/-1')).to.equal(-10);
+        });
+
+        it('10*-1', function () {
+          expect(Parser.evaluate('10*-1')).to.equal(-10);
+        });
+
+        it('10*-x', function () {
+          expect(Parser.evaluate('10*-x', {x: 1})).to.equal(-10);
+        });
+
+        it('10+-1', function () {
+          expect(Parser.evaluate('10+-1')).to.equal(9);
+        });
+
+        it('10/+1', function () {
+          expect(Parser.evaluate('10/+1')).to.equal(10);
+        });
+
+        it('10*+1', function () {
+          expect(Parser.evaluate('10*+1')).to.equal(10);
+        });
+
+        it('10*+x', function () {
+          expect(Parser.evaluate('10*+x', {x: 1})).to.equal(10);
+        });
+
+        it('10+ +1', function () {
+          expect(Parser.evaluate('10+ +1')).to.equal(11);
         });
     });
     describe("#substitute()", function() {

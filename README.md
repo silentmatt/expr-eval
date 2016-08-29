@@ -5,12 +5,15 @@ Description
 -----------
 
 This library is a modified version of Raphael Graf’s ActionScript Expression
-Parser. When I wrote the JavaScript Function Plotter, I wanted a better
-alternative to using JavaScript’s eval function. There’s no security risk
-currently, because you can only run code in your own browser, but it’s not as
-convenient for math (`Math.pow(2, x)` instead of `2^x`, etc.).
+Parser. It's a safer and more math-oriented alternative to JavaScript’s eval
+function for mathematical expressions instead of JavaScript.
 
-Documentation (incomplete, of course)
+It has built-in support for common math operators and functions, and any
+JavaScript function with string or numeric arguments and return values can be
+added. Parsed expressions can be evaluated directly, or compiled into native
+JavaScript functions.
+
+Documentation
 -------------------------------------
 
 ### Parser ###

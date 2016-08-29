@@ -306,10 +306,11 @@ var Parser = (function (scope) {
 
 		variables: function () {
 			var L = this.tokens.length;
+			var functions = [ "random","fac","min","max","pyt","pow","atan2"];
 			var vars = [];
 			for (var i = 0; i < L; i++) {
 				var item = this.tokens[i];
-				if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1)) {
+				if (item.type_ === TVAR && (vars.indexOf(item.index_) == -1 && functions.indexOf(item.index_)==-1)) {
 					vars.push(item.index_);
 				}
 			}
@@ -507,7 +508,7 @@ var Parser = (function (scope) {
 		};
 
 		this.consts = {
-			"E": Math.E,
+			"_E": Math.E,
 			"PI": Math.PI
 		};
 	}

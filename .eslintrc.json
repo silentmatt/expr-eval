@@ -1,0 +1,10 @@
+{
+  "extends": "semistandard",
+  "rules": {
+    "space-before-function-paren": "off",
+    "linebreak-style": [
+      "error",
+      "unix"
+    ]
+  }
+}

@@ -143,6 +143,22 @@ describe('Parser', function() {
     it('3 == 3', function() {
       expect(Parser.evaluate('3 == 3')).to.equal(true);
     });
+
+    it('\'3\' == 3', function() {
+      expect(Parser.evaluate('\'3\' == 3')).to.equal(false);
+    });
+
+    it('\'string 1\' == \'string 2\'', function() {
+      expect(Parser.evaluate('\'string 1\' == \'string 2\'')).to.equal(false);
+    });
+
+    it('\'string 1\' == "string 1"', function() {
+      expect(Parser.evaluate('\'string 1\' == \'string 1\'')).to.equal(true);
+    });
+
+    it('\'3\' == \'3\'', function() {
+      expect(Parser.evaluate('\'3\' == \'3\'')).to.equal(true);
+    });
   });
 
   describe('#notEqual()', function() {
@@ -156,6 +172,22 @@ describe('Parser', function() {
 
     it('3 != 3', function() {
       expect(Parser.evaluate('3 != 3')).to.equal(false);
+    });
+
+    it('\'3\' != 3', function() {
+      expect(Parser.evaluate('\'3\' != 3')).to.equal(true);
+    });
+
+    it('\'3\' != \'3\'', function() {
+      expect(Parser.evaluate('\'3\' != \'3\'')).to.equal(false);
+    });
+
+    it('\'string 1\' != \'string 1\'', function() {
+      expect(Parser.evaluate('\'string 1\' != \'string 1\'')).to.equal(false);
+    });
+
+    it('\'string 1\' != \'string 2\'', function() {
+      expect(Parser.evaluate('\'string 1\' != \'string 2\'')).to.equal(true);
     });
   });
 

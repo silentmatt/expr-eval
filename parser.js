@@ -318,10 +318,10 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return '' + a + b;
   }
   function equal(a, b) {
-    return a == b; // eslint-disable-line eqeqeq
+    return a === b;
   }
   function notEqual(a, b) {
-    return a != b; // eslint-disable-line eqeqeq
+    return a !== b;
   }
   function greaterThan(a, b) {
     return a > b;

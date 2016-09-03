@@ -27,11 +27,11 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return new F();
   }
 
-  var TNUMBER = 0;
-  var TOP1 = 1;
-  var TOP2 = 2;
-  var TVAR = 3;
-  var TFUNCALL = 4;
+  var TNUMBER = 'TNUMBER';
+  var TOP1 = 'TOP1';
+  var TOP2 = 'TOP2';
+  var TVAR = 'TVAR';
+  var TFUNCALL = 'TFUNCALL';
 
   function Token(type, index, prio, number) {
     this.type = type;

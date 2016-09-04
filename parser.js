@@ -1024,9 +1024,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isComment: function () {
-      var code = this.expression.charCodeAt(this.pos - 1);
-      if (code === 47 && this.expression.charCodeAt(this.pos) === 42) {
-        this.pos = indexOf(this.expression, '*/', this.pos) + 2;
+      var char = this.expression.charAt(this.pos - 1);
+      if (char === '/' && this.expression.charAt(this.pos) === '*') {
+        this.pos = this.expression.indexOf('*/', this.pos) + 2;
         if (this.pos === 1) {
           this.pos = this.expression.length;
         }

@@ -6,6 +6,13 @@ var expect = require('chai').expect;
 var Parser = require('../parser').Parser;
 
 describe('Parser', function() {
+  describe('#parse()', function () {
+    it('should skip comments', function () {
+      expect(Parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
+      expect(Parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
+    });
+  });
+
   describe('#evaluate()', function() {
     it('2 ^ x', function() {
       expect(Parser.evaluate('2 ^ x', {x: 3})).to.equal(8);

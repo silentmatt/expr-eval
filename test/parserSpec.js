@@ -11,6 +11,10 @@ describe('Parser', function() {
       expect(Parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
       expect(Parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
     });
+
+    it('should ignore whitespace', function () {
+      expect(Parser.evaluate(' 3\r + \n \t 4 ')).to.equal(7);
+    });
   });
 
   describe('#evaluate()', function() {

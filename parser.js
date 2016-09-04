@@ -708,8 +708,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       var r = false;
       var str = '';
       while (this.pos < this.expression.length) {
-        var code = this.expression.charCodeAt(this.pos);
-        if ((code >= 48 && code <= 57) || code === 46) {
+        var char = this.expression.charAt(this.pos);
+        if ((char >= '0' && char <= '9') || char === '.') {
           str += this.expression.charAt(this.pos);
           this.pos++;
           this.tokennumber = parseFloat(str);
@@ -814,15 +814,15 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isOperator: function () {
-      var code = this.expression.charCodeAt(this.pos);
-      if (code === 43) { // +
+      var char = this.expression.charAt(this.pos);
+      if (char === '+') {
         this.tokenprio = 2;
         this.tokenindex = '+';
-      } else if (code === 45) { // -
+      } else if (char === '-') {
         this.tokenprio = 2;
         this.tokenindex = '-';
-      } else if (code === 62) { // >
-        if (this.expression.charCodeAt(this.pos + 1) === 61) {
+      } else if (char === '>') {
+        if (this.expression.charAt(this.pos + 1) === '=') {
           this.pos++;
           this.tokenprio = 1;
           this.tokenindex = '>=';
@@ -830,8 +830,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
           this.tokenprio = 1;
           this.tokenindex = '>';
         }
-      } else if (code === 60) { // <
-        if (this.expression.charCodeAt(this.pos + 1) === 61) {
+      } else if (char === '<') {
+        if (this.expression.charAt(this.pos + 1) === '=') {
           this.pos++;
           this.tokenprio = 1;
           this.tokenindex = '<=';
@@ -839,32 +839,32 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
           this.tokenprio = 1;
           this.tokenindex = '<';
         }
-      } else if (code === 124) { // |
-        if (this.expression.charCodeAt(this.pos + 1) === 124) {
+      } else if (char === '|') {
+        if (this.expression.charAt(this.pos + 1) === '|') {
           this.pos++;
           this.tokenprio = 1;
           this.tokenindex = '||';
         } else {
           return false;
         }
-      } else if (code === 61) { // =
-        if (this.expression.charCodeAt(this.pos + 1) === 61) {
+      } else if (char === '=') {
+        if (this.expression.charAt(this.pos + 1) === '=') {
           this.pos++;
           this.tokenprio = 1;
           this.tokenindex = '==';
         } else {
           return false;
         }
-      } else if (code === 33) { // !
-        if (this.expression.charCodeAt(this.pos + 1) === 61) {
+      } else if (char === '!') {
+        if (this.expression.charAt(this.pos + 1) === '=') {
           this.pos++;
           this.tokenprio = 1;
           this.tokenindex = '!=';
         } else {
           return false;
         }
-      } else if (code === 97) { // a
-        if (this.expression.charCodeAt(this.pos + 1) === 110 && this.expression.charCodeAt(this.pos + 2) === 100) { // n && d
+      } else if (char === 'a') {
+        if (this.expression.charAt(this.pos + 1) === 'n' && this.expression.charAt(this.pos + 2) === 'd') {
           this.pos++;
           this.pos++;
           this.tokenprio = 0;
@@ -872,24 +872,24 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         } else {
           return false;
         }
-      } else if (code === 111) { // o
-        if (this.expression.charCodeAt(this.pos + 1) === 114) { // r
+      } else if (char === 'o') {
+        if (this.expression.charAt(this.pos + 1) === 'r') {
           this.pos++;
           this.tokenprio = 0;
           this.tokenindex = 'or';
         } else {
           return false;
         }
-      } else if (code === 42 || code === 8729 || code === 8226) { // * or ∙ or •
+      } else if (char === '*' || char === '∙' || char === '•') {
         this.tokenprio = 3;
         this.tokenindex = '*';
-      } else if (code === 47) { // /
+      } else if (char === '/') {
         this.tokenprio = 4;
         this.tokenindex = '/';
-      } else if (code === 37) { // %
+      } else if (char === '%') {
         this.tokenprio = 4;
         this.tokenindex = '%';
-      } else if (code === 94) { // ^
+      } else if (char === '^') {
         this.tokenprio = 6;
         this.tokenindex = '^';
       } else {
@@ -900,32 +900,32 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isSign: function () {
-      var code = this.expression.charCodeAt(this.pos - 1);
-      if (code === 45 || code === 43) { // -
+      var char = this.expression.charAt(this.pos - 1);
+      if (char === '-' || char === '+') {
         return true;
       }
       return false;
     },
 
     isPositiveSign: function () {
-      var code = this.expression.charCodeAt(this.pos - 1);
-      if (code === 43) { // +
+      var char = this.expression.charAt(this.pos - 1);
+      if (char === '+') {
         return true;
       }
       return false;
     },
 
     isNegativeSign: function () {
-      var code = this.expression.charCodeAt(this.pos - 1);
-      if (code === 45) { // -
+      var char = this.expression.charAt(this.pos - 1);
+      if (char === '-') {
         return true;
       }
       return false;
     },
 
     isLeftParenth: function () {
-      var code = this.expression.charCodeAt(this.pos);
-      if (code === 40) { // (
+      var char = this.expression.charAt(this.pos);
+      if (char === '(') {
         this.pos++;
         this.tmpprio += 10;
         return true;
@@ -934,8 +934,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isRightParenth: function () {
-      var code = this.expression.charCodeAt(this.pos);
-      if (code === 41) { // )
+      var char = this.expression.charAt(this.pos);
+      if (char === ')') {
         this.pos++;
         this.tmpprio -= 10;
         return true;
@@ -944,8 +944,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isComma: function () {
-      var code = this.expression.charCodeAt(this.pos);
-      if (code === 44) { // ,
+      var char = this.expression.charAt(this.pos);
+      if (char === ',') {
         this.pos++;
         this.tokenprio = -1;
         this.tokenindex = ',';
@@ -955,8 +955,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     },
 
     isWhite: function () {
-      var code = this.expression.charCodeAt(this.pos);
-      if (code === 32 || code === 9 || code === 10 || code === 13) {
+      var char = this.expression.charAt(this.pos);
+      if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
         this.pos++;
         return true;
       }

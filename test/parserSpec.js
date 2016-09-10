@@ -363,6 +363,32 @@ describe('Parser', function() {
       expect(Parser.evaluate('if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)')).to.equal(2.4);
     });
   });
+
+  describe('not operator', function() {
+    it('not 1', function() {
+      expect(Parser.evaluate('not 1')).to.equal(false);
+    });
+
+    it('not 0', function() {
+      expect(Parser.evaluate('not 0')).to.equal(true);
+    });
+
+    it('not 4', function() {
+      expect(Parser.evaluate('not 4')).to.equal(false);
+    });
+
+    it('1 and not 0', function() {
+      expect(Parser.evaluate('1 and not 0')).to.equal(true);
+    });
+
+    it('not \'0\'', function() {
+      expect(Parser.evaluate('not \'0\'')).to.equal(false);
+    });
+
+    it('not \'\'', function() {
+      expect(Parser.evaluate('not \'\'')).to.equal(true);
+    });
+  });
 });
 
 /* @todo

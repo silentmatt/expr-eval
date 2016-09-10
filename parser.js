@@ -368,6 +368,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   function neg(a) {
     return -a;
   }
+  function not(a) {
+    return !a;
+  }
   function trunc(a) {
     if (Math.trunc) {
       return Math.trunc(a);
@@ -945,7 +948,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       trunc: trunc,
       '-': neg,
       '+': Number,
-      exp: Math.exp
+      exp: Math.exp,
+      not: not
     };
 
     this.ops2 = {

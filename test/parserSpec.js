@@ -89,6 +89,22 @@ describe('Parser', function() {
     it('10+ +1', function () {
       expect(Parser.evaluate('10+ +1')).to.equal(11);
     });
+
+    it('10/-2', function() {
+      expect(Parser.evaluate('10/-2')).to.equal(-5);
+    });
+
+    it('2^-4', function() {
+      expect(Parser.evaluate('2^-4')).to.equal(1 / 16);
+    });
+
+    it('2^(-4)', function() {
+      expect(Parser.evaluate('2^(-4)')).to.equal(1 / 16);
+    });
+
+    it('\'as\' || \'df\'', function () {
+      expect(Parser.evaluate('\'as\' || \'df\'')).to.equal('asdf');
+    });
   });
 
   describe('#substitute()', function() {

@@ -1,7 +1,7 @@
 {
-  "name": "js-expression-eval",
+  "name": "expr-eval",
   "version": "1.0.0",
-  "description": "Mathematical expression evaluator in JavaScript",
+  "description": "Mathematical expression evaluator",
   "main": "parser.js",
   "directories": {
     "test": "test"
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/silentmatt/js-expression-eval.git"
+    "url": "git+https://github.com/silentmatt/expr-eval.git"
   },
   "keywords": [
     "expression",
@@ -35,7 +35,7 @@
   "author": "Matthew Crumley",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/silentmatt/js-expression-eval/issues"
+    "url": "https://github.com/silentmatt/expr-eval/issues"
   },
-  "homepage": "https://github.com/silentmatt/js-expression-eval#readme"
+  "homepage": "https://github.com/silentmatt/expr-eval#readme"
 }

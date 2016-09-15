@@ -15,6 +15,22 @@ describe('Parser', function() {
     it('should ignore whitespace', function () {
       expect(Parser.evaluate(' 3\r + \n \t 4 ')).to.equal(7);
     });
+
+    it('should accept variables starting with E', function () {
+      expect(Parser.parse('2 * ERGONOMIC').evaluate({ ERGONOMIC: 1000 })).to.equal(2000);
+    });
+
+    it('should accept variables starting with PI', function () {
+      expect(Parser.parse('1 / PITTSBURGH').evaluate({ PITTSBURGH: 2 })).to.equal(0.5);
+    });
+
+    it('should fail on empty parentheses', function () {
+      expect(function () { Parser.parse('5/()'); }).to.throw(Error);
+    });
+
+    it('should fail on 5/', function () {
+      expect(function () { Parser.parse('5/'); }).to.throw(Error);
+    });
   });
 
   describe('#evaluate()', function() {

@@ -782,20 +782,20 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return (this.nextToken = this.tokens.next());
   };
 
-  ParserState.prototype.accept = function (type, value) {
-    function isMatch(token, value) {
-      if (typeof value === 'undefined') {
-        return true;
-      } else if (Object.prototype.toString.call(value) === '[object Array]') {
-        return indexOf(value, token.value) >= 0;
-      } else if (typeof value === 'function') {
-        return value(token);
-      } else {
-        return token.value === value;
-      }
+  ParserState.prototype.tokenMatches = function (token, value) {
+    if (typeof value === 'undefined') {
+      return true;
+    } else if (Object.prototype.toString.call(value) === '[object Array]') {
+      return indexOf(value, token.value) >= 0;
+    } else if (typeof value === 'function') {
+      return value(token);
+    } else {
+      return token.value === value;
     }
+  };
 
-    if (this.nextToken.type === type && isMatch(this.nextToken, value)) {
+  ParserState.prototype.accept = function (type, value) {
+    if (this.nextToken.type === type && this.tokenMatches(this.nextToken, value)) {
       this.next();
       return true;
     }

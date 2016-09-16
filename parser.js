@@ -91,26 +91,15 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   }
 
   function hasValue(values, index) {
-    var parts = index.split(/\./);
-    var value = values;
-    var part;
-    while ((part = parts.shift())) {
-      if (!(part in value)) {
-        return false;
-      }
-      value = value[part];
-    }
-    return true;
+    return (getValue(values, index) !== undefined);
   }
 
   function getValue(values, index) {
-    var parts = index.split(/\./);
-    var value = values;
-    var part;
-    while ((part = parts.shift())) {
-      value = value[part];
-    }
-    return value;
+    var val = index.split(/\./).reduce(function index(o, i) {
+      return (o && (o[i] !== undefined)) ? o[i] : undefined;
+    }, values);
+
+    return val;
   }
 
   function simplify(tokens, ops1, ops2, ops3, values) {
@@ -221,12 +210,15 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
           nstack.push(f(n1, n2, n3));
         }
       } else if (type === IVAR) {
-        if (hasValue(values, item.value)) {
-          nstack.push(getValue(values, item.value));
-        } else if (hasValue(expr.functions, item.value)) {
-          nstack.push(getValue(expr.functions, item.value));
+        if (item.value in expr.functions) {
+          nstack.push(expr.functions[item.value]);
         } else {
-          throw new Error('undefined variable: ' + item.value);
+          var v = getValue(values, item.value);
+          if (v !== undefined) {
+            nstack.push(v);
+          } else {
+            throw new Error('undefined variable: ' + item.value);
+          }
         }
       } else if (type === IOP1) {
         n1 = nstack.pop();

@@ -87,26 +87,16 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   }
 
   function hasValue(values, index) {
-    var parts = index.split(/\./);
-    var value = values;
-    var part;
-    while ((part = parts.shift())) {
-      if (!(part in value)) {
-        return false;
-      }
-      value = value[part];
-    }
-    return true;
+      return (getValue(values, index) !== undefined);
   }
 
   function getValue(values, index) {
-    var parts = index.split(/\./);
-    var value = values;
-    var part;
-    while ((part = parts.shift())) {
-      value = value[part];
-    }
-    return value;
+      var val = true;
+      val = index.split(/\./).reduce(function index(o, i) {
+          return (o && (o[i] !== undefined)) ? o[i] : undefined;
+      }, values);
+
+      return val;
   }
 
   Expression.prototype = {

@@ -160,17 +160,37 @@ describe('Parser', function() {
   });
 
   describe('#variables()', function() {
-    var expr = Parser.parse('x * (y * atan(1)) + z.y.x');
+    var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function() {
-      expect(expr.variables()).to.have.same.members(['x', 'y', 'z.y.x']);
+      expect(expr.variables()).to.include.members(['x', 'y', 'z.y.x']);
+      expect(expr.variables()).to.not.include.members(['atan2']);
     });
 
     it('["x", "z.y.x"]', function() {
-      expect(expr.simplify({y: 4}).variables()).to.have.same.members(['x', 'z.y.x']);
+      expect(expr.simplify({y: 4}).variables()).to.include.members(['x', 'z.y.x']);
+      expect(expr.simplify({y: 4}).variables()).to.not.include.members(['y', 'atan2']);
     });
 
     it('["x"]', function() {
-      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.have.same.members(['x']);
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.include.members(['x']);
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.not.include.members(['y', 'z.y.x', 'atan2']);
+    });
+  });
+
+  describe('#symbols()', function() {
+    var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
+    it('["x", "y", "z.y.x"]', function() {
+      expect(expr.symbols()).to.include.members(['x', 'y', 'z.y.x', 'atan2']);
+    });
+
+    it('["x", "z.y.x"]', function() {
+      expect(expr.simplify({y: 4}).symbols()).to.include.members(['x', 'z.y.x', 'atan2']);
+      expect(expr.simplify({y: 4}).symbols()).to.not.include.members(['y']);
+    });
+
+    it('["x"]', function() {
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.include.members(['x', 'atan2']);
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.not.include.members(['y', 'z.y.x']);
     });
   });
 

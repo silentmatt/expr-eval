@@ -313,22 +313,30 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return toString(this.tokens);
   };
 
-  Expression.prototype.variables = function () {
-    var vars = [];
-
-    function getVariables(tokens) {
-      for (var i = 0, L = tokens.length; i < L; i++) {
-        var item = tokens[i];
-        if (item.type === IVAR && (indexOf(vars, item.value) === -1)) {
-          vars.push(item.value);
-        } else if (item.type === IEXPR) {
-          getVariables(item.value);
-        }
+  function getSymbols(tokens, symbols) {
+    for (var i = 0, L = tokens.length; i < L; i++) {
+      var item = tokens[i];
+      if (item.type === IVAR && (indexOf(symbols, item.value) === -1)) {
+        symbols.push(item.value);
+      } else if (item.type === IEXPR) {
+        getSymbols(item.value, symbols);
       }
     }
+  }
 
-    getVariables(this.tokens);
+  Expression.prototype.symbols = function () {
+    var vars = [];
+    getSymbols(this.tokens, vars);
     return vars;
+  };
+
+  Expression.prototype.variables = function () {
+    var vars = [];
+    getSymbols(this.tokens, vars);
+    var functions = this.functions;
+    return vars.filter(function (name) {
+      return !(name in functions);
+    });
   };
 
   Expression.prototype.toJSFunction = function (param, variables) {

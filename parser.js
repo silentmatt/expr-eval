@@ -46,7 +46,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       case IVAR:
         return this.value;
       case IFUNCALL:
-        return 'CALL';
+        return 'CALL ' + this.value;
       default:
         return 'Invalid Instruction';
     }
@@ -211,14 +211,14 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
           f = this.ops1[item.value];
           nstack.push(f(n1));
         } else if (type === IFUNCALL) {
-          n1 = nstack.pop();
+          var argCount = item.value;
+          var args = [];
+          while (argCount-- > 0) {
+            args.unshift(nstack.pop());
+          }
           f = nstack.pop();
           if (f.apply && f.call) {
-            if (Object.prototype.toString.call(n1) === '[object Array]') {
-              nstack.push(f.apply(undefined, n1));
-            } else {
-              nstack.push(f(n1));
-            }
+            nstack.push(f.apply(undefined, args));
           } else {
             throw new Error(f + ' is not a function');
           }
@@ -265,9 +265,13 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
             nstack.push(f + '(' + n1 + ')');
           }
         } else if (type === IFUNCALL) {
-          n1 = nstack.pop();
+          var argCount = item.value;
+          var args = [];
+          while (argCount-- > 0) {
+            args.unshift(nstack.pop());
+          }
           f = nstack.pop();
-          nstack.push(f + '(' + n1 + ')');
+          nstack.push(f + '(' + args.join(', ') + ')');
         } else {
           throw new Error('invalid Expression');
         }
@@ -383,7 +387,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   }
   function fac(a) { // a!
     a = Math.floor(a);
-    var b = a;
+    var b = Math.max(a, 1);
     while (a > 1) {
       b = b * (--a);
     }
@@ -902,25 +906,28 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   ParserState.prototype.parseFunctionCall = function (instr) {
     this.parseAtom(instr);
     while (this.accept(TPAREN, '(')) {
-      instr.push(new Instruction(INUMBER, []));
       if (this.accept(TPAREN, ')')) {
         instr.push(new Instruction(IFUNCALL, 0));
       } else {
-        this.parseArgumentList(instr);
-        instr.push(new Instruction(IFUNCALL, 0));
+        var argCount = this.parseArgumentList(instr);
+        instr.push(new Instruction(IFUNCALL, argCount));
       }
     }
   };
 
   ParserState.prototype.parseArgumentList = function (instr) {
+    var argCount = 0;
+
     while (!this.accept(TPAREN, ')')) {
-      this.parseOrExpression(instr);
-      instr.push(new Instruction(IOP2, ','));
+      this.parseExpression(instr);
+      ++argCount;
       while (this.accept(TCOMMA)) {
-        this.parseOrExpression(instr);
-        instr.push(new Instruction(IOP2, ','));
+        this.parseExpression(instr);
+        ++argCount;
       }
     }
+
+    return argCount;
   };
 
   function Parser() {

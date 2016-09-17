@@ -367,6 +367,39 @@ describe('Parser', function() {
       expect(Parser.evaluate('not \'\'')).to.equal(true);
     });
   });
+
+  describe('conditional operator', function () {
+    var parser = new Parser();
+
+    it('1 ? 2 : 0 ? 3 : 4', function () {
+      expect(parser.evaluate('1 ? 2 : 0 ? 3 : 4')).to.equal(2);
+    });
+
+    it('(1 ? 2 : 0) ? 3 : 4', function () {
+      expect(parser.evaluate('(1 ? 2 : 0) ? 3 : 4')).to.equal(3);
+    });
+
+    it('0 ? 2 : 0 ? 3 : 4', function () {
+      expect(parser.evaluate('0 ? 2 : 0 ? 3 : 4')).to.equal(4);
+    });
+
+    it('(0 ? 2 : 0) ? 3 : 4', function () {
+      expect(parser.evaluate('0 ? 2 : 0 ? 3 : 4')).to.equal(4);
+    });
+
+    it('(0 ? 0 : 2) ? 3 : 4', function () {
+      expect(parser.evaluate('(1 ? 2 : 0) ? 3 : 4')).to.equal(3);
+    });
+
+    it('min(1 ? 3 : 10, 0 ? 11 : 2)', function () {
+      expect(parser.evaluate('min(1 ? 3 : 10, 0 ? 11 : 2)')).to.equal(2);
+    });
+
+    it('should only evaluate one branch', function () {
+      expect(parser.evaluate('1 ? 42 : fail')).to.equal(42);
+      expect(parser.evaluate('0 ? fail : 99')).to.equal(99);
+    });
+  });
 });
 
 describe('Functions', function () {

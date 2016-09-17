@@ -30,8 +30,10 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   var INUMBER = 'INUMBER';
   var IOP1 = 'IOP1';
   var IOP2 = 'IOP2';
+  var IOP3 = 'IOP3';
   var IVAR = 'IVAR';
   var IFUNCALL = 'IFUNCALL';
+  var IEXPR = 'IEXPR';
 
   function Instruction(type, value) {
     this.type = type;
@@ -43,6 +45,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       case INUMBER:
       case IOP1:
       case IOP2:
+      case IOP3:
       case IVAR:
         return this.value;
       case IFUNCALL:
@@ -52,10 +55,11 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     }
   };
 
-  function Expression(tokens, ops1, ops2, functions) {
+  function Expression(tokens, ops1, ops2, ops3, functions) {
     this.tokens = tokens;
     this.ops1 = ops1;
     this.ops2 = ops2;
+    this.ops3 = ops3;
     this.functions = functions;
   }
 
@@ -109,60 +113,70 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return value;
   }
 
-  Expression.prototype = {
-    simplify: function (values) {
-      values = values || {};
-      var nstack = [];
-      var newexpression = [];
-      var n1;
-      var n2;
-      var f;
-      var L = this.tokens.length;
-      var item;
-      var i = 0;
-      for (i = 0; i < L; i++) {
-        item = this.tokens[i];
-        var type = item.type;
-        if (type === INUMBER) {
-          nstack.push(item);
-        } else if (type === IVAR && hasValue(values, item.value)) {
-          item = new Instruction(INUMBER, getValue(values, item.value));
-          nstack.push(item);
-        } else if (type === IOP2 && nstack.length > 1) {
-          n2 = nstack.pop();
-          n1 = nstack.pop();
-          f = this.ops2[item.value];
-          item = new Instruction(INUMBER, f(n1.value, n2.value));
-          nstack.push(item);
-        } else if (type === IOP1 && nstack.length > 0) {
-          n1 = nstack.pop();
-          f = this.ops1[item.value];
-          item = new Instruction(INUMBER, f(n1.value));
-          nstack.push(item);
+  function simplify(tokens, ops1, ops2, ops3, values) {
+    var nstack = [];
+    var newexpression = [];
+    var n1, n2, n3;
+    var f;
+    for (var i = 0, L = tokens.length; i < L; i++) {
+      var item = tokens[i];
+      var type = item.type;
+      if (type === INUMBER) {
+        nstack.push(item);
+      } else if (type === IVAR && hasValue(values, item.value)) {
+        item = new Instruction(INUMBER, getValue(values, item.value));
+        nstack.push(item);
+      } else if (type === IOP2 && nstack.length > 1) {
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        f = ops2[item.value];
+        item = new Instruction(INUMBER, f(n1.value, n2.value));
+        nstack.push(item);
+      } else if (type === IOP3 && nstack.length > 2) {
+        n3 = nstack.pop();
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        if (item.value === '?') {
+          nstack.push(n1.value ? n2.value : n3.value);
         } else {
-          while (nstack.length > 0) {
-            newexpression.push(nstack.shift());
-          }
-          newexpression.push(item);
+          f = ops3[item.value];
+          item = new Instruction(INUMBER, f(n1.value, n2.value, n3.value));
+          nstack.push(item);
         }
+      } else if (type === IOP1 && nstack.length > 0) {
+        n1 = nstack.pop();
+        f = ops1[item.value];
+        item = new Instruction(INUMBER, f(n1.value));
+        nstack.push(item);
+      } else if (type === IEXPR) {
+        nstack.push(new Instruction(IEXPR, simplify(item.value, ops1, ops2, ops3)));
+      } else {
+        while (nstack.length > 0) {
+          newexpression.push(nstack.shift());
+        }
+        newexpression.push(item);
       }
-      while (nstack.length > 0) {
-        newexpression.push(nstack.shift());
-      }
+    }
+    while (nstack.length > 0) {
+      newexpression.push(nstack.shift());
+    }
+    return newexpression;
+  }
 
-      return new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
-    },
+  Expression.prototype.simplify = function (values) {
+    values = values || {};
+    return new Expression(simplify(this.tokens, this.ops1, this.ops2, this.ops3, values), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+  };
 
-    substitute: function (variable, expr) {
-      if (!(expr instanceof Expression)) {
-        expr = new Parser().parse(String(expr));
-      }
+  Expression.prototype.substitute = function (variable, expr) {
+    if (!(expr instanceof Expression)) {
+      expr = new Parser().parse(String(expr));
+    }
+
+    function substitute(tokens) {
       var newexpression = [];
-      var L = this.tokens.length;
-      var item;
-      var i = 0;
-      for (i = 0; i < L; i++) {
-        item = this.tokens[i];
+      for (var i = 0, L = tokens.length; i < L; i++) {
+        var item = tokens[i];
         var type = item.type;
         if (type === IVAR && item.value === variable) {
           for (var j = 0; j < expr.tokens.length; j++) {
@@ -170,78 +184,90 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
             var replitem = new Instruction(expritem.type, expritem.value);
             newexpression.push(replitem);
           }
+        } else if (type === IEXPR) {
+          newexpression.push(new Instruction(IEXPR, substitute(item.value)));
         } else {
           newexpression.push(item);
         }
       }
+      return newexpression;
+    }
 
-      var ret = new Expression(newexpression, object(this.ops1), object(this.ops2), object(this.functions));
-      return ret;
-    },
+    return new Expression(substitute(this.tokens), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+  };
 
-    evaluate: function (values) {
-      values = values || {};
-      var nstack = [];
-      var n1;
-      var n2;
-      var f;
-      var L = this.tokens.length;
-      var item;
-      var i = 0;
-      for (i = 0; i < L; i++) {
-        item = this.tokens[i];
-        var type = item.type;
-        if (type === INUMBER) {
-          nstack.push(item.value);
-        } else if (type === IOP2) {
-          n2 = nstack.pop();
-          n1 = nstack.pop();
-          f = this.ops2[item.value];
-          nstack.push(f(n1, n2));
-        } else if (type === IVAR) {
-          if (hasValue(values, item.value)) {
-            nstack.push(getValue(values, item.value));
-          } else if (hasValue(this.functions, item.value)) {
-            nstack.push(getValue(this.functions, item.value));
-          } else {
-            throw new Error('undefined variable: ' + item.value);
-          }
-        } else if (type === IOP1) {
-          n1 = nstack.pop();
-          f = this.ops1[item.value];
-          nstack.push(f(n1));
-        } else if (type === IFUNCALL) {
-          var argCount = item.value;
-          var args = [];
-          while (argCount-- > 0) {
-            args.unshift(nstack.pop());
-          }
-          f = nstack.pop();
-          if (f.apply && f.call) {
-            nstack.push(f.apply(undefined, args));
-          } else {
-            throw new Error(f + ' is not a function');
-          }
+  function evaluate(tokens, expr, values) {
+    var nstack = [];
+    var n1, n2, n3;
+    var f;
+    for (var i = 0, L = tokens.length; i < L; i++) {
+      var item = tokens[i];
+      var type = item.type;
+      if (type === INUMBER) {
+        nstack.push(item.value);
+      } else if (type === IOP2) {
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        f = expr.ops2[item.value];
+        nstack.push(f(n1, n2));
+      } else if (type === IOP3) {
+        n3 = nstack.pop();
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        if (item.value === '?') {
+          nstack.push(evaluate(n1 ? n2 : n3, expr, values));
         } else {
-          throw new Error('invalid Expression');
+          f = expr.ops3[item.value];
+          nstack.push(f(n1, n2, n3));
         }
+      } else if (type === IVAR) {
+        if (hasValue(values, item.value)) {
+          nstack.push(getValue(values, item.value));
+        } else if (hasValue(expr.functions, item.value)) {
+          nstack.push(getValue(expr.functions, item.value));
+        } else {
+          throw new Error('undefined variable: ' + item.value);
+        }
+      } else if (type === IOP1) {
+        n1 = nstack.pop();
+        f = expr.ops1[item.value];
+        nstack.push(f(n1));
+      } else if (type === IFUNCALL) {
+        var argCount = item.value;
+        var args = [];
+        while (argCount-- > 0) {
+          args.unshift(nstack.pop());
+        }
+        f = nstack.pop();
+        if (f.apply && f.call) {
+          nstack.push(f.apply(undefined, args));
+        } else {
+          throw new Error(f + ' is not a function');
+        }
+      } else if (type === IEXPR) {
+        nstack.push(item.value);
+      } else {
+        throw new Error('invalid Expression');
       }
-      if (nstack.length > 1) {
-        throw new Error('invalid Expression (parity)');
-      }
-      return nstack[0];
-    },
+    }
+    if (nstack.length > 1) {
+      throw new Error('invalid Expression (parity)');
+    }
+    return nstack[0];
+  }
 
-    toString: function (toJS) {
+  Expression.prototype.evaluate = function (values) {
+    values = values || {};
+    return evaluate(this.tokens, this, values);
+  };
+
+  Expression.prototype.toString = function (toJS) {
+    function toString(tokens) {
       var nstack = [];
-      var n1;
-      var n2;
+      var n1, n2, n3;
       var f;
-      var L = this.tokens.length;
-      var item;
-      var i = 0;
-      for (i = 0; i < L; i++) {
-        item = this.tokens[i];
+      for (var i = 0, L = tokens.length; i < L; i++) {
+        var item = tokens[i];
         var type = item.type;
         if (type === INUMBER) {
           nstack.push(escapeValue(item.value));
@@ -253,6 +279,16 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
             nstack.push('Math.pow(' + n1 + ',' + n2 + ')');
           } else {
             nstack.push('(' + n1 + f + n2 + ')');
+          }
+        } else if (type === IOP3) {
+          n3 = nstack.pop();
+          n2 = nstack.pop();
+          n1 = nstack.pop();
+          f = item.value;
+          if (f === '?') {
+            nstack.push('(' + n1 + '?' + n2 + ':' + n3 + ')');
+          } else {
+            throw new Error('invalid Expression');
           }
         } else if (type === IVAR) {
           nstack.push(item.value);
@@ -280,25 +316,32 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         throw new Error('invalid Expression (parity)');
       }
       return nstack[0];
-    },
+    }
 
-    variables: function () {
-      var L = this.tokens.length;
-      var vars = [];
-      for (var i = 0; i < L; i++) {
-        var item = this.tokens[i];
+    return toString(this.tokens);
+  };
+
+  Expression.prototype.variables = function () {
+    var vars = [];
+
+    function getVariables(tokens) {
+      for (var i = 0, L = tokens.length; i < L; i++) {
+        var item = tokens[i];
         if (item.type === IVAR && (indexOf(vars, item.value) === -1)) {
           vars.push(item.value);
+        } else if (item.type === IEXPR) {
+          getVariables(item.value);
         }
       }
-
-      return vars;
-    },
-
-    toJSFunction: function (param, variables) {
-      var f = new Function(param, 'with(Parser.values) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
-      return f;
     }
+
+    getVariables(this.tokens);
+    return vars;
+  };
+
+  Expression.prototype.toJSFunction = function (param, variables) {
+    var f = new Function(param, 'with(Parser.values) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
+    return f;
   };
 
   function add(a, b) {
@@ -440,13 +483,14 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return this.type + ': ' + this.value;
   };
 
-  function TokenStream(expression, ops1, ops2, consts) {
+  function TokenStream(expression, ops1, ops2, ops3, consts) {
     this.pos = 0;
     this.line = 0;
     this.column = 0;
     this.current = null;
     this.ops1 = ops1;
     this.ops2 = ops2;
+    this.ops3 = ops3;
     this.consts = consts;
     this.expression = expression;
   }
@@ -560,7 +604,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       }
       str += c;
     }
-    if (str.length > 0 && (str in this.ops2 || str in this.ops1)) {
+    if (str.length > 0 && (str in this.ops2 || str in this.ops1 || str in this.ops3)) {
       this.current = this.newToken(TOP, str);
       this.pos += str.length;
       this.column += str.length;
@@ -704,7 +748,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   TokenStream.prototype.isOperator = function () {
     var char = this.expression.charAt(this.pos);
 
-    if (char === '+' || char === '-' || char === '*' || char === '/' || char === '%' || char === '^') {
+    if (char === '+' || char === '-' || char === '*' || char === '/' || char === '%' || char === '^' || char === '?' || char === ':') {
       this.current = this.newToken(TOP, char);
     } else if (char === '∙' || char === '•') {
       this.current = this.newToken(TOP, '*');
@@ -832,7 +876,21 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   };
 
   ParserState.prototype.parseExpression = function (instr) {
+    this.parseConditionalExpression(instr);
+  };
+
+  ParserState.prototype.parseConditionalExpression = function (instr) {
     this.parseOrExpression(instr);
+    while (this.accept(TOP, '?')) {
+      var trueBranch = [];
+      var falseBranch = [];
+      this.parseOrExpression(trueBranch);
+      this.expect(TOP, ':');
+      this.parseConditionalExpression(falseBranch);
+      instr.push(new Instruction(IEXPR, trueBranch));
+      instr.push(new Instruction(IEXPR, falseBranch));
+      instr.push(new Instruction(IOP3, '?'));
+    }
   };
 
   ParserState.prototype.parseOrExpression = function (instr) {
@@ -978,6 +1036,10 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       or: orOperator
     };
 
+    this.ops3 = {
+      '?': condition
+    };
+
     this.functions = {
       random: random,
       fac: fac,
@@ -1047,11 +1109,11 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   Parser.prototype = {
     parse: function (expr) {
       var instr = [];
-      var parserState = new ParserState(this, new TokenStream(expr, this.ops1, this.ops2, this.consts));
+      var parserState = new ParserState(this, new TokenStream(expr, this.ops1, this.ops2, this.ops3, this.consts));
       parserState.parseExpression(instr);
       parserState.expect(TEOF, 'EOF');
 
-      return new Expression(instr, object(this.ops1), object(this.ops2), object(this.functions));
+      return new Expression(instr, object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
     },
 
     evaluate: function (expr, variables) {

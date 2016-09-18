@@ -129,7 +129,10 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         item = new Instruction(INUMBER, f(n1.value));
         nstack.push(item);
       } else if (type === IEXPR) {
-        nstack.push(new Instruction(IEXPR, simplify(item.value, ops1, ops2, ops3)));
+        while (nstack.length > 0) {
+          newexpression.push(nstack.shift());
+        }
+        newexpression.push(new Instruction(IEXPR, simplify(item.value, ops1, ops2, ops3, values)));
       } else if (type === IMEMBER && nstack.length > 0) {
         n1 = nstack.pop();
         nstack.push(new Instruction(INUMBER, n1.value[item.value]));

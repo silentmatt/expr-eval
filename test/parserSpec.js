@@ -167,6 +167,18 @@ describe('Parser', function() {
     it('6.283185307179586', function() {
       expect(expr.evaluate({ x: 2 })).to.equal(6.283185307179586);
     });
+
+    it('(x/2) ? y : z', function() {
+      expect(Parser.parse('(x/2) ? y : z').simplify({ x: 4 }).toString()).to.equal('((2)?(y):(z))');
+    });
+
+    it('x ? (y + 1) : z', function() {
+      expect(Parser.parse('x ? (y + 1) : z').simplify({ y: 2 }).toString()).to.equal('((x)?(3):(z))');
+    });
+
+    it('x ? y : (z * 4)', function() {
+      expect(Parser.parse('x ? y : (z * 4)').simplify({ z: 3 }).toString()).to.equal('((x)?(y):(12))');
+    });
   });
 
   describe('#variables()', function() {

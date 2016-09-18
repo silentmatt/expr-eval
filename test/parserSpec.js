@@ -152,18 +152,6 @@ describe('Parser', function() {
       expect(expr2.evaluate({x: 3})).to.equal(25);
     });
 
-    var expr3 = Parser.parse('2 * x.y.z + 1');
-    var expr4 = expr3.substitute('x.y.z', '4 * x');
-    it('((2*(4*x))+1)', function() {
-      expect(expr4.evaluate({ x: 3 })).to.equal(25);
-    });
-
-    var expr5 = Parser.parse('2 * x.y.z + 1');
-    var expr6 = expr5.substitute('x.y.z', '4 * x.y.z');
-    it('((2*(4*x.y.z))+1)', function() {
-      expect(expr6.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
-    });
-
     var expr7 = expr.substitute('x', '4 * x.y.z');
     it('((2*(4*x.y.z))+1)', function() {
       expect(expr7.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
@@ -184,35 +172,35 @@ describe('Parser', function() {
   describe('#variables()', function() {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function() {
-      expect(expr.variables()).to.include.members(['x', 'y', 'z.y.x']);
+      expect(expr.variables()).to.include.members(['x', 'y', 'z']);
       expect(expr.variables()).to.not.include.members(['atan2']);
     });
 
     it('["x", "z.y.x"]', function() {
-      expect(expr.simplify({y: 4}).variables()).to.include.members(['x', 'z.y.x']);
+      expect(expr.simplify({y: 4}).variables()).to.include.members(['x', 'z']);
       expect(expr.simplify({y: 4}).variables()).to.not.include.members(['y', 'atan2']);
     });
 
     it('["x"]', function() {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.include.members(['x']);
-      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.not.include.members(['y', 'z.y.x', 'atan2']);
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.not.include.members(['y', 'z', 'atan2']);
     });
   });
 
   describe('#symbols()', function() {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function() {
-      expect(expr.symbols()).to.include.members(['x', 'y', 'z.y.x', 'atan2']);
+      expect(expr.symbols()).to.include.members(['x', 'y', 'z', 'atan2']);
     });
 
     it('["x", "z.y.x"]', function() {
-      expect(expr.simplify({y: 4}).symbols()).to.include.members(['x', 'z.y.x', 'atan2']);
+      expect(expr.simplify({y: 4}).symbols()).to.include.members(['x', 'z', 'atan2']);
       expect(expr.simplify({y: 4}).symbols()).to.not.include.members(['y']);
     });
 
     it('["x"]', function() {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.include.members(['x', 'atan2']);
-      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.not.include.members(['y', 'z.y.x']);
+      expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.not.include.members(['y', 'z']);
     });
   });
 

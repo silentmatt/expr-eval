@@ -51,6 +51,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         return this.value;
       case IFUNCALL:
         return 'CALL ' + this.value;
+      case IMEMBER:
+        return '.' + this.value;
       default:
         return 'Invalid Instruction';
     }
@@ -91,18 +93,6 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return v;
   }
 
-  function hasValue(values, index) {
-    return (getValue(values, index) !== undefined);
-  }
-
-  function getValue(values, index) {
-    var val = index.split(/\./).reduce(function index(o, i) {
-      return (o && (o[i] !== undefined)) ? o[i] : undefined;
-    }, values);
-
-    return val;
-  }
-
   function simplify(tokens, ops1, ops2, ops3, values) {
     var nstack = [];
     var newexpression = [];
@@ -113,8 +103,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       var type = item.type;
       if (type === INUMBER) {
         nstack.push(item);
-      } else if (type === IVAR && hasValue(values, item.value)) {
-        item = new Instruction(INUMBER, getValue(values, item.value));
+      } else if (type === IVAR && values.hasOwnProperty(item.value)) {
+        item = new Instruction(INUMBER, values[item.value]);
         nstack.push(item);
       } else if (type === IOP2 && nstack.length > 1) {
         n2 = nstack.pop();
@@ -140,6 +130,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         nstack.push(item);
       } else if (type === IEXPR) {
         nstack.push(new Instruction(IEXPR, simplify(item.value, ops1, ops2, ops3)));
+      } else if (type === IMEMBER && nstack.length > 0) {
+        n1 = nstack.pop();
+        nstack.push(new Instruction(INUMBER, n1.value[item.value]));
       } else {
         while (nstack.length > 0) {
           newexpression.push(nstack.shift());
@@ -214,7 +207,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         if (item.value in expr.functions) {
           nstack.push(expr.functions[item.value]);
         } else {
-          var v = getValue(values, item.value);
+          var v = values[item.value];
           if (v !== undefined) {
             nstack.push(v);
           } else {
@@ -239,6 +232,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         }
       } else if (type === IEXPR) {
         nstack.push(item.value);
+      } else if (type === IMEMBER) {
+        n1 = nstack.pop();
+        nstack.push(n1[item.value]);
       } else {
         throw new Error('invalid Expression');
       }
@@ -301,6 +297,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
           }
           f = nstack.pop();
           nstack.push(f + '(' + args.join(', ') + ')');
+        } else if (type === IMEMBER) {
+          n1 = nstack.pop();
+          nstack.push(n1 + '.' + item.value);
         } else {
           throw new Error('invalid Expression');
         }
@@ -507,8 +506,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
 
     if (this.isWhitespace() || this.isComment()) {
       return this.next();
-    } else if (this.isOperator() ||
-        this.isNumber() ||
+    } else if (this.isNumber() ||
+        this.isOperator() ||
         this.isString() ||
         this.isParen() ||
         this.isComma() ||
@@ -619,7 +618,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     for (var i = this.pos; i < this.expression.length; i++) {
       var c = this.expression.charAt(i);
       if (c.toUpperCase() === c.toLowerCase()) {
-        if (i === this.pos || (c !== '_' && c !== '.' && (c < '0' || c > '9'))) {
+        if (i === this.pos || (c !== '_' && (c < '0' || c > '9'))) {
           break;
         }
       }
@@ -759,7 +758,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   TokenStream.prototype.isOperator = function () {
     var char = this.expression.charAt(this.pos);
 
-    if (char === '+' || char === '-' || char === '*' || char === '/' || char === '%' || char === '^' || char === '?' || char === ':') {
+    if (char === '+' || char === '-' || char === '*' || char === '/' || char === '%' || char === '^' || char === '?' || char === ':' || char === '.') {
       this.current = this.newToken(TOP, char);
     } else if (char === '∙' || char === '•') {
       this.current = this.newToken(TOP, '*');
@@ -865,10 +864,9 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   };
 
   ParserState.prototype.expect = function (type, value) {
-    if (this.accept(type, value)) {
-      return true;
+    if (!this.accept(type, value)) {
+      throw new Error('parse error [' + this.tokens.line + ':' + this.tokens.column + ']: Expected ' + (value || type));
     }
-    throw new Error('parse error [' + this.tokens.line + ':' + this.tokens.column + ']: Expected ' + (value || type));
   };
 
   ParserState.prototype.parseAtom = function (instr) {
@@ -973,7 +971,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   };
 
   ParserState.prototype.parseFunctionCall = function (instr) {
-    this.parseAtom(instr);
+    this.parseMemberExpression(instr);
     while (this.accept(TPAREN, '(')) {
       if (this.accept(TPAREN, ')')) {
         instr.push(new Instruction(IFUNCALL, 0));
@@ -997,6 +995,14 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     }
 
     return argCount;
+  };
+
+  ParserState.prototype.parseMemberExpression = function (instr) {
+    this.parseAtom(instr);
+    while (this.accept(TOP, '.')) {
+      this.expect(TNAME);
+      instr.push(new Instruction(IMEMBER, this.current.value));
+    }
   };
 
   function Parser() {

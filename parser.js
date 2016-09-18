@@ -154,41 +154,41 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return new Expression(simplify(this.tokens, this.ops1, this.ops2, this.ops3, values), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
   };
 
+  function substitute(tokens, variable, expr) {
+    var newexpression = [];
+    for (var i = 0, L = tokens.length; i < L; i++) {
+      var item = tokens[i];
+      var type = item.type;
+      if (type === IVAR && item.value === variable) {
+        for (var j = 0; j < expr.tokens.length; j++) {
+          var expritem = expr.tokens[j];
+          var replitem;
+          if (expritem.type === IOP1) {
+            replitem = unaryInstruction(expritem.value);
+          } else if (expritem.type === IOP2) {
+            replitem = binaryInstruction(expritem.value);
+          } else if (expritem.type === IOP3) {
+            replitem = ternaryInstruction(expritem.value);
+          } else {
+            replitem = new Instruction(expritem.type, expritem.value);
+          }
+          newexpression.push(replitem);
+        }
+      } else if (type === IEXPR) {
+        newexpression.push(new Instruction(IEXPR, substitute(item.value, variable, expr)));
+      } else {
+        newexpression.push(item);
+      }
+    }
+    return newexpression;
+  }
+
   Expression.prototype.substitute = function (variable, expr) {
     if (!(expr instanceof Expression)) {
       expr = new Parser().parse(String(expr));
     }
 
-    function substitute(tokens) {
-      var newexpression = [];
-      for (var i = 0, L = tokens.length; i < L; i++) {
-        var item = tokens[i];
-        var type = item.type;
-        if (type === IVAR && item.value === variable) {
-          for (var j = 0; j < expr.tokens.length; j++) {
-            var expritem = expr.tokens[j];
-            var replitem;
-            if (expritem.type === IOP1) {
-              replitem = unaryInstruction(expritem.value);
-            } else if (expritem.type === IOP2) {
-              replitem = binaryInstruction(expritem.value);
-            } else if (expritem.type === IOP3) {
-              replitem = ternaryInstruction(expritem.value);
-            } else {
-              replitem = new Instruction(expritem.type, expritem.value);
-            }
-            newexpression.push(replitem);
-          }
-        } else if (type === IEXPR) {
-          newexpression.push(new Instruction(IEXPR, substitute(item.value)));
-        } else {
-          newexpression.push(item);
-        }
-      }
-      return newexpression;
-    }
-
-    return new Expression(substitute(this.tokens), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+    return new Expression(substitute(this.tokens, variable, expr), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
   };
 
   function evaluate(tokens, expr, values) {
@@ -262,67 +262,69 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     return evaluate(this.tokens, this, values);
   };
 
-  Expression.prototype.toString = function (toJS) {
-    function toString(tokens) {
-      var nstack = [];
-      var n1, n2, n3;
-      var f;
-      for (var i = 0, L = tokens.length; i < L; i++) {
-        var item = tokens[i];
-        var type = item.type;
-        if (type === INUMBER) {
-          nstack.push(escapeValue(item.value));
-        } else if (type === IOP2) {
-          n2 = nstack.pop();
-          n1 = nstack.pop();
-          f = item.value;
-          if (toJS && f === '^') {
-            nstack.push('Math.pow(' + n1 + ',' + n2 + ')');
-          } else {
-            nstack.push('(' + n1 + f + n2 + ')');
-          }
-        } else if (type === IOP3) {
-          n3 = nstack.pop();
-          n2 = nstack.pop();
-          n1 = nstack.pop();
-          f = item.value;
-          if (f === '?') {
-            nstack.push('(' + n1 + '?' + n2 + ':' + n3 + ')');
-          } else {
-            throw new Error('invalid Expression');
-          }
-        } else if (type === IVAR) {
-          nstack.push(item.value);
-        } else if (type === IOP1) {
-          n1 = nstack.pop();
-          f = item.value;
-          if (f === '-') {
-            nstack.push('(' + f + n1 + ')');
-          } else {
-            nstack.push(f + '(' + n1 + ')');
-          }
-        } else if (type === IFUNCALL) {
-          var argCount = item.value;
-          var args = [];
-          while (argCount-- > 0) {
-            args.unshift(nstack.pop());
-          }
-          f = nstack.pop();
-          nstack.push(f + '(' + args.join(', ') + ')');
-        } else if (type === IMEMBER) {
-          n1 = nstack.pop();
-          nstack.push(n1 + '.' + item.value);
+  function expressionToString(tokens, toJS) {
+    var nstack = [];
+    var n1, n2, n3;
+    var f;
+    for (var i = 0, L = tokens.length; i < L; i++) {
+      var item = tokens[i];
+      var type = item.type;
+      if (type === INUMBER) {
+        nstack.push(escapeValue(item.value));
+      } else if (type === IOP2) {
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        f = item.value;
+        if (toJS && f === '^') {
+          nstack.push('Math.pow(' + n1 + ',' + n2 + ')');
+        } else {
+          nstack.push('(' + n1 + f + n2 + ')');
+        }
+      } else if (type === IOP3) {
+        n3 = nstack.pop();
+        n2 = nstack.pop();
+        n1 = nstack.pop();
+        f = item.value;
+        if (f === '?') {
+          nstack.push('((' + n1 + ')?' + n2 + ':' + n3 + ')');
         } else {
           throw new Error('invalid Expression');
         }
+      } else if (type === IVAR) {
+        nstack.push(item.value);
+      } else if (type === IOP1) {
+        n1 = nstack.pop();
+        f = item.value;
+        if (f === '-') {
+          nstack.push('(' + f + n1 + ')');
+        } else {
+          nstack.push(f + '(' + n1 + ')');
+        }
+      } else if (type === IFUNCALL) {
+        var argCount = item.value;
+        var args = [];
+        while (argCount-- > 0) {
+          args.unshift(nstack.pop());
+        }
+        f = nstack.pop();
+        nstack.push(f + '(' + args.join(', ') + ')');
+      } else if (type === IMEMBER) {
+        n1 = nstack.pop();
+        nstack.push(n1 + '.' + item.value);
+      } else if (type === IEXPR) {
+        nstack.push('(' + expressionToString(item.value, toJS) + ')');
+      } else {
+        throw new Error('invalid Expression');
       }
-      if (nstack.length > 1) {
-        throw new Error('invalid Expression (parity)');
-      }
-      return nstack[0];
     }
+    if (nstack.length > 1) {
+      throw new Error('invalid Expression (parity)');
+    }
+    return nstack[0];
+  }
 
-    return toString(this.tokens);
+  Expression.prototype.toString = function (toJS) {
+    return expressionToString(this.tokens, toJS);
   };
 
   function getSymbols(tokens, symbols) {

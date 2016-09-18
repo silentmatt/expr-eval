@@ -2,7 +2,7 @@ JavaScript Expression Evaluator
 ===============================
 
 Description
------------
+-------------------------------------
 
 This library is a modified version of Raphael Graf’s ActionScript Expression
 Parser. It's a safer and more math-oriented alternative to JavaScript’s eval
@@ -12,6 +12,23 @@ It has built-in support for common math operators and functions, and any
 JavaScript function with string or numeric arguments and return values can be
 added. Parsed expressions can be evaluated directly, or compiled into native
 JavaScript functions.
+
+Installation
+-------------------------------------
+
+    npm install expr-eval
+
+Basic Usage
+-------------------------------------
+
+    var Parser = require('expr-eval').Parser;
+
+    var parser = new Parser();
+    var expr = parser.parse('2 * x + 1');
+    console.log(expr.evaluate({ x: 3 })); // 7
+
+    // or
+    Parser.evaluate('6 * x', { x: 7 }) // 42
 
 Documentation
 -------------------------------------
@@ -80,7 +97,7 @@ functions), since they may not be deterministic.
 
 Simplify is pretty simple (see what I did there?). It doesn’t know that
 addition and multiplication are associative, so `((2*(4*x))+1)` from the
-previous example cannot be simplified unless you provide a value for x. 
+previous example cannot be simplified unless you provide a value for x.
 `2*4*x+1` can however, because it’s parsed as `(((2*4)*x)+1)`, so the `(2*4)`
 sub-expression will be replaced with “8″, resulting in `((8*x)+1)`.
 

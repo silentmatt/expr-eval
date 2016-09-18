@@ -164,7 +164,16 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         if (type === IVAR && item.value === variable) {
           for (var j = 0; j < expr.tokens.length; j++) {
             var expritem = expr.tokens[j];
-            var replitem = new Instruction(expritem.type, expritem.value);
+            var replitem;
+            if (expritem.type === IOP1) {
+              replitem = unaryInstruction(expritem.value);
+            } else if (expritem.type === IOP2) {
+              replitem = binaryInstruction(expritem.value);
+            } else if (expritem.type === IOP3) {
+              replitem = ternaryInstruction(expritem.value);
+            } else {
+              replitem = new Instruction(expritem.type, expritem.value);
+            }
             newexpression.push(replitem);
           }
         } else if (type === IEXPR) {
@@ -830,6 +839,33 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     throw new Error('parse error [' + (this.line + 1) + ':' + (this.column + 1) + ']: ' + msg);
   };
 
+  var unaryInstructionCache = {};
+  function unaryInstruction(value) {
+    var inst = unaryInstructionCache[value];
+    if (!inst) {
+      inst = unaryInstructionCache[value] = new Instruction(IOP1, value);
+    }
+    return inst;
+  }
+
+  var binaryInstructionCache = {};
+  function binaryInstruction(value) {
+    var inst = binaryInstructionCache[value];
+    if (!inst) {
+      inst = binaryInstructionCache[value] = new Instruction(IOP2, value);
+    }
+    return inst;
+  }
+
+  var ternaryInstructionCache = {};
+  function ternaryInstruction(value) {
+    var inst = ternaryInstructionCache[value];
+    if (!inst) {
+      inst = ternaryInstructionCache[value] = new Instruction(IOP3, value);
+    }
+    return inst;
+  }
+
   function ParserState(parser, tokenStream) {
     this.parser = parser;
     this.tokens = tokenStream;
@@ -898,25 +934,23 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       this.parseConditionalExpression(falseBranch);
       instr.push(new Instruction(IEXPR, trueBranch));
       instr.push(new Instruction(IEXPR, falseBranch));
-      instr.push(new Instruction(IOP3, '?'));
+      instr.push(ternaryInstruction('?'));
     }
   };
 
   ParserState.prototype.parseOrExpression = function (instr) {
     this.parseAndExpression(instr);
     while (this.accept(TOP, 'or')) {
-      var op = this.current;
       this.parseAndExpression(instr);
-      instr.push(new Instruction(IOP2, op.value));
+      instr.push(binaryInstruction('or'));
     }
   };
 
   ParserState.prototype.parseAndExpression = function (instr) {
     this.parseComparison(instr);
     while (this.accept(TOP, 'and')) {
-      var op = this.current;
       this.parseComparison(instr);
-      instr.push(new Instruction(IOP2, op.value));
+      instr.push(binaryInstruction('and'));
     }
   };
 
@@ -925,7 +959,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     while (this.accept(TOP, ['==', '!=', '<', '<=', '>=', '>'])) {
       var op = this.current;
       this.parseAddSub(instr);
-      instr.push(new Instruction(IOP2, op.value));
+      instr.push(binaryInstruction(op.value));
     }
   };
 
@@ -934,7 +968,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     while (this.accept(TOP, ['+', '-', '||'])) {
       var op = this.current;
       this.parseTerm(instr);
-      instr.push(new Instruction(IOP2, op.value));
+      instr.push(binaryInstruction(op.value));
     }
   };
 
@@ -943,7 +977,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     while (this.accept(TOP, ['*', '/', '%'])) {
       var op = this.current;
       this.parseFactor(instr);
-      instr.push(new Instruction(IOP2, op.value));
+      instr.push(binaryInstruction(op.value));
     }
   };
 
@@ -956,7 +990,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     if (this.accept(TOP, isPrefixOperator)) {
       var op = this.current;
       this.parseFactor(instr);
-      instr.push(new Instruction(IOP1, op.value));
+      instr.push(unaryInstruction(op.value));
     } else {
       this.parseExponential(instr);
     }
@@ -966,7 +1000,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     this.parseFunctionCall(instr);
     while (this.accept(TOP, '^')) {
       this.parseFactor(instr);
-      instr.push(new Instruction(IOP2, '^'));
+      instr.push(binaryInstruction('^'));
     }
   };
 

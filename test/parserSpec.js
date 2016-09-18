@@ -7,29 +7,51 @@ var Parser = require('../parser').Parser;
 
 describe('Parser', function() {
   describe('#parse()', function () {
+    var parser = new Parser();
+
     it('should skip comments', function () {
-      expect(Parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
-      expect(Parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
+      expect(parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
+      expect(parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
     });
 
     it('should ignore whitespace', function () {
-      expect(Parser.evaluate(' 3\r + \n \t 4 ')).to.equal(7);
+      expect(parser.evaluate(' 3\r + \n \t 4 ')).to.equal(7);
     });
 
     it('should accept variables starting with E', function () {
-      expect(Parser.parse('2 * ERGONOMIC').evaluate({ ERGONOMIC: 1000 })).to.equal(2000);
+      expect(parser.parse('2 * ERGONOMIC').evaluate({ ERGONOMIC: 1000 })).to.equal(2000);
     });
 
     it('should accept variables starting with PI', function () {
-      expect(Parser.parse('1 / PITTSBURGH').evaluate({ PITTSBURGH: 2 })).to.equal(0.5);
+      expect(parser.parse('1 / PITTSBURGH').evaluate({ PITTSBURGH: 2 })).to.equal(0.5);
     });
 
     it('should fail on empty parentheses', function () {
-      expect(function () { Parser.parse('5/()'); }).to.throw(Error);
+      expect(function () { parser.parse('5/()'); }).to.throw(Error);
     });
 
     it('should fail on 5/', function () {
-      expect(function () { Parser.parse('5/'); }).to.throw(Error);
+      expect(function () { parser.parse('5/'); }).to.throw(Error);
+    });
+
+    it('should parse numbers', function () {
+      expect(parser.evaluate('123')).to.equal(123);
+      expect(parser.evaluate('123.')).to.equal(123);
+      expect(parser.evaluate('123.456')).to.equal(123.456);
+      expect(parser.evaluate('.456')).to.equal(0.456);
+      expect(parser.evaluate('0.456')).to.equal(0.456);
+      expect(parser.evaluate('0.')).to.equal(0);
+      expect(parser.evaluate('.0')).to.equal(0);
+      expect(parser.evaluate('123.+3')).to.equal(126);
+      expect(parser.evaluate('2/123')).to.equal(2 / 123);
+    });
+
+    it('should fail on invalid numbers', function() {
+      expect(function () { parser.parse('123..'); }).to.throw(Error);
+      expect(function () { parser.parse('0..123'); }).to.throw(Error);
+      expect(function () { parser.parse('0..'); }).to.throw(Error);
+      expect(function () { parser.parse('.0.'); }).to.throw(Error);
+      expect(function () { parser.parse('.'); }).to.throw(Error);
     });
   });
 

@@ -34,6 +34,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   var IVAR = 'IVAR';
   var IFUNCALL = 'IFUNCALL';
   var IEXPR = 'IEXPR';
+  var IMEMBER = 'IMEMBER';
 
   function Instruction(type, value) {
     this.type = type;
@@ -727,13 +728,21 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
   TokenStream.prototype.isNumber = function () {
     var r = false;
     var str = '';
+    var startPos = this.pos;
+    var foundDot = false;
+    var foundDigits = false;
     while (this.pos < this.expression.length) {
       var char = this.expression.charAt(this.pos);
-      if ((char >= '0' && char <= '9') || char === '.') {
+      if ((char >= '0' && char <= '9') || (!foundDot && char === '.')) {
+        if (char === '.') {
+          foundDot = true;
+        } else {
+          foundDigits = true;
+        }
         str += this.expression.charAt(this.pos);
         this.pos++;
         this.column++;
-        r = true;
+        r = foundDigits;
       } else {
         break;
       }
@@ -741,6 +750,8 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
 
     if (r) {
       this.current = this.newToken(TNUMBER, parseFloat(str));
+    } else {
+      this.pos = startPos;
     }
     return r;
   };

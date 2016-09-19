@@ -437,6 +437,13 @@ describe('Parser', function() {
       expect(parser.evaluate('min(1 ? 3 : 10, 0 ? 11 : 2)')).to.equal(2);
     });
 
+    it('a == 1 ? b == 2 ? 3 : 4 : 5', function () {
+      expect(parser.evaluate('a == 1 ? b == 2 ? 3 : 4 : 5', { a: 1, b: 2 })).to.equal(3);
+      expect(parser.evaluate('a == 1 ? b == 2 ? 3 : 4 : 5', { a: 1, b: 9 })).to.equal(4);
+      expect(parser.evaluate('a == 1 ? b == 2 ? 3 : 4 : 5', { a: 9, b: 2 })).to.equal(5);
+      expect(parser.evaluate('a == 1 ? b == 2 ? 3 : 4 : 5', { a: 9, b: 9 })).to.equal(5);
+    });
+
     it('should only evaluate one branch', function () {
       expect(parser.evaluate('1 ? 42 : fail')).to.equal(42);
       expect(parser.evaluate('0 ? fail : 99')).to.equal(99);

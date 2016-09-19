@@ -934,7 +934,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
     while (this.accept(TOP, '?')) {
       var trueBranch = [];
       var falseBranch = [];
-      this.parseOrExpression(trueBranch);
+      this.parseConditionalExpression(trueBranch);
       this.expect(TOP, ':');
       this.parseConditionalExpression(falseBranch);
       instr.push(new Instruction(IEXPR, trueBranch));

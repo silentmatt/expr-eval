@@ -5,7 +5,7 @@
 var expect = require('chai').expect;
 var Parser = require('../parser').Parser;
 
-describe('Parser', function() {
+describe('Parser', function () {
   describe('#parse()', function () {
     var parser = new Parser();
 
@@ -46,7 +46,7 @@ describe('Parser', function() {
       expect(parser.evaluate('2/123')).to.equal(2 / 123);
     });
 
-    it('should fail on invalid numbers', function() {
+    it('should fail on invalid numbers', function () {
       expect(function () { parser.parse('123..'); }).to.throw(Error);
       expect(function () { parser.parse('0..123'); }).to.throw(Error);
       expect(function () { parser.parse('0..'); }).to.throw(Error);
@@ -55,44 +55,44 @@ describe('Parser', function() {
     });
   });
 
-  describe('#evaluate()', function() {
-    it('2 ^ x', function() {
+  describe('#evaluate()', function () {
+    it('2 ^ x', function () {
       expect(Parser.evaluate('2 ^ x', {x: 3})).to.equal(8);
     });
 
-    it('2 * x + 1', function() {
+    it('2 * x + 1', function () {
       expect(Parser.evaluate('2 * x + 1', {x: 3})).to.equal(7);
     });
 
-    it('2 + 3 * x', function() {
+    it('2 + 3 * x', function () {
       expect(Parser.evaluate('2 + 3 * x', {x: 4})).to.equal(14);
     });
 
-    it('(2 + 3) * x', function() {
+    it('(2 + 3) * x', function () {
       expect(Parser.evaluate('(2 + 3) * x', {x: 4})).to.equal(20);
     });
 
-    it('2-3^x', function() {
+    it('2-3^x', function () {
       expect(Parser.evaluate('2-3^x', {x: 4})).to.equal(-79);
     });
 
-    it('-2-3^x', function() {
+    it('-2-3^x', function () {
       expect(Parser.evaluate('-2-3^x', {x: 4})).to.equal(-83);
     });
 
-    it('-3^x', function() {
+    it('-3^x', function () {
       expect(Parser.evaluate('-3^x', {x: 4})).to.equal(-81);
     });
 
-    it('(-3)^x', function() {
+    it('(-3)^x', function () {
       expect(Parser.evaluate('(-3)^x', {x: 4})).to.equal(81);
     });
 
-    it('2 ^ x.y', function() {
+    it('2 ^ x.y', function () {
       expect(Parser.evaluate('2^x.y', {x: {y: 3}})).to.equal(8);
     });
 
-    it('2 + 3 * foo.bar.baz', function() {
+    it('2 + 3 * foo.bar.baz', function () {
       expect(Parser.evaluate('2 + 3 * foo.bar.baz', {foo: {bar: {baz: 4}}})).to.equal(14);
     });
 
@@ -128,15 +128,15 @@ describe('Parser', function() {
       expect(Parser.evaluate('10+ +1')).to.equal(11);
     });
 
-    it('10/-2', function() {
+    it('10/-2', function () {
       expect(Parser.evaluate('10/-2')).to.equal(-5);
     });
 
-    it('2^-4', function() {
+    it('2^-4', function () {
       expect(Parser.evaluate('2^-4')).to.equal(1 / 16);
     });
 
-    it('2^(-4)', function() {
+    it('2^(-4)', function () {
       expect(Parser.evaluate('2^(-4)')).to.equal(1 / 16);
     });
 
@@ -145,267 +145,267 @@ describe('Parser', function() {
     });
   });
 
-  describe('#substitute()', function() {
+  describe('#substitute()', function () {
     var expr = Parser.parse('2 * x + 1');
     var expr2 = expr.substitute('x', '4 * x');
-    it('((2*(4*x))+1)', function() {
+    it('((2*(4*x))+1)', function () {
       expect(expr2.evaluate({x: 3})).to.equal(25);
     });
 
     var expr7 = expr.substitute('x', '4 * x.y.z');
-    it('((2*(4*x.y.z))+1)', function() {
+    it('((2*(4*x.y.z))+1)', function () {
       expect(expr7.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
     });
   });
 
-  describe('#simplify()', function() {
+  describe('#simplify()', function () {
     var expr = Parser.parse('x * (y * atan(1))').simplify({ y: 4 });
-    it('(x*3.141592653589793)', function() {
+    it('(x*3.141592653589793)', function () {
       expect(expr.toString()).to.equal('(x*3.141592653589793)');
     });
 
-    it('6.283185307179586', function() {
+    it('6.283185307179586', function () {
       expect(expr.evaluate({ x: 2 })).to.equal(6.283185307179586);
     });
 
-    it('(x/2) ? y : z', function() {
+    it('(x/2) ? y : z', function () {
       expect(Parser.parse('(x/2) ? y : z').simplify({ x: 4 }).toString()).to.equal('((2)?(y):(z))');
     });
 
-    it('x ? (y + 1) : z', function() {
+    it('x ? (y + 1) : z', function () {
       expect(Parser.parse('x ? (y + 1) : z').simplify({ y: 2 }).toString()).to.equal('((x)?(3):(z))');
     });
 
-    it('x ? y : (z * 4)', function() {
+    it('x ? y : (z * 4)', function () {
       expect(Parser.parse('x ? y : (z * 4)').simplify({ z: 3 }).toString()).to.equal('((x)?(y):(12))');
     });
   });
 
-  describe('#variables()', function() {
+  describe('#variables()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
-    it('["x", "y", "z.y.x"]', function() {
+    it('["x", "y", "z.y.x"]', function () {
       expect(expr.variables()).to.include.members(['x', 'y', 'z']);
       expect(expr.variables()).to.not.include.members(['atan2']);
     });
 
-    it('["x", "z.y.x"]', function() {
+    it('["x", "z.y.x"]', function () {
       expect(expr.simplify({y: 4}).variables()).to.include.members(['x', 'z']);
       expect(expr.simplify({y: 4}).variables()).to.not.include.members(['y', 'atan2']);
     });
 
-    it('["x"]', function() {
+    it('["x"]', function () {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.include.members(['x']);
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.not.include.members(['y', 'z', 'atan2']);
     });
   });
 
-  describe('#symbols()', function() {
+  describe('#symbols()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
-    it('["x", "y", "z.y.x"]', function() {
+    it('["x", "y", "z.y.x"]', function () {
       expect(expr.symbols()).to.include.members(['x', 'y', 'z', 'atan2']);
     });
 
-    it('["x", "z.y.x"]', function() {
+    it('["x", "z.y.x"]', function () {
       expect(expr.simplify({y: 4}).symbols()).to.include.members(['x', 'z', 'atan2']);
       expect(expr.simplify({y: 4}).symbols()).to.not.include.members(['y']);
     });
 
-    it('["x"]', function() {
+    it('["x"]', function () {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.include.members(['x', 'atan2']);
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.not.include.members(['y', 'z']);
     });
   });
 
-  describe('#equal()', function() {
-    it('2 == 3', function() {
+  describe('#equal()', function () {
+    it('2 == 3', function () {
       expect(Parser.evaluate('2 == 3')).to.equal(false);
     });
 
-    it('3 * 1 == 2', function() {
+    it('3 * 1 == 2', function () {
       expect(Parser.evaluate('3 == 2')).to.not.equal(true);
     });
 
-    it('3 == 3', function() {
+    it('3 == 3', function () {
       expect(Parser.evaluate('3 == 3')).to.equal(true);
     });
 
-    it('\'3\' == 3', function() {
+    it('\'3\' == 3', function () {
       expect(Parser.evaluate('\'3\' == 3')).to.equal(false);
     });
 
-    it('\'string 1\' == \'string 2\'', function() {
+    it('\'string 1\' == \'string 2\'', function () {
       expect(Parser.evaluate('\'string 1\' == \'string 2\'')).to.equal(false);
     });
 
-    it('\'string 1\' == "string 1"', function() {
+    it('\'string 1\' == "string 1"', function () {
       expect(Parser.evaluate('\'string 1\' == \'string 1\'')).to.equal(true);
     });
 
-    it('\'3\' == \'3\'', function() {
+    it('\'3\' == \'3\'', function () {
       expect(Parser.evaluate('\'3\' == \'3\'')).to.equal(true);
     });
   });
 
-  describe('#notEqual()', function() {
-    it('2 != 3', function() {
+  describe('#notEqual()', function () {
+    it('2 != 3', function () {
       expect(Parser.evaluate('2 != 3')).to.equal(true);
     });
 
-    it('3 != 2', function() {
+    it('3 != 2', function () {
       expect(Parser.evaluate('3 != 2')).to.not.equal(false);
     });
 
-    it('3 != 3', function() {
+    it('3 != 3', function () {
       expect(Parser.evaluate('3 != 3')).to.equal(false);
     });
 
-    it('\'3\' != 3', function() {
+    it('\'3\' != 3', function () {
       expect(Parser.evaluate('\'3\' != 3')).to.equal(true);
     });
 
-    it('\'3\' != \'3\'', function() {
+    it('\'3\' != \'3\'', function () {
       expect(Parser.evaluate('\'3\' != \'3\'')).to.equal(false);
     });
 
-    it('\'string 1\' != \'string 1\'', function() {
+    it('\'string 1\' != \'string 1\'', function () {
       expect(Parser.evaluate('\'string 1\' != \'string 1\'')).to.equal(false);
     });
 
-    it('\'string 1\' != \'string 2\'', function() {
+    it('\'string 1\' != \'string 2\'', function () {
       expect(Parser.evaluate('\'string 1\' != \'string 2\'')).to.equal(true);
     });
   });
 
-  describe('#greaterThan()', function() {
-    it('2 > 3', function() {
+  describe('#greaterThan()', function () {
+    it('2 > 3', function () {
       expect(Parser.evaluate('2 > 3')).to.equal(false);
     });
 
-    it('3 > 2', function() {
+    it('3 > 2', function () {
       expect(Parser.evaluate('3 > 2')).to.equal(true);
     });
 
-    it('3 > 3', function() {
+    it('3 > 3', function () {
       expect(Parser.evaluate('3 > 3')).to.equal(false);
     });
   });
 
-  describe('#greaterThanEqual()', function() {
-    it('2 >= 3', function() {
+  describe('#greaterThanEqual()', function () {
+    it('2 >= 3', function () {
       expect(Parser.evaluate('2 >= 3')).to.equal(false);
     });
 
-    it('3 >= 2', function() {
+    it('3 >= 2', function () {
       expect(Parser.evaluate('3 >= 2')).to.equal(true);
     });
 
-    it('3 >= 3', function() {
+    it('3 >= 3', function () {
       expect(Parser.evaluate('3 >= 3')).to.equal(true);
     });
   });
 
-  describe('#lessThan()', function() {
-    it('2 < 3', function() {
+  describe('#lessThan()', function () {
+    it('2 < 3', function () {
       expect(Parser.evaluate('2 < 3')).to.equal(true);
     });
 
-    it('3 < 2', function() {
+    it('3 < 2', function () {
       expect(Parser.evaluate('3 < 2')).to.equal(false);
     });
 
-    it('3 < 3', function() {
+    it('3 < 3', function () {
       expect(Parser.evaluate('3 < 3')).to.equal(false);
     });
   });
 
-  describe('#lessThanEqual()', function() {
-    it('2 <= 3', function() {
+  describe('#lessThanEqual()', function () {
+    it('2 <= 3', function () {
       expect(Parser.evaluate('2 <= 3')).to.equal(true);
     });
 
-    it('3 <= 2', function() {
+    it('3 <= 2', function () {
       expect(Parser.evaluate('3 <= 2')).to.equal(false);
     });
 
-    it('3 <= 3', function() {
+    it('3 <= 3', function () {
       expect(Parser.evaluate('3 <= 3')).to.equal(true);
     });
   });
 
-  describe('#andOperator()', function() {
-    it('1 and 0', function() {
+  describe('#andOperator()', function () {
+    it('1 and 0', function () {
       expect(Parser.evaluate('1 and 0')).to.equal(false);
     });
 
-    it('1 and 1', function() {
+    it('1 and 1', function () {
       expect(Parser.evaluate('1 and 1')).to.equal(true);
     });
 
-    it('0 and 0', function() {
+    it('0 and 0', function () {
       expect(Parser.evaluate('0 and 0')).to.equal(false);
     });
 
-    it('0 and 1', function() {
+    it('0 and 1', function () {
       expect(Parser.evaluate('0 and 1')).to.equal(false);
     });
 
-    it('0 and 1 and 0', function() {
+    it('0 and 1 and 0', function () {
       expect(Parser.evaluate('0 and 1 and 0')).to.equal(false);
     });
 
-    it('1 and 1 and 0', function() {
+    it('1 and 1 and 0', function () {
       expect(Parser.evaluate('1 and 1 and 0')).to.equal(false);
     });
   });
 
-  describe('#orOperator()', function() {
-    it('1 or 0', function() {
+  describe('#orOperator()', function () {
+    it('1 or 0', function () {
       expect(Parser.evaluate('1 or 0')).to.equal(true);
     });
 
-    it('1 or 1', function() {
+    it('1 or 1', function () {
       expect(Parser.evaluate('1 or 1')).to.equal(true);
     });
 
-    it('0 or 0', function() {
+    it('0 or 0', function () {
       expect(Parser.evaluate('0 or 0')).to.equal(false);
     });
 
-    it('0 or 1', function() {
+    it('0 or 1', function () {
       expect(Parser.evaluate('0 or 1')).to.equal(true);
     });
 
-    it('0 or 1 or 0', function() {
+    it('0 or 1 or 0', function () {
       expect(Parser.evaluate('0 or 1 or 0')).to.equal(true);
     });
 
-    it('1 or 1 or 0', function() {
+    it('1 or 1 or 0', function () {
       expect(Parser.evaluate('1 or 1 or 0')).to.equal(true);
     });
   });
 
   describe('not operator', function () {
-    it('not 1', function() {
+    it('not 1', function () {
       expect(Parser.evaluate('not 1')).to.equal(false);
     });
 
-    it('not 0', function() {
+    it('not 0', function () {
       expect(Parser.evaluate('not 0')).to.equal(true);
     });
 
-    it('not 4', function() {
+    it('not 4', function () {
       expect(Parser.evaluate('not 4')).to.equal(false);
     });
 
-    it('1 and not 0', function() {
+    it('1 and not 0', function () {
       expect(Parser.evaluate('1 and not 0')).to.equal(true);
     });
 
-    it('not \'0\'', function() {
+    it('not \'0\'', function () {
       expect(Parser.evaluate('not \'0\'')).to.equal(false);
     });
 
-    it('not \'\'', function() {
+    it('not \'\'', function () {
       expect(Parser.evaluate('not \'\'')).to.equal(true);
     });
   });
@@ -549,36 +549,36 @@ describe('Functions', function () {
     });
   });
 
-  describe('if(p, t, f)', function() {
-    it('if(1, 1, 0)', function() {
+  describe('if(p, t, f)', function () {
+    it('if(1, 1, 0)', function () {
       expect(Parser.evaluate('if(1, 1, 0)')).to.equal(1);
     });
 
-    it('if(0, 1, 0)', function() {
+    it('if(0, 1, 0)', function () {
       expect(Parser.evaluate('if(0, 1, 0)')).to.equal(0);
     });
 
-    it('if(1==1 or 2==1, 39, 0)', function() {
+    it('if(1==1 or 2==1, 39, 0)', function () {
       expect(Parser.evaluate('if(1==1 or 2==1, 39, 0)')).to.equal(39);
     });
 
-    it('if(1==1 or 1==2, -4 + 8, 0)', function() {
+    it('if(1==1 or 1==2, -4 + 8, 0)', function () {
       expect(Parser.evaluate('if(1==1 or 1==2, -4 + 8, 0)')).to.equal(4);
     });
 
-    it('if(3 && 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)', function() {
+    it('if(3 && 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)', function () {
       expect(Parser.evaluate('if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)')).to.equal(2.4);
     });
   });
 });
 
 /* @todo
-testToJSFunction: function() {
+testToJSFunction: function () {
     var expr = Parser.parse('x * (y * atan(1))');
     var fn = expr.toJSFunction(['x', 'y']);
     assert.strictEqual(fn(2, 4), 6.283185307179586);
     fn = expr.toJSFunction(['y']);
-    assert.throws(function() { return fn(4); });
+    assert.throws(function () { return fn(4); });
 }
 sin(x)
 cos(x)

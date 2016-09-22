@@ -275,10 +275,24 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         n2 = nstack.pop();
         n1 = nstack.pop();
         f = item.value;
-        if (toJS && f === '^') {
-          nstack.push('Math.pow(' + n1 + ',' + n2 + ')');
+        if (toJS) {
+          if (f === '^') {
+            nstack.push('Math.pow(' + n1 + ', ' + n2 + ')');
+          } else if (f === 'and') {
+            nstack.push('(' + n1 + ' && ' + n2 + ')');
+          } else if (f === 'or') {
+            nstack.push('(' + n1 + ' || ' + n2 + ')');
+          } else if (f === '||') {
+            nstack.push('(String(' + n1 + ') + String(' + n2 + '))');
+          } else if (f === '==') {
+            nstack.push('(' + n1 + ' === ' + n2 + ')');
+          } else if (f === '!=') {
+            nstack.push('(' + n1 + ' !== ' + n2 + ')');
+          } else {
+            nstack.push('(' + n1 + ' ' + f + ' ' + n2 + ')');
+          }
         } else {
-          nstack.push('(' + n1 + f + n2 + ')');
+          nstack.push('(' + n1 + ' ' + f + ' ' + n2 + ')');
         }
       } else if (type === IOP3) {
         n3 = nstack.pop();
@@ -286,7 +300,7 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
         n1 = nstack.pop();
         f = item.value;
         if (f === '?') {
-          nstack.push('((' + n1 + ')?' + n2 + ':' + n3 + ')');
+          nstack.push('(' + n1 + ' ? ' + n2 + ' : ' + n3 + ')');
         } else {
           throw new Error('invalid Expression');
         }
@@ -295,10 +309,16 @@ var Parser = (function (scope) { // eslint-disable-line no-unused-vars
       } else if (type === IOP1) {
         n1 = nstack.pop();
         f = item.value;
-        if (f === '-') {
+        if (f === '-' || f === '+') {
           nstack.push('(' + f + n1 + ')');
+        } else if (toJS) {
+          if (f === 'not') {
+            nstack.push('(' + '!' + n1 + ')');
+          } else {
+            nstack.push(f + '(' + n1 + ')');
+          }
         } else {
-          nstack.push(f + '(' + n1 + ')');
+          nstack.push('(' + f + ' ' + n1 + ')');
         }
       } else if (type === IFUNCALL) {
         var argCount = item.value;

@@ -2,7 +2,7 @@
   "name": "expr-eval",
   "version": "0.9.0",
   "description": "Mathematical expression evaluator",
-  "main": "parser.js",
+  "main": "dist/bundle.js",
   "directories": {
     "test": "test"
   },
@@ -14,12 +14,18 @@
     "eslint-config-standard": "^6.0.0",
     "eslint-plugin-promise": "^2.0.1",
     "eslint-plugin-standard": "^2.0.0",
-    "mocha": "^2.5.3"
+    "mocha": "^2.5.3",
+    "rollup": "^0.36.0"
   },
   "scripts": {
-    "test": "mocha",
-    "lint": "eslint ."
+    "test": "npm run build && mocha",
+    "lint": "eslint parser.js test",
+    "build": "rollup parser.js --format=umd --name=exprEval --output=dist/bundle.js",
+    "prepublish": "npm run build"
   },
+  "files": [
+    "dist/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/silentmatt/expr-eval.git"

@@ -3,7 +3,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Parser = require('../parser').Parser;
+var Parser = require('../dist/bundle').Parser;
 
 describe('Parser', function () {
   describe('parse()', function () {

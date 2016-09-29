@@ -374,8 +374,11 @@ Expression.prototype.variables = function () {
 };
 
 Expression.prototype.toJSFunction = function (param, variables) {
-  var f = new Function(param, 'with(Parser.values) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
-  return f;
+  var expr = this;
+  var f = new Function(param, 'with(this.functions) with (this.ops3) with (this.ops2) with (this.ops1) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
+  return function () {
+    return f.apply(expr, arguments);
+  };
 };
 
 function add(a, b) {
@@ -1145,42 +1148,6 @@ Parser.evaluate = function (expr, variables) {
 };
 
 Parser.Expression = Expression;
-
-Parser.values = {
-  sin: Math.sin,
-  cos: Math.cos,
-  tan: Math.tan,
-  asin: Math.asin,
-  acos: Math.acos,
-  atan: Math.atan,
-  sinh: sinh,
-  cosh: cosh,
-  tanh: tanh,
-  asinh: asinh,
-  acosh: acosh,
-  atanh: atanh,
-  sqrt: Math.sqrt,
-  log: Math.log,
-  lg: log10,
-  log10: log10,
-  abs: Math.abs,
-  ceil: Math.ceil,
-  floor: Math.floor,
-  round: Math.round,
-  trunc: trunc,
-  random: random,
-  fac: fac,
-  exp: Math.exp,
-  min: Math.min,
-  max: Math.max,
-  hypot: hypot,
-  pyt: hypot, // backward compat
-  pow: Math.pow,
-  atan2: Math.atan2,
-  'if': condition,
-  E: Math.E,
-  PI: Math.PI
-};
 
 Parser.prototype = {
   parse: function (expr) {

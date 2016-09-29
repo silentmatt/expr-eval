@@ -423,6 +423,46 @@ describe('Expression', function () {
       expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString(true)).to.equal('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'');
     });
   });
+
+  describe('toJSFunction()', function () {
+    var parser = new Parser();
+
+    it('2 ^ x', function () {
+      var expr = parser.parse('2 ^ x');
+      var f = expr.toJSFunction('x');
+      expect(f(2)).to.equal(4);
+      expect(f(3)).to.equal(8);
+      expect(f(-1)).to.equal(0.5);
+    });
+
+    it('x || y', function () {
+      var expr = parser.parse('x || y');
+      var f = expr.toJSFunction('x, y');
+      expect(f(4, 2)).to.equal('42');
+    });
+
+    it('(sqrt y) + max(3, 1) * (x ? -y : z)', function () {
+      var expr = parser.parse('(sqrt y) + max(3, 1) * (x ? -y : z)');
+      var f = expr.toJSFunction('x,y,z');
+      expect(f(true, 4, 3)).to.equal(-10);
+      expect(f(false, 4, 3)).to.equal(11);
+    });
+
+    it('should throw when missing parameter', function () {
+      var expr = parser.parse('x * (y * atan(1))');
+      var f = expr.toJSFunction(['x', 'y']);
+      expect(f(2, 4)).to.equal(6.283185307179586);
+
+      f = expr.toJSFunction(['y']);
+      expect(function () { return f(4); }).to.throw(Error);
+    });
+
+    it('should simplify first', function () {
+      var expr = parser.parse('x * (y * atan(1))');
+      var f = expr.toJSFunction(['y'], { x: 2 });
+      expect(f(4)).to.equal(6.283185307179586);
+    });
+  });
 });
 
 describe('Operators', function () {
@@ -783,13 +823,6 @@ describe('Functions', function () {
 });
 
 /* @todo
-testToJSFunction: function () {
-    var expr = Parser.parse('x * (y * atan(1))');
-    var fn = expr.toJSFunction(['x', 'y']);
-    assert.strictEqual(fn(2, 4), 6.283185307179586);
-    fn = expr.toJSFunction(['y']);
-    assert.throws(function () { return fn(4); });
-}
 sin(x)
 cos(x)
 tan(x)

@@ -57,12 +57,13 @@ Instruction.prototype.toString = function () {
   }
 };
 
-function Expression(tokens, ops1, ops2, ops3, functions) {
+function Expression(tokens, parser) {
   this.tokens = tokens;
-  this.ops1 = ops1;
-  this.ops2 = ops2;
-  this.ops3 = ops3;
-  this.functions = functions;
+  this.parser = parser;
+  this.ops1 = object(parser.ops1);
+  this.ops2 = object(parser.ops2);
+  this.ops3 = object(parser.ops3);
+  this.functions = object(parser.functions);
 }
 
 // Based on http://www.json.org/json2.js
@@ -150,7 +151,7 @@ function simplify(tokens, ops1, ops2, ops3, values) {
 
 Expression.prototype.simplify = function (values) {
   values = values || {};
-  return new Expression(simplify(this.tokens, this.ops1, this.ops2, this.ops3, values), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+  return new Expression(simplify(this.tokens, this.ops1, this.ops2, this.ops3, values), this.parser);
 };
 
 function substitute(tokens, variable, expr) {
@@ -184,10 +185,10 @@ function substitute(tokens, variable, expr) {
 
 Expression.prototype.substitute = function (variable, expr) {
   if (!(expr instanceof Expression)) {
-    expr = new Parser().parse(String(expr));
+    expr = this.parser.parse(String(expr));
   }
 
-  return new Expression(substitute(this.tokens, variable, expr), object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+  return new Expression(substitute(this.tokens, variable, expr), this.parser);
 };
 
 function evaluate(tokens, expr, values) {
@@ -1188,7 +1189,7 @@ Parser.prototype = {
     parserState.parseExpression(instr);
     parserState.expect(TEOF, 'EOF');
 
-    return new Expression(instr, object(this.ops1), object(this.ops2), object(this.ops3), object(this.functions));
+    return new Expression(instr, this);
   },
 
   evaluate: function (expr, variables) {

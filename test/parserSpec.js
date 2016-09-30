@@ -321,6 +321,11 @@ describe('Expression', function () {
     it('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'', function () {
       expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString()).to.equal('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'');
     });
+
+    it('negative numbers are parenthesized', function () {
+      expect(parser.parse('x + y').simplify({ y: -2 }).toString()).to.equal('(x + (-2))');
+      expect(parser.parse('x + (2 - 3)').simplify().toString()).to.equal('(x + (-1))');
+    });
   });
 
   describe('toString(true)', function () {

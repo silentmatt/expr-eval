@@ -270,7 +270,11 @@ function expressionToString(tokens, toJS) {
     var item = tokens[i];
     var type = item.type;
     if (type === INUMBER) {
-      nstack.push(escapeValue(item.value));
+      if (typeof item.value === 'number' && item.value < 0) {
+        nstack.push('(' + item.value + ')');
+      } else {
+        nstack.push(escapeValue(item.value));
+      }
     } else if (type === IOP2) {
       n2 = nstack.pop();
       n1 = nstack.pop();

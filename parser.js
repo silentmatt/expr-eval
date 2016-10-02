@@ -1151,8 +1151,6 @@ Parser.evaluate = function (expr, variables) {
   return Parser.parse(expr).evaluate(variables);
 };
 
-Parser.Expression = Expression;
-
 Parser.prototype = {
   parse: function (expr) {
     var instr = [];
@@ -1169,5 +1167,6 @@ Parser.prototype = {
 };
 
 export default {
-  Parser: Parser
+  Parser: Parser,
+  Expression: Expression
 };

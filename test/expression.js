@@ -264,11 +264,11 @@ describe('Expression', function () {
     });
 
     it('\'as\' || \'df\'', function () {
-      expect(parser.parse('\'as\' || \'df\'').toString()).to.equal('(\'as\' || \'df\')');
+      expect(parser.parse('\'as\' || \'df\'').toString()).to.equal('("as" || "df")');
     });
 
     it('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'', function () {
-      expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString()).to.equal('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'');
+      expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString()).to.equal('"A\\bB\\tC\\nD\\fE\\r\'F\\\\G"');
     });
 
     it('negative numbers are parenthesized', function () {
@@ -370,11 +370,15 @@ describe('Expression', function () {
     });
 
     it('\'as\' || \'df\'', function () {
-      expect(parser.parse('\'as\' || \'df\'').toString(true)).to.equal('(String(\'as\') + String(\'df\'))');
+      expect(parser.parse('\'as\' || \'df\'').toString(true)).to.equal('(String("as") + String("df"))');
     });
 
     it('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'', function () {
-      expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString(true)).to.equal('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'');
+      expect(parser.parse('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'').toString(true)).to.equal('"A\\bB\\tC\\nD\\fE\\r\'F\\\\G"');
+    });
+
+    it('"A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G"', function () {
+      expect(parser.parse('"A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G"').toString(true)).to.equal('"A\\bB\\tC\\nD\\fE\\r\'F\\\\G"');
     });
   });
 

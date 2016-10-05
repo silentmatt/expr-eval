@@ -53,5 +53,18 @@ describe('Parser', function () {
       expect(function () { parser.parse('.0.'); }).to.throw(Error);
       expect(function () { parser.parse('.'); }).to.throw(Error);
     });
+
+    it('should parse strings', function () {
+      expect(parser.evaluate('\'asdf\'')).to.equal('asdf');
+      expect(parser.evaluate('"asdf"')).to.equal('asdf');
+      expect(parser.evaluate('""')).to.equal('');
+      expect(parser.evaluate('\'\'')).to.equal('');
+      expect(parser.evaluate('"  "')).to.equal('  ');
+      expect(parser.evaluate('"a\nb\tc"')).to.equal('a\nb\tc');
+      expect(parser.evaluate('"Nested \'single quotes\'"')).to.equal('Nested \'single quotes\'');
+      expect(parser.evaluate('\'Nested "double quotes"\'')).to.equal('Nested "double quotes"');
+      expect(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\'')).to.equal('Single quotes \'inside\' single quotes');
+      expect(parser.evaluate('"Double quotes \\"inside\\" double quotes"')).to.equal('Double quotes "inside" double quotes');
+    });
   });
 });

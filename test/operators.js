@@ -239,6 +239,30 @@ describe('Operators', function () {
       expect(parser.evaluate('0 ? fail : 99')).to.equal(99);
     });
   });
+
+  describe('length operator', function () {
+    var parser = new Parser();
+
+    it('should return 0 for empty strings', function () {
+      expect(parser.evaluate('length ""')).to.equal(0);
+    });
+
+    it('should return the length of a string', function () {
+      expect(parser.evaluate('length "a"')).to.equal(1);
+      expect(parser.evaluate('length "as"')).to.equal(2);
+      expect(parser.evaluate('length "asd"')).to.equal(3);
+      expect(parser.evaluate('length "asdf"')).to.equal(4);
+    });
+
+    it('should convert numbers to strings', function () {
+      expect(parser.evaluate('length 0')).to.equal(1);
+      expect(parser.evaluate('length 12')).to.equal(2);
+      expect(parser.evaluate('length 999')).to.equal(3);
+      expect(parser.evaluate('length 1000')).to.equal(4);
+      expect(parser.evaluate('length -1')).to.equal(2);
+      expect(parser.evaluate('length -999')).to.equal(4);
+    });
+  });
 });
 
 /* @todo

@@ -457,6 +457,9 @@ function fac(a) { // a!
   }
   return b;
 }
+function stringLength(s) {
+  return String(s).length;
+}
 
 // TODO: use hypot that doesn't overflow
 function hypot() {
@@ -1131,7 +1134,8 @@ function Parser() {
     '-': neg,
     '+': Number,
     exp: Math.exp,
-    not: not
+    not: not,
+    length: stringLength
   };
 
   this.ops2 = {

@@ -215,6 +215,7 @@ floor x  | Floor of x — the largest integer that’s <= x
 round x  | X, rounded to the nearest integer, using "gradeschool rounding"
 trunc x  | Integral part of a X, looks like floor(x) unless for negative number
 exp x    | e^x (exponential/antilogarithm function with base e)
+length x | String length of x
 -x       | Negation
 +x       | Unary plus. This converts it's operand to a number, but has no other effect.
 

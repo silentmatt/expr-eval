@@ -263,6 +263,33 @@ describe('Operators', function () {
       expect(parser.evaluate('length -999')).to.equal(4);
     });
   });
+
+  describe('ln/log operator', function () {
+    it('ln E', function () {
+      expect(Parser.evaluate('ln E')).to.equal(1);
+      expect(Parser.evaluate('log E')).to.equal(1);
+    });
+
+    it('ln 1', function () {
+      expect(Parser.evaluate('ln 1')).to.equal(0);
+      expect(Parser.evaluate('log 1')).to.equal(0);
+    });
+
+    it('ln 10', function () {
+      expect(Parser.evaluate('ln 10')).to.equal(Math.log(10));
+      expect(Parser.evaluate('log 10')).to.equal(Math.log(10));
+    });
+
+    it('ln 0', function () {
+      expect(Parser.evaluate('ln 0')).to.equal(-Infinity);
+      expect(Parser.evaluate('log 0')).to.equal(-Infinity);
+    });
+
+    it('ln -1', function () {
+      expect(Parser.evaluate('ln -1')).to.be.NaN;
+      expect(Parser.evaluate('log -1')).to.be.NaN;
+    });
+  });
 });
 
 /* @todo

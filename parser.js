@@ -1124,6 +1124,7 @@ function Parser() {
     atanh: atanh,
     sqrt: Math.sqrt,
     log: Math.log,
+    ln: Math.log,
     lg: log10,
     log10: log10,
     abs: Math.abs,

@@ -207,7 +207,8 @@ asinh x  | Hyperbolic arc sine of x (in radians)
 acosh x  | Hyperbolic arc cosine of x (in radians)
 atanh x  | Hyperbolic arc tangent of x (in radians)
 sqrt x   | Square root of x. Result is NaN (Not a Number) if x is negative.
-log x    | Natural logarithm of x (not base-10).
+ln x     | Natural logarithm of x
+log x    | Natural logarithm of x (synonym for ln, not base-10)
 log10 x  | Base-10 logarithm of x
 abs x    | Absolute value (magnatude) of x
 ceil x   | Ceiling of x — the smallest integer that’s >= x

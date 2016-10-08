@@ -183,10 +183,14 @@ x ? y : z             | Right         | Ternary conditional (if x then y else z)
 #### Unary operators
 
 The parser has several built-in "functions" that are actually unary operators.
-These have a slightly lower precedence than function calls, and can be called
-without parentheses. Be careful with exponentiation though, since it has a
-higher precedence. For example, `sin(x) ^ 2` is `sin (x^2)` **not**
-`(sin x) ^ 2`.
+The primary difference between these and functions are that they can only accept
+exactly one argument, and parentheses are optional. With parentheses, they have
+the same precedence as function calls, but without parentheses, they keep their
+normal precedence (just below `^`). For example, `sin(x)^2` is equivalent to
+`(sin x)^2`, and `sin x^2` is equivalent to `sin(x^2)`.
+
+The unary `+` and `-` operators are an exception, and always have their normal
+precedence.
 
 Operator | Description
 :------- | :----------

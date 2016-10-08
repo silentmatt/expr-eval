@@ -66,5 +66,17 @@ describe('Parser', function () {
       expect(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\'')).to.equal('Single quotes \'inside\' single quotes');
       expect(parser.evaluate('"Double quotes \\"inside\\" double quotes"')).to.equal('Double quotes "inside" double quotes');
     });
+
+    it('should parse operators that look like functions as function calls', function () {
+      expect(parser.parse('sin 2^3').toString()).to.equal('(sin (2 ^ 3))');
+      expect(parser.parse('sin(2)^3').toString()).to.equal('((sin 2) ^ 3)');
+      expect(parser.parse('sin 2^3').evaluate()).to.equal(Math.sin(Math.pow(2, 3)));
+      expect(parser.parse('sin(2)^3').evaluate()).to.equal(Math.pow(Math.sin(2), 3));
+    });
+
+    it('unary + and - should not be parsed as function calls', function () {
+      expect(parser.parse('-2^3').toString()).to.equal('(-(2 ^ 3))');
+      expect(parser.parse('-(2)^3').toString()).to.equal('(-(2 ^ 3))');
+    });
   });
 });

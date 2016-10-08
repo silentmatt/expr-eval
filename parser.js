@@ -514,10 +514,28 @@ function TokenStream(expression, ops1, ops2, ops3, consts) {
   this.ops3 = ops3;
   this.consts = consts;
   this.expression = expression;
+  this.savedPosition = 0;
+  this.savedCurrent = null;
+  this.savedLine = 0;
+  this.savedColumn = 0;
 }
 
 TokenStream.prototype.newToken = function (type, value, line, column) {
   return new Token(type, value, line != null ? line : this.line, column != null ? column : this.column);
+};
+
+TokenStream.prototype.save = function () {
+  this.savedPosition = this.pos;
+  this.savedCurrent = this.current;
+  this.savedLine = this.line;
+  this.savedColumn = this.column;
+};
+
+TokenStream.prototype.restore = function () {
+  this.pos = this.savedPosition;
+  this.current = this.savedCurrent;
+  this.line = this.savedLine;
+  this.column = this.savedColumn;
 };
 
 TokenStream.prototype.next = function () {
@@ -889,6 +907,8 @@ function ParserState(parser, tokenStream) {
   this.current = null;
   this.nextToken = null;
   this.next();
+  this.savedCurrent = null;
+  this.savedNextToken = null;
 }
 
 ParserState.prototype.next = function () {
@@ -906,6 +926,18 @@ ParserState.prototype.tokenMatches = function (token, value) {
   } else {
     return token.value === value;
   }
+};
+
+ParserState.prototype.save = function () {
+  this.savedCurrent = this.current;
+  this.savedNextToken = this.nextToken;
+  this.tokens.save();
+};
+
+ParserState.prototype.restore = function () {
+  this.tokens.restore();
+  this.current = this.savedCurrent;
+  this.nextToken = this.savedNextToken;
 };
 
 ParserState.prototype.accept = function (type, value) {
@@ -1004,10 +1036,16 @@ ParserState.prototype.parseFactor = function (instr) {
     return token.value in ops1;
   }
 
+  this.save();
   if (this.accept(TOP, isPrefixOperator)) {
-    var op = this.current;
-    this.parseFactor(instr);
-    instr.push(unaryInstruction(op.value));
+    if ((this.current.value !== '-' && this.current.value !== '+' && this.nextToken.type === TPAREN && this.nextToken.value === '(')) {
+      this.restore();
+      this.parseExponential(instr);
+    } else {
+      var op = this.current;
+      this.parseFactor(instr);
+      instr.push(unaryInstruction(op.value));
+    }
   } else {
     this.parseExponential(instr);
   }
@@ -1022,13 +1060,24 @@ ParserState.prototype.parseExponential = function (instr) {
 };
 
 ParserState.prototype.parseFunctionCall = function (instr) {
-  this.parseMemberExpression(instr);
-  while (this.accept(TPAREN, '(')) {
-    if (this.accept(TPAREN, ')')) {
-      instr.push(new Instruction(IFUNCALL, 0));
-    } else {
-      var argCount = this.parseArgumentList(instr);
-      instr.push(new Instruction(IFUNCALL, argCount));
+  var ops1 = this.tokens.ops1;
+  function isPrefixOperator(token) {
+    return token.value in ops1;
+  }
+
+  if (this.accept(TOP, isPrefixOperator)) {
+    var op = this.current;
+    this.parseAtom(instr);
+    instr.push(unaryInstruction(op.value));
+  } else {
+    this.parseMemberExpression(instr);
+    while (this.accept(TPAREN, '(')) {
+      if (this.accept(TPAREN, ')')) {
+        instr.push(new Instruction(IFUNCALL, 0));
+      } else {
+        var argCount = this.parseArgumentList(instr);
+        instr.push(new Instruction(IFUNCALL, argCount));
+      }
     }
   }
 };

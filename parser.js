@@ -60,9 +60,9 @@ Instruction.prototype.toString = function () {
 function Expression(tokens, parser) {
   this.tokens = tokens;
   this.parser = parser;
-  this.ops1 = object(parser.ops1);
-  this.ops2 = object(parser.ops2);
-  this.ops3 = object(parser.ops3);
+  this.unaryOps = object(parser.unaryOps);
+  this.binaryOps = object(parser.binaryOps);
+  this.ternaryOps = object(parser.ternaryOps);
   this.functions = object(parser.functions);
 }
 
@@ -73,7 +73,7 @@ function escapeValue(v) {
   return v;
 }
 
-function simplify(tokens, ops1, ops2, ops3, values) {
+function simplify(tokens, unaryOps, binaryOps, ternaryOps, values) {
   var nstack = [];
   var newexpression = [];
   var n1, n2, n3;
@@ -89,7 +89,7 @@ function simplify(tokens, ops1, ops2, ops3, values) {
     } else if (type === IOP2 && nstack.length > 1) {
       n2 = nstack.pop();
       n1 = nstack.pop();
-      f = ops2[item.value];
+      f = binaryOps[item.value];
       item = new Instruction(INUMBER, f(n1.value, n2.value));
       nstack.push(item);
     } else if (type === IOP3 && nstack.length > 2) {
@@ -99,20 +99,20 @@ function simplify(tokens, ops1, ops2, ops3, values) {
       if (item.value === '?') {
         nstack.push(n1.value ? n2.value : n3.value);
       } else {
-        f = ops3[item.value];
+        f = ternaryOps[item.value];
         item = new Instruction(INUMBER, f(n1.value, n2.value, n3.value));
         nstack.push(item);
       }
     } else if (type === IOP1 && nstack.length > 0) {
       n1 = nstack.pop();
-      f = ops1[item.value];
+      f = unaryOps[item.value];
       item = new Instruction(INUMBER, f(n1.value));
       nstack.push(item);
     } else if (type === IEXPR) {
       while (nstack.length > 0) {
         newexpression.push(nstack.shift());
       }
-      newexpression.push(new Instruction(IEXPR, simplify(item.value, ops1, ops2, ops3, values)));
+      newexpression.push(new Instruction(IEXPR, simplify(item.value, unaryOps, binaryOps, ternaryOps, values)));
     } else if (type === IMEMBER && nstack.length > 0) {
       n1 = nstack.pop();
       nstack.push(new Instruction(INUMBER, n1.value[item.value]));
@@ -131,7 +131,7 @@ function simplify(tokens, ops1, ops2, ops3, values) {
 
 Expression.prototype.simplify = function (values) {
   values = values || {};
-  return new Expression(simplify(this.tokens, this.ops1, this.ops2, this.ops3, values), this.parser);
+  return new Expression(simplify(this.tokens, this.unaryOps, this.binaryOps, this.ternaryOps, values), this.parser);
 };
 
 function substitute(tokens, variable, expr) {
@@ -183,7 +183,7 @@ function evaluate(tokens, expr, values) {
     } else if (type === IOP2) {
       n2 = nstack.pop();
       n1 = nstack.pop();
-      f = expr.ops2[item.value];
+      f = expr.binaryOps[item.value];
       nstack.push(f(n1, n2));
     } else if (type === IOP3) {
       n3 = nstack.pop();
@@ -192,7 +192,7 @@ function evaluate(tokens, expr, values) {
       if (item.value === '?') {
         nstack.push(evaluate(n1 ? n2 : n3, expr, values));
       } else {
-        f = expr.ops3[item.value];
+        f = expr.ternaryOps[item.value];
         nstack.push(f(n1, n2, n3));
       }
     } else if (type === IVAR) {
@@ -208,7 +208,7 @@ function evaluate(tokens, expr, values) {
       }
     } else if (type === IOP1) {
       n1 = nstack.pop();
-      f = expr.ops1[item.value];
+      f = expr.unaryOps[item.value];
       nstack.push(f(n1));
     } else if (type === IFUNCALL) {
       var argCount = item.value;
@@ -359,7 +359,7 @@ Expression.prototype.variables = function () {
 
 Expression.prototype.toJSFunction = function (param, variables) {
   var expr = this;
-  var f = new Function(param, 'with(this.functions) with (this.ops3) with (this.ops2) with (this.ops1) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
+  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
   return function () {
     return f.apply(expr, arguments);
   };
@@ -507,14 +507,14 @@ Token.prototype.toString = function () {
   return this.type + ': ' + this.value;
 };
 
-function TokenStream(expression, ops1, ops2, ops3, consts) {
+function TokenStream(expression, unaryOps, binaryOps, ternaryOps, consts) {
   this.pos = 0;
   this.line = 0;
   this.column = 0;
   this.current = null;
-  this.ops1 = ops1;
-  this.ops2 = ops2;
-  this.ops3 = ops3;
+  this.unaryOps = unaryOps;
+  this.binaryOps = binaryOps;
+  this.ternaryOps = ternaryOps;
   this.consts = consts;
   this.expression = expression;
   this.savedPosition = 0;
@@ -648,7 +648,7 @@ TokenStream.prototype.isNamedOp = function () {
     }
     str += c;
   }
-  if (str.length > 0 && (str in this.ops2 || str in this.ops1 || str in this.ops3)) {
+  if (str.length > 0 && (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps)) {
     this.current = this.newToken(TOP, str);
     this.pos += str.length;
     this.column += str.length;
@@ -1034,9 +1034,9 @@ ParserState.prototype.parseTerm = function (instr) {
 };
 
 ParserState.prototype.parseFactor = function (instr) {
-  var ops1 = this.tokens.ops1;
+  var unaryOps = this.tokens.unaryOps;
   function isPrefixOperator(token) {
-    return token.value in ops1;
+    return token.value in unaryOps;
   }
 
   this.save();
@@ -1063,9 +1063,9 @@ ParserState.prototype.parseExponential = function (instr) {
 };
 
 ParserState.prototype.parseFunctionCall = function (instr) {
-  var ops1 = this.tokens.ops1;
+  var unaryOps = this.tokens.unaryOps;
   function isPrefixOperator(token) {
-    return token.value in ops1;
+    return token.value in unaryOps;
   }
 
   if (this.accept(TOP, isPrefixOperator)) {
@@ -1109,7 +1109,7 @@ ParserState.prototype.parseMemberExpression = function (instr) {
 };
 
 function Parser() {
-  this.ops1 = {
+  this.unaryOps = {
     sin: Math.sin,
     cos: Math.cos,
     tan: Math.tan,
@@ -1139,7 +1139,7 @@ function Parser() {
     length: stringLength
   };
 
-  this.ops2 = {
+  this.binaryOps = {
     '+': add,
     '-': sub,
     '*': mul,
@@ -1158,7 +1158,7 @@ function Parser() {
     or: orOperator
   };
 
-  this.ops3 = {
+  this.ternaryOps = {
     '?': condition
   };
 
@@ -1193,7 +1193,7 @@ Parser.evaluate = function (expr, variables) {
 Parser.prototype = {
   parse: function (expr) {
     var instr = [];
-    var parserState = new ParserState(this, new TokenStream(expr, this.ops1, this.ops2, this.ops3, this.consts));
+    var parserState = new ParserState(this, new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts));
     parserState.parseExpression(instr);
     parserState.expect(TEOF, 'EOF');
 

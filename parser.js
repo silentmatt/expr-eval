@@ -408,27 +408,25 @@ function orOperator(a, b) {
   return Boolean(a || b);
 }
 function sinh(a) {
-  return Math.sinh ? Math.sinh(a) : ((Math.exp(a) - Math.exp(-a)) / 2);
+  return ((Math.exp(a) - Math.exp(-a)) / 2);
 }
 function cosh(a) {
-  return Math.cosh ? Math.cosh(a) : ((Math.exp(a) + Math.exp(-a)) / 2);
+  return ((Math.exp(a) + Math.exp(-a)) / 2);
 }
 function tanh(a) {
-  if (Math.tanh) return Math.tanh(a);
   if (a === Infinity) return 1;
   if (a === -Infinity) return -1;
   return (Math.exp(a) - Math.exp(-a)) / (Math.exp(a) + Math.exp(-a));
 }
 function asinh(a) {
-  if (Math.asinh) return Math.asinh(a);
   if (a === -Infinity) return a;
   return Math.log(a + Math.sqrt(a * a + 1));
 }
 function acosh(a) {
-  return Math.acosh ? Math.acosh(a) : Math.log(a + Math.sqrt(a * a - 1));
+  return Math.log(a + Math.sqrt(a * a - 1));
 }
 function atanh(a) {
-  return Math.atanh ? Math.atanh(a) : (Math.log((1 + a) / (1 - a)) / 2);
+  return (Math.log((1 + a) / (1 - a)) / 2);
 }
 function log10(a) {
   return Math.log(a) * Math.LOG10E;
@@ -440,11 +438,7 @@ function not(a) {
   return !a;
 }
 function trunc(a) {
-  if (Math.trunc) {
-    return Math.trunc(a);
-  } else {
-    return a < 0 ? Math.ceil(a) : Math.floor(a);
-  }
+  return a < 0 ? Math.ceil(a) : Math.floor(a);
 }
 function random(a) {
   return Math.random() * (a || 1);
@@ -463,7 +457,6 @@ function stringLength(s) {
 
 // TODO: use hypot that doesn't overflow
 function hypot() {
-  if (Math.hypot) return Math.hypot.apply(this, arguments);
   var y = 0;
   var length = arguments.length;
   for (var i = 0; i < length; i++) {
@@ -1116,12 +1109,12 @@ function Parser() {
     asin: Math.asin,
     acos: Math.acos,
     atan: Math.atan,
-    sinh: sinh,
-    cosh: cosh,
-    tanh: tanh,
-    asinh: asinh,
-    acosh: acosh,
-    atanh: atanh,
+    sinh: Math.sinh || sinh,
+    cosh: Math.cosh || cosh,
+    tanh: Math.tanh || tanh,
+    asinh: Math.asinh || asinh,
+    acosh: Math.acosh || acosh,
+    atanh: Math.atanh || atanh,
     sqrt: Math.sqrt,
     log: Math.log,
     ln: Math.log,
@@ -1131,7 +1124,7 @@ function Parser() {
     ceil: Math.ceil,
     floor: Math.floor,
     round: Math.round,
-    trunc: trunc,
+    trunc: Math.trunc || trunc,
     '-': neg,
     '+': Number,
     exp: Math.exp,
@@ -1167,8 +1160,8 @@ function Parser() {
     fac: fac,
     min: Math.min,
     max: Math.max,
-    hypot: hypot,
-    pyt: hypot, // backward compat
+    hypot: Math.hypot || hypot,
+    pyt: Math.hypot || hypot, // backward compat
     pow: Math.pow,
     atan2: Math.atan2,
     'if': condition

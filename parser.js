@@ -472,15 +472,6 @@ function condition(cond, yep, nope) {
   return cond ? yep : nope;
 }
 
-function append(a, b) {
-  if (Object.prototype.toString.call(a) !== '[object Array]') {
-    return [a, b];
-  }
-  a = a.slice();
-  a.push(b);
-  return a;
-}
-
 var TEOF = 'TEOF';
 var TOP = 'TOP';
 var TNUMBER = 'TNUMBER';
@@ -1139,7 +1130,6 @@ function Parser() {
     '/': div,
     '%': mod,
     '^': Math.pow,
-    ',': append,
     '||': concat,
     '==': equal,
     '!=': notEqual,

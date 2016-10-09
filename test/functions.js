@@ -72,8 +72,9 @@ describe('Functions', function () {
   });
 
   describe('hypot(a, b, ...)', function () {
+    var parser = new Parser();
+
     it('should return the hypotenuse', function () {
-      var parser = new Parser();
       expect(parser.evaluate('hypot()')).to.equal(0);
       expect(parser.evaluate('hypot(3)')).to.equal(3);
       expect(parser.evaluate('hypot(3,4)')).to.equal(5);
@@ -82,6 +83,14 @@ describe('Functions', function () {
       expect(parser.evaluate('hypot(1 / 0)')).to.equal(Infinity);
       expect(parser.evaluate('hypot(-1 / 0)')).to.equal(Infinity);
       expect(parser.evaluate('hypot(1, 2, 1 / 0)')).to.equal(Infinity);
+    });
+
+    it('should avoid overflowing', function () {
+      expect(parser.evaluate('hypot(10^200, 10^200)')).to.equal(1.4142135623730959e+200);
+      expect(parser.evaluate('hypot(10^-200, 10^-200)')).to.equal(1.4142135623730944e-200);
+      expect(parser.evaluate('hypot(10^100, 11^100, 12^100, 13^100)')).to.equal(2.4793352492856554e+111);
+      expect(parser.evaluate('hypot(x)', { x: Number.MAX_VALUE })).to.equal(Number.MAX_VALUE);
+      expect(parser.evaluate('hypot(x, 0)', { x: Number.MAX_VALUE })).to.equal(Number.MAX_VALUE);
     });
   });
 

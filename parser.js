@@ -455,17 +455,24 @@ function stringLength(s) {
   return String(s).length;
 }
 
-// TODO: use hypot that doesn't overflow
 function hypot() {
-  var y = 0;
-  var length = arguments.length;
-  for (var i = 0; i < length; i++) {
-    if (arguments[i] === Infinity || arguments[i] === -Infinity) {
-      return Infinity;
+  var sum = 0;
+  var larg = 0;
+  for (var i = 0, L = arguments.length; i < L; i++) {
+    var arg = Math.abs(arguments[i]);
+    var div;
+    if (larg < arg) {
+      div = larg / arg;
+      sum = sum * div * div + 1;
+      larg = arg;
+    } else if (arg > 0) {
+      div = arg / larg;
+      sum += div * div;
+    } else {
+      sum += arg;
     }
-    y += arguments[i] * arguments[i];
   }
-  return Math.sqrt(y);
+  return larg === Infinity ? Infinity : larg * Math.sqrt(sum);
 }
 
 function condition(cond, yep, nope) {

@@ -79,6 +79,9 @@ describe('Functions', function () {
       expect(parser.evaluate('hypot(3,4)')).to.equal(5);
       expect(parser.evaluate('hypot(4,3)')).to.equal(5);
       expect(parser.evaluate('hypot(2,3,4)')).to.equal(5.385164807134504);
+      expect(parser.evaluate('hypot(1 / 0)')).to.equal(Infinity);
+      expect(parser.evaluate('hypot(-1 / 0)')).to.equal(Infinity);
+      expect(parser.evaluate('hypot(1, 2, 1 / 0)')).to.equal(Infinity);
     });
   });
 

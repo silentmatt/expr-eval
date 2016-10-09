@@ -94,18 +94,54 @@ describe('Expression', function () {
     it('\'as\' || \'df\'', function () {
       expect(Parser.evaluate('\'as\' || \'df\'')).to.equal('asdf');
     });
+
+    it('should fail with undefined variables', function () {
+      expect(function () { Parser.evaluate('x + 1'); }).to.throw(Error);
+    });
+
+    it('should fail trying to call a non-function', function () {
+      expect(function () { Parser.evaluate('f()', { f: 2 }); }).to.throw(Error);
+    });
   });
 
   describe('substitute()', function () {
-    var expr = Parser.parse('2 * x + 1');
+    var parser = new Parser();
+
+    var expr = parser.parse('2 * x + 1');
     var expr2 = expr.substitute('x', '4 * x');
     it('((2*(4*x))+1)', function () {
       expect(expr2.evaluate({x: 3})).to.equal(25);
     });
 
-    var expr7 = expr.substitute('x', '4 * x.y.z');
+    var expr3 = expr.substitute('x', '4 * x.y.z');
     it('((2*(4*x.y.z))+1)', function () {
-      expect(expr7.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
+      expect(expr3.evaluate({ x: { y: { z: 3 } } })).to.equal(25);
+    });
+
+    var expr4 = parser.parse('-x').substitute('x', '-4 + y');
+    it('-(-4 + y)', function () {
+      expect(expr4.toString()).to.equal('(-((-4) + y))');
+      expect(expr4.evaluate({ y: 2 })).to.equal(2);
+    });
+
+    var expr5 = parser.parse('x + y').substitute('y', 'x ? 1 : 2');
+    it('x + (x ? 1 : 2)', function () {
+      expect(expr5.toString()).to.equal('(x + (x ? (1) : (2)))');
+      expect(expr5.evaluate({ x: 3 })).to.equal(4);
+      expect(expr5.evaluate({ x: 0 })).to.equal(2);
+    });
+
+    var expr6 = parser.parse('x ? y : z').substitute('y', 'x');
+    it('x ? x : z', function () {
+      expect(expr6.toString()).to.equal('(x ? (x) : (z))');
+      expect(expr6.evaluate({ x: 1, z: 2 })).to.equal(1);
+      expect(expr6.evaluate({ x: 0, z: 2 })).to.equal(2);
+    });
+
+    var expr7 = expr.substitute('x', parser.parse('4 * x'));
+    it('should substitute expressions', function () {
+      expect(expr7.toString()).to.equal('((2 * (4 * x)) + 1)');
+      expect(expr7.evaluate({x: 3})).to.equal(25);
     });
   });
 
@@ -148,6 +184,10 @@ describe('Expression', function () {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.include.members(['x']);
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables()).to.not.include.members(['y', 'z', 'atan2']);
     });
+
+    it('a or b ? c + d : e * f', function () {
+      expect(Parser.parse('a or b ? c + d : e * f').variables()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
+    });
   });
 
   describe('symbols()', function () {
@@ -164,6 +204,10 @@ describe('Expression', function () {
     it('["x"]', function () {
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.include.members(['x', 'atan2']);
       expect(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols()).to.not.include.members(['y', 'z']);
+    });
+
+    it('a or b ? c + d : e * f', function () {
+      expect(Parser.parse('a or b ? c + d : e * f').symbols()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
     });
   });
 

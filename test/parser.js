@@ -12,6 +12,8 @@ describe('Parser', function () {
     it('should skip comments', function () {
       expect(parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
       expect(parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
+      expect(parser.evaluate('/* comment at the beginning */2 + 3/* unterminated comment')).to.equal(5);
+      expect(parser.evaluate('2 +/* comment\n with\n multiple\n lines */3')).to.equal(5);
     });
 
     it('should ignore whitespace', function () {
@@ -54,6 +56,19 @@ describe('Parser', function () {
       expect(function () { parser.parse('.'); }).to.throw(Error);
     });
 
+    it('should fail on unknown characters', function () {
+      expect(function () { parser.parse('1 + @'); }).to.throw(Error);
+    });
+
+    it('should fail with partial operators', function () {
+      expect(function () { parser.parse('"a" | "b"'); }).to.throw(Error);
+      expect(function () { parser.parse('2 = 2'); }).to.throw(Error);
+      expect(function () { parser.parse('2 ! 3'); }).to.throw(Error);
+      expect(function () { parser.parse('1 o 0'); }).to.throw(Error);
+      expect(function () { parser.parse('1 an 2'); }).to.throw(Error);
+      expect(function () { parser.parse('1 a 2'); }).to.throw(Error);
+    });
+
     it('should parse strings', function () {
       expect(parser.evaluate('\'asdf\'')).to.equal('asdf');
       expect(parser.evaluate('"asdf"')).to.equal('asdf');
@@ -77,6 +92,11 @@ describe('Parser', function () {
     it('unary + and - should not be parsed as function calls', function () {
       expect(parser.parse('-2^3').toString()).to.equal('(-(2 ^ 3))');
       expect(parser.parse('-(2)^3').toString()).to.equal('(-(2 ^ 3))');
+    });
+
+    it('should treat ∙ and • as * operators', function () {
+      expect(parser.parse('2 ∙ 3').toString()).to.equal('(2 * 3)');
+      expect(parser.parse('4 • 5').toString()).to.equal('(4 * 5)');
     });
   });
 });

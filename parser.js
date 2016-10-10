@@ -763,70 +763,71 @@ TokenStream.prototype.isComment = function () {
 };
 
 TokenStream.prototype.isNumber = function () {
-  var r = false;
-  var str = '';
-  var startPos = this.pos;
-  var startColumn = this.column;
+  var valid = false;
+  var pos = this.pos;
+  var startPos = pos;
+  var resetPos = pos;
+  var column = this.column;
+  var resetColumn = column;
   var foundDot = false;
   var foundDigits = false;
   var char;
 
-  while (this.pos < this.expression.length) {
-    char = this.expression.charAt(this.pos);
+  while (pos < this.expression.length) {
+    char = this.expression.charAt(pos);
     if ((char >= '0' && char <= '9') || (!foundDot && char === '.')) {
       if (char === '.') {
         foundDot = true;
       } else {
         foundDigits = true;
       }
-      str += this.expression.charAt(this.pos);
-      this.pos++;
-      this.column++;
-      r = foundDigits;
+      pos++;
+      column++;
+      valid = foundDigits;
     } else {
       break;
     }
   }
 
-  if (r) {
-    startPos = this.pos;
-    startColumn = this.column;
+  if (valid) {
+    resetPos = pos;
+    resetColumn = column;
   }
 
   if (char === 'e' || char === 'E') {
-    this.pos++;
-    this.column++;
-    var expString = 'e';
+    pos++;
+    column++;
+    var acceptSign = true;
     var validExponent = false;
-    while (this.pos < this.expression.length) {
-      char = this.expression.charAt(this.pos);
-      if ((char === '+' || char === '-') && expString === 'e') {
-        expString += char;
+    while (pos < this.expression.length) {
+      char = this.expression.charAt(pos);
+      if (acceptSign && (char === '+' || char === '-')) {
+        acceptSign = false;
       } else if (char >= '0' && char <= '9') {
         validExponent = true;
-        expString += char;
+        acceptSign = false;
       } else {
         break;
       }
-      this.pos++;
-      this.column++;
+      pos++;
+      column++;
     }
 
-    if (validExponent) {
-      str += expString;
-    } else {
-      this.pos = startPos;
-      this.column = startPos;
+    if (!validExponent) {
+      pos = resetPos;
+      column = resetColumn;
     }
   }
 
-  if (r) {
-    this.current = this.newToken(TNUMBER, parseFloat(str));
+  if (valid) {
+    this.current = this.newToken(TNUMBER, parseFloat(this.expression.substring(startPos, pos)));
+    this.pos = pos;
+    this.column = column;
   } else {
-    this.pos = startPos;
-    this.column = startColumn;
+    this.pos = resetPos;
+    this.column = resetColumn;
   }
-  return r;
+  return valid;
 };
 
 TokenStream.prototype.isOperator = function () {

@@ -608,57 +608,64 @@ TokenStream.prototype.isComma = function () {
 };
 
 TokenStream.prototype.isConst = function () {
-  var str = '';
-  for (var i = this.pos; i < this.expression.length; i++) {
+  var startPos = this.pos;
+  var i = startPos;
+  for (; i < this.expression.length; i++) {
     var c = this.expression.charAt(i);
     if (c.toUpperCase() === c.toLowerCase()) {
       if (i === this.pos || (c !== '_' && c !== '.' && (c < '0' || c > '9'))) {
         break;
       }
     }
-    str += c;
   }
-  if (str.length > 0 && (str in this.consts)) {
-    this.current = this.newToken(TNUMBER, this.consts[str]);
-    this.pos += str.length;
-    this.column += str.length;
-    return true;
+  if (i > startPos) {
+    var str = this.expression.substring(startPos, i);
+    if (str in this.consts) {
+      this.current = this.newToken(TNUMBER, this.consts[str]);
+      this.pos += str.length;
+      this.column += str.length;
+      return true;
+    }
   }
   return false;
 };
 
 TokenStream.prototype.isNamedOp = function () {
-  var str = '';
-  for (var i = this.pos; i < this.expression.length; i++) {
+  var startPos = this.pos;
+  var i = startPos;
+  for (; i < this.expression.length; i++) {
     var c = this.expression.charAt(i);
     if (c.toUpperCase() === c.toLowerCase()) {
       if (i === this.pos || (c !== '_' && (c < '0' || c > '9'))) {
         break;
       }
     }
-    str += c;
   }
-  if (str.length > 0 && (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps)) {
-    this.current = this.newToken(TOP, str);
-    this.pos += str.length;
-    this.column += str.length;
-    return true;
+  if (i > startPos) {
+    var str = this.expression.substring(startPos, i);
+    if (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps) {
+      this.current = this.newToken(TOP, str);
+      this.pos += str.length;
+      this.column += str.length;
+      return true;
+    }
   }
   return false;
 };
 
 TokenStream.prototype.isName = function () {
-  var str = '';
-  for (var i = this.pos; i < this.expression.length; i++) {
+  var startPos = this.pos;
+  var i = startPos;
+  for (; i < this.expression.length; i++) {
     var c = this.expression.charAt(i);
     if (c.toUpperCase() === c.toLowerCase()) {
       if (i === this.pos || (c !== '_' && (c < '0' || c > '9'))) {
         break;
       }
     }
-    str += c;
   }
-  if (str.length > 0) {
+  if (i > startPos) {
+    var str = this.expression.substring(startPos, i);
     this.current = this.newToken(TNAME, str);
     this.pos += str.length;
     this.column += str.length;

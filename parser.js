@@ -555,10 +555,10 @@ TokenStream.prototype.next = function () {
 
 TokenStream.prototype.isString = function () {
   var r = false;
-  var str = '';
   var startLine = this.line;
   var startColumn = this.column;
-  var char = this.expression.charAt(this.pos);
+  var startPos = this.pos;
+  var char = this.expression.charAt(startPos);
 
   if (this.pos < this.expression.length && (char === '\'' || char === '"')) {
     var quote = char;
@@ -566,8 +566,7 @@ TokenStream.prototype.isString = function () {
     this.column++;
     while (this.pos < this.expression.length) {
       char = this.expression.charAt(this.pos);
-      if (char !== quote || str.slice(-1) === '\\') {
-        str += char;
+      if (char !== quote || this.expression.charAt(this.pos - 1) === '\\') {
         this.pos++;
         this.column++;
         if (char === '\n') {
@@ -575,7 +574,7 @@ TokenStream.prototype.isString = function () {
           this.column = 0;
         }
       } else {
-        this.current = this.newToken(TSTRING, this.unescape(str), startLine, startColumn);
+        this.current = this.newToken(TSTRING, this.unescape(this.expression.substring(startPos + 1, this.pos)), startLine, startColumn);
         this.pos++;
         this.column++;
         r = true;

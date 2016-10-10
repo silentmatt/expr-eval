@@ -121,6 +121,17 @@ describe('Parser', function () {
       expect(parser.evaluate('\'Nested "double quotes"\'')).to.equal('Nested "double quotes"');
       expect(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\'')).to.equal('Single quotes \'inside\' single quotes');
       expect(parser.evaluate('"Double quotes \\"inside\\" double quotes"')).to.equal('Double quotes "inside" double quotes');
+      expect(parser.evaluate('"\n"')).to.equal('\n');
+    });
+
+    it('should fail on bad strings', function () {
+      expect(function () { parser.evaluate('\'asdf"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"asdf\''); }).to.throw(Error);
+      expect(function () { parser.evaluate('"asdf'); }).to.throw(Error);
+      expect(function () { parser.evaluate('\'asdf'); }).to.throw(Error);
+      expect(function () { parser.evaluate('\'asdf\\'); }).to.throw(Error);
+      expect(function () { parser.evaluate('\''); }).to.throw(Error);
+      expect(function () { parser.evaluate('"'); }).to.throw(Error);
     });
 
     it('should parse operators that look like functions as function calls', function () {

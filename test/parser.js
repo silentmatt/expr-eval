@@ -48,12 +48,53 @@ describe('Parser', function () {
       expect(parser.evaluate('2/123')).to.equal(2 / 123);
     });
 
+    it('should parse numbers using scientific notation', function () {
+      expect(parser.evaluate('123e2')).to.equal(12300);
+      expect(parser.evaluate('123E2')).to.equal(12300);
+      expect(parser.evaluate('123e12')).to.equal(123000000000000);
+      expect(parser.evaluate('123e+12')).to.equal(123000000000000);
+      expect(parser.evaluate('123E+12')).to.equal(123000000000000);
+      expect(parser.evaluate('123e-12')).to.equal(0.000000000123);
+      expect(parser.evaluate('123E-12')).to.equal(0.000000000123);
+      expect(parser.evaluate('1.7e308')).to.equal(1.7e308);
+      expect(parser.evaluate('1.7e-308')).to.equal(1.7e-308);
+      expect(parser.evaluate('123.e3')).to.equal(123000);
+      expect(parser.evaluate('123.456e+1')).to.equal(1234.56);
+      expect(parser.evaluate('.456e-3')).to.equal(0.000456);
+      expect(parser.evaluate('0.456')).to.equal(0.456);
+      expect(parser.evaluate('0e3')).to.equal(0);
+      expect(parser.evaluate('0e-3')).to.equal(0);
+      expect(parser.evaluate('0e+3')).to.equal(0);
+      expect(parser.evaluate('.0e+3')).to.equal(0);
+      expect(parser.evaluate('.0e-3')).to.equal(0);
+      expect(parser.evaluate('123e5+4')).to.equal(12300004);
+      expect(parser.evaluate('123e+5+4')).to.equal(12300004);
+      expect(parser.evaluate('123e-5+4')).to.equal(4.00123);
+      expect(parser.evaluate('123e0')).to.equal(123);
+      expect(parser.evaluate('123e01')).to.equal(1230);
+      expect(parser.evaluate('123e+00000000002')).to.equal(12300);
+      expect(parser.evaluate('123e-00000000002')).to.equal(1.23);
+      expect(parser.evaluate('e1', { e1: 42 })).to.equal(42);
+      expect(parser.evaluate('e+1', { e: 12 })).to.equal(13);
+    });
+
     it('should fail on invalid numbers', function () {
       expect(function () { parser.parse('123..'); }).to.throw(Error);
       expect(function () { parser.parse('0..123'); }).to.throw(Error);
       expect(function () { parser.parse('0..'); }).to.throw(Error);
       expect(function () { parser.parse('.0.'); }).to.throw(Error);
       expect(function () { parser.parse('.'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e+'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e-'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e++4'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e--4'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e+-4'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e4-'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23ee4'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23ee.4'); }).to.throw(Error);
+      expect(function () { parser.parse('1.23e4.0'); }).to.throw(Error);
+      expect(function () { parser.parse('123e.4'); }).to.throw(Error);
     });
 
     it('should fail on unknown characters', function () {

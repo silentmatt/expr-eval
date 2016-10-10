@@ -769,8 +769,10 @@ TokenStream.prototype.isNumber = function () {
   var startColumn = this.column;
   var foundDot = false;
   var foundDigits = false;
+  var char;
+
   while (this.pos < this.expression.length) {
-    var char = this.expression.charAt(this.pos);
+    char = this.expression.charAt(this.pos);
     if ((char >= '0' && char <= '9') || (!foundDot && char === '.')) {
       if (char === '.') {
         foundDot = true;
@@ -783,6 +785,38 @@ TokenStream.prototype.isNumber = function () {
       r = foundDigits;
     } else {
       break;
+    }
+  }
+
+  if (r) {
+    startPos = this.pos;
+    startColumn = this.column;
+  }
+
+  if (char === 'e' || char === 'E') {
+    this.pos++;
+    this.column++;
+    var expString = 'e';
+    var validExponent = false;
+    while (this.pos < this.expression.length) {
+      char = this.expression.charAt(this.pos);
+      if ((char === '+' || char === '-') && expString === 'e') {
+        expString += char;
+      } else if (char >= '0' && char <= '9') {
+        validExponent = true;
+        expString += char;
+      } else {
+        break;
+      }
+      this.pos++;
+      this.column++;
+    }
+
+    if (validExponent) {
+      str += expString;
+    } else {
+      this.pos = startPos;
+      this.column = startPos;
     }
   }
 

@@ -766,6 +766,7 @@ TokenStream.prototype.isNumber = function () {
   var r = false;
   var str = '';
   var startPos = this.pos;
+  var startColumn = this.column;
   var foundDot = false;
   var foundDigits = false;
   while (this.pos < this.expression.length) {
@@ -789,6 +790,7 @@ TokenStream.prototype.isNumber = function () {
     this.current = this.newToken(TNUMBER, parseFloat(str));
   } else {
     this.pos = startPos;
+    this.column = startColumn;
   }
   return r;
 };

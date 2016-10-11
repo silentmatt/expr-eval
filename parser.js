@@ -728,7 +728,11 @@ TokenStream.prototype.unescape = function (v) {
           break;
         case 'u':
           // interpret the following 4 characters as the hex of the unicode code point
-          var codePoint = parseInt(v.substring(i + 1, i + 5), 16);
+          var hexCode = v.substring(i + 1, i + 5);
+          if (!/^[0-9a-f]{4}$/i.test(hexCode)) {
+            this.parseError('Illegal escape sequence: \\u' + hexCode);
+          }
+          var codePoint = parseInt(hexCode, 16);
           buffer.push(String.fromCharCode(codePoint));
           i += 4;
           break;

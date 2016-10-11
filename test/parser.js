@@ -122,6 +122,18 @@ describe('Parser', function () {
       expect(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\'')).to.equal('Single quotes \'inside\' single quotes');
       expect(parser.evaluate('"Double quotes \\"inside\\" double quotes"')).to.equal('Double quotes "inside" double quotes');
       expect(parser.evaluate('"\n"')).to.equal('\n');
+      expect(parser.evaluate('"\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"')).to.equal('\'"\\/\b\f\n\r\t\u1234');
+      expect(parser.evaluate('"\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"')).to.equal('\'"\\/\b\f\n\r\t\u1234');
+      expect(parser.evaluate('\'\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234\'')).to.equal('\'"\\/\b\f\n\r\t\u1234');
+      expect(parser.evaluate('\'\\\'"\\\\\\/\\b\\f\\n\\r\\t\\u1234\'')).to.equal('\'"\\/\b\f\n\r\t\u1234');
+      expect(parser.evaluate('"\\uFFFF"')).to.equal('\uFFFF');
+      expect(parser.evaluate('"\\u0123"')).to.equal('\u0123');
+      expect(parser.evaluate('"\\u4567"')).to.equal('\u4567');
+      expect(parser.evaluate('"\\u89ab"')).to.equal('\u89ab');
+      expect(parser.evaluate('"\\ucdef"')).to.equal('\ucdef');
+      expect(parser.evaluate('"\\uABCD"')).to.equal('\uABCD');
+      expect(parser.evaluate('"\\uEF01"')).to.equal('\uEF01');
+      expect(parser.evaluate('"\\u11111"')).to.equal('\u11111');
     });
 
     it('should fail on bad strings', function () {
@@ -132,6 +144,11 @@ describe('Parser', function () {
       expect(function () { parser.evaluate('\'asdf\\'); }).to.throw(Error);
       expect(function () { parser.evaluate('\''); }).to.throw(Error);
       expect(function () { parser.evaluate('"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"\\x"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"\\u123"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"\\u12"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"\\u1"'); }).to.throw(Error);
+      expect(function () { parser.evaluate('"\\uGGGG"'); }).to.throw(Error);
     });
 
     it('should parse operators that look like functions as function calls', function () {

@@ -424,6 +424,10 @@ describe('Expression', function () {
     it('"A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G"', function () {
       expect(parser.parse('"A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G"').toString(true)).to.equal('"A\\bB\\tC\\nD\\fE\\r\'F\\\\G"');
     });
+
+    it('"\\u2028 and \\u2029"', function () {
+      expect(parser.parse('"\\u2028 and \\u2029 \\u2028\\u2029"').toString(true)).to.equal('"\\u2028 and \\u2029 \\u2028\\u2029"');
+    });
   });
 
   describe('toJSFunction()', function () {

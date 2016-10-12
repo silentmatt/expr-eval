@@ -690,66 +690,64 @@ TokenStream.prototype.isWhitespace = function () {
   return r;
 };
 
+var codePointPattern = /^[0-9a-f]{4}$/i;
+
 TokenStream.prototype.unescape = function (v) {
-  var buffer = [];
-  var escaping = false;
-
-  for (var i = 0; i < v.length; i++) {
-    var c = v.charAt(i);
-
-    if (escaping) {
-      switch (c) {
-        case '\'':
-          buffer.push('\'');
-          break;
-        case '"':
-          buffer.push('"');
-          break;
-        case '\\':
-          buffer.push('\\');
-          break;
-        case '/':
-          buffer.push('/');
-          break;
-        case 'b':
-          buffer.push('\b');
-          break;
-        case 'f':
-          buffer.push('\f');
-          break;
-        case 'n':
-          buffer.push('\n');
-          break;
-        case 'r':
-          buffer.push('\r');
-          break;
-        case 't':
-          buffer.push('\t');
-          break;
-        case 'u':
-          // interpret the following 4 characters as the hex of the unicode code point
-          var hexCode = v.substring(i + 1, i + 5);
-          if (!/^[0-9a-f]{4}$/i.test(hexCode)) {
-            this.parseError('Illegal escape sequence: \\u' + hexCode);
-          }
-          var codePoint = parseInt(hexCode, 16);
-          buffer.push(String.fromCharCode(codePoint));
-          i += 4;
-          break;
-        default:
-          throw this.parseError('Illegal escape sequence: "\\' + c + '"');
-      }
-      escaping = false;
-    } else {
-      if (c === '\\') {
-        escaping = true;
-      } else {
-        buffer.push(c);
-      }
-    }
+  var index = v.indexOf('\\');
+  if (index < 0) {
+    return v;
   }
 
-  return buffer.join('');
+  var buffer = v.substring(0, index);
+  while (index >= 0) {
+    var c = v.charAt(++index);
+    switch (c) {
+      case '\'':
+        buffer += '\'';
+        break;
+      case '"':
+        buffer += '"';
+        break;
+      case '\\':
+        buffer += '\\';
+        break;
+      case '/':
+        buffer += '/';
+        break;
+      case 'b':
+        buffer += '\b';
+        break;
+      case 'f':
+        buffer += '\f';
+        break;
+      case 'n':
+        buffer += '\n';
+        break;
+      case 'r':
+        buffer += '\r';
+        break;
+      case 't':
+        buffer += '\t';
+        break;
+      case 'u':
+        // interpret the following 4 characters as the hex of the unicode code point
+        var codePoint = v.substring(index + 1, index + 5);
+        if (!codePointPattern.test(codePoint)) {
+          this.parseError('Illegal escape sequence: \\u' + codePoint);
+        }
+        buffer += String.fromCharCode(parseInt(codePoint, 16));
+        index += 4;
+        break;
+      default:
+        throw this.parseError('Illegal escape sequence: "\\' + c + '"');
+    }
+    ++index;
+    var backslash = v.indexOf('\\', index);
+    buffer += v.substring(index, backslash < 0 ? v.length : backslash);
+    index = backslash;
+  }
+
+  return buffer;
 };
 
 TokenStream.prototype.isComment = function () {

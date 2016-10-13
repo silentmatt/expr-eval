@@ -558,28 +558,30 @@ TokenStream.prototype.isString = function () {
   var startLine = this.line;
   var startColumn = this.column;
   var startPos = this.pos;
-  var char = this.expression.charAt(startPos);
+  var quote = this.expression.charAt(startPos);
 
-  if (this.pos < this.expression.length && (char === '\'' || char === '"')) {
-    var quote = char;
+  if (quote === '\'' || quote === '"') {
     this.pos++;
     this.column++;
-    while (this.pos < this.expression.length) {
-      char = this.expression.charAt(this.pos);
-      if (char !== quote || this.expression.charAt(this.pos - 1) === '\\') {
-        this.pos++;
-        this.column++;
-        if (char === '\n') {
+    var index = this.expression.indexOf(quote, startPos + 1);
+    while (index >= 0 && this.pos < this.expression.length) {
+      this.pos = index + 1;
+      if (this.expression.charAt(index - 1) !== '\\') {
+        var rawString = this.expression.substring(startPos + 1, index);
+        this.current = this.newToken(TSTRING, this.unescape(rawString), startLine, startColumn);
+        var newLine = rawString.indexOf('\n');
+        var lastNewline = -1;
+        while (newLine >= 0) {
           this.line++;
           this.column = 0;
+          lastNewline = newLine;
+          newLine = rawString.indexOf('\n', newLine + 1);
         }
-      } else {
-        this.current = this.newToken(TSTRING, this.unescape(this.expression.substring(startPos + 1, this.pos)), startLine, startColumn);
-        this.pos++;
-        this.column++;
+        this.column += rawString.length - lastNewline;
         r = true;
         break;
       }
+      index = this.expression.indexOf(quote, index + 1);
     }
   }
   return r;

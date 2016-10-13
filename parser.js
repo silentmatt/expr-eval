@@ -685,6 +685,9 @@ TokenStream.prototype.isWhitespace = function () {
       this.line++;
       this.column = 0;
     }
+    if (this.pos >= this.expression.length) {
+      break;
+    }
     char = this.expression.charAt(this.pos);
   }
   return r;

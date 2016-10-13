@@ -21,6 +21,9 @@ function indexOf(array, obj, start) {
 }
 
 function object(o) {
+  if (Object.create) {
+    return Object.create(o);
+  }
   function F() {}
   F.prototype = o;
   return new F();

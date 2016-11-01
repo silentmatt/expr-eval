@@ -1,0 +1,24 @@
+{
+  "name": "js-expression-eval",
+  "version": "0.12.0",
+  "homepage": "https://silentmatt.com/javascript-expression-evaluator/",
+  "authors": [
+    "Silentmatt <email@matthewcrumley.com>"
+  ],
+  "description": "JavaScript Expression Evaluator",
+  "main": "parser.js",
+  "keywords": [
+    "math",
+    "parser",
+    "expression",
+    "evaluator"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

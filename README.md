@@ -171,6 +171,7 @@ Operator              | Associativity | Description
 :-------------------- | :------------ | :----------
 (...)                 | None          | Grouping
 f(), x.y              | Left          | Function call, property access
+!                     | Left          | Factorial
 ^                     | Right         | Exponentiation
 +, -, not, sqrt, etc. | Right         | Unary prefix operators (see below for the full list)
 \*, /, %              | Left          | Multiplication, division, remainder
@@ -219,6 +220,7 @@ exp x    | e^x (exponential/antilogarithm function with base e)
 length x | String length of x
 -x       | Negation
 +x       | Unary plus. This converts it's operand to a number, but has no other effect.
+x!       | Factorial (x * (x-1) * (x-2) * … * 2 * 1). gamma(x + 1) for non-integers.
 
 #### Pre-defined functions
 
@@ -229,7 +231,7 @@ These are not evaluated by simplify.
 Function     | Description
 :----------- | :----------
 random(n)    | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
-fac(n)       | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1")
+fac(n)       | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
 min(a,b,…)   | Get the smallest (minimum) number in the list
 max(a,b,…)   | Get the largest (maximum) number in the list
 hypot(a,b)   | Hypotenuse, i.e. the square root of the sum of squares of its arguments.

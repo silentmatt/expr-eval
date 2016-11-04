@@ -301,9 +301,13 @@ function expressionToString(tokens, toJS) {
       } else if (toJS) {
         if (f === 'not') {
           nstack.push('(' + '!' + n1 + ')');
+        } else if (f === '!') {
+          nstack.push('fac(' + n1 + ')');
         } else {
           nstack.push(f + '(' + n1 + ')');
         }
+      } else if (f === '!') {
+        nstack.push('(' + n1 + '!)');
       } else {
         nstack.push('(' + f + ' ' + n1 + ')');
       }
@@ -446,13 +450,8 @@ function trunc(a) {
 function random(a) {
   return Math.random() * (a || 1);
 }
-function fac(a) { // a!
-  a = Math.floor(a);
-  var b = Math.max(a, 1);
-  while (a > 1) {
-    b = b * (--a);
-  }
-  return b;
+function factorial(a) { // a!
+  return gamma(a + 1);
 }
 function stringLength(s) {
   return String(s).length;
@@ -480,6 +479,79 @@ function hypot() {
 
 function condition(cond, yep, nope) {
   return cond ? yep : nope;
+}
+
+function isInteger(value) {
+  return isFinite(value) && (value === Math.round(value));
+}
+
+var GAMMA_G = 4.7421875;
+var GAMMA_P = [
+  0.99999999999999709182,
+  57.156235665862923517, -59.597960355475491248,
+  14.136097974741747174, -0.49191381609762019978,
+  0.33994649984811888699e-4,
+  0.46523628927048575665e-4, -0.98374475304879564677e-4,
+  0.15808870322491248884e-3, -0.21026444172410488319e-3,
+  0.21743961811521264320e-3, -0.16431810653676389022e-3,
+  0.84418223983852743293e-4, -0.26190838401581408670e-4,
+  0.36899182659531622704e-5
+];
+
+// Gamma function from math.js
+function gamma(n) {
+  var t, x;
+
+  if (isInteger(n)) {
+    if (n <= 0) {
+      return isFinite(n) ? Infinity : NaN;
+    }
+
+    if (n > 171) {
+      return Infinity; // Will overflow
+    }
+
+    var value = n - 2;
+    var res = n - 1;
+    while (value > 1) {
+      res *= value;
+      value--;
+    }
+
+    if (res === 0) {
+      res = 1; // 0! is per definition 1
+    }
+
+    return res;
+  }
+
+  if (n < 0.5) {
+    return Math.PI / (Math.sin(Math.PI * n) * gamma(1 - n));
+  }
+
+  if (n >= 171.35) {
+    return Infinity; // will overflow
+  }
+
+  if (n > 85.0) { // Extended Stirling Approx
+    var twoN = n * n;
+    var threeN = twoN * n;
+    var fourN = threeN * n;
+    var fiveN = fourN * n;
+    return Math.sqrt(2 * Math.PI / n) * Math.pow((n / Math.E), n) *
+      (1 + 1 / (12 * n) + 1 / (288 * twoN) - 139 / (51840 * threeN) -
+      571 / (2488320 * fourN) + 163879 / (209018880 * fiveN) +
+      5246819 / (75246796800 * fiveN * n));
+  }
+
+  --n;
+  x = GAMMA_P[0];
+  for (var i = 1; i < GAMMA_P.length; ++i) {
+    x += GAMMA_P[i] / (n + i);
+  }
+
+  t = n + GAMMA_G + 0.5;
+  return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
 }
 
 var TEOF = 'TEOF';
@@ -891,7 +963,7 @@ TokenStream.prototype.isOperator = function () {
       this.pos++;
       this.column++;
     } else {
-      return false;
+      this.current = this.newToken(TOP, char);
     }
   } else if (char === 'a') {
     if (this.expression.charAt(this.pos + 1) === 'n' && this.expression.charAt(this.pos + 2) === 'd') {
@@ -1099,10 +1171,17 @@ ParserState.prototype.parseFactor = function (instr) {
 };
 
 ParserState.prototype.parseExponential = function (instr) {
-  this.parseFunctionCall(instr);
+  this.parsePostfixExpression(instr);
   while (this.accept(TOP, '^')) {
     this.parseFactor(instr);
     instr.push(binaryInstruction('^'));
+  }
+};
+
+ParserState.prototype.parsePostfixExpression = function (instr) {
+  this.parseFunctionCall(instr);
+  while (this.accept(TOP, '!')) {
+    instr.push(unaryInstruction('!'));
   }
 };
 
@@ -1180,7 +1259,8 @@ function Parser() {
     '+': Number,
     exp: Math.exp,
     not: not,
-    length: stringLength
+    length: stringLength,
+    '!': factorial
   };
 
   this.binaryOps = {
@@ -1207,14 +1287,15 @@ function Parser() {
 
   this.functions = {
     random: random,
-    fac: fac,
+    fac: factorial,
     min: Math.min,
     max: Math.max,
     hypot: Math.hypot || hypot,
     pyt: Math.hypot || hypot, // backward compat
     pow: Math.pow,
     atan2: Math.atan2,
-    'if': condition
+    'if': condition,
+    gamma: gamma
   };
 
   this.consts = {

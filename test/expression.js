@@ -319,6 +319,10 @@ describe('Expression', function () {
       expect(parser.parse('x + y').simplify({ y: -2 }).toString()).to.equal('(x + (-2))');
       expect(parser.parse('x + (2 - 3)').simplify().toString()).to.equal('(x + (-1))');
     });
+
+    it('(x - 1)!', function () {
+      expect(parser.parse('(x - 1)!').toString()).to.equal('((x - 1)!)');
+    });
   });
 
   describe('toString(true)', function () {
@@ -427,6 +431,10 @@ describe('Expression', function () {
 
     it('"\\u2028 and \\u2029"', function () {
       expect(parser.parse('"\\u2028 and \\u2029 \\u2028\\u2029"').toString(true)).to.equal('"\\u2028 and \\u2029 \\u2028\\u2029"');
+    });
+
+    it('(x - 1)!', function () {
+      expect(parser.parse('(x - 1)!').toString(true)).to.equal('fac((x - 1))');
     });
   });
 

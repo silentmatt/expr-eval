@@ -770,4 +770,61 @@ describe('Operators', function () {
       expect(parser.evaluate('+"123"')).to.equal(123);
     });
   });
+
+  describe('x!', function () {
+    it('has the correct precedence', function () {
+      expect(parser.parse('2^3!').toString()).to.equal('(2 ^ (3!))');
+      expect(parser.parse('-5!').toString()).to.equal('(-(5!))');
+      expect(parser.parse('4!^3').toString()).to.equal('((4!) ^ 3)');
+      expect(parser.parse('sqrt(4)!').toString()).to.equal('((sqrt 4)!)');
+      expect(parser.parse('sqrt 4!').toString()).to.equal('(sqrt (4!))');
+      expect(parser.parse('x!!').toString()).to.equal('((x!)!)');
+    });
+
+    it('returns exact answer for integers', function () {
+      expect(parser.evaluate('(-10)!')).to.equal(Infinity);
+      expect(parser.evaluate('(-2)!')).to.equal(Infinity);
+      expect(parser.evaluate('(-1)!')).to.equal(Infinity);
+      expect(parser.evaluate('0!')).to.equal(1);
+      expect(parser.evaluate('1!')).to.equal(1);
+      expect(parser.evaluate('2!')).to.equal(2);
+      expect(parser.evaluate('3!')).to.equal(6);
+      expect(parser.evaluate('4!')).to.equal(24);
+      expect(parser.evaluate('5!')).to.equal(120);
+      expect(parser.evaluate('6!')).to.equal(720);
+      expect(parser.evaluate('7!')).to.equal(5040);
+      expect(parser.evaluate('8!')).to.equal(40320);
+      expect(parser.evaluate('9!')).to.equal(362880);
+      expect(parser.evaluate('10!')).to.equal(3628800);
+      expect(parser.evaluate('25!')).to.equal(1.5511210043330984e+25);
+      expect(parser.evaluate('50!')).to.equal(3.0414093201713376e+64);
+      expect(parser.evaluate('100!')).to.equal(9.332621544394418e+157);
+      expect(parser.evaluate('170!')).to.equal(7.257415615308004e+306);
+      expect(parser.evaluate('171!')).to.equal(Infinity);
+    });
+
+    it('returns approximation for fractions', function () {
+      var delta = 1e-14;
+      expect(parser.evaluate('(-2.5)!')).to.be.closeTo(2.36327180120735, delta);
+      expect(parser.evaluate('(-1.5)!')).to.be.closeTo(-3.54490770181103, delta);
+      expect(parser.evaluate('(-0.75)!')).to.equal(3.625609908221908, delta);
+      expect(parser.evaluate('(-0.5)!')).to.be.closeTo(1.772453850905516, delta);
+      expect(parser.evaluate('(-0.25)!')).to.be.closeTo(1.225416702465177, delta);
+      expect(parser.evaluate('0.25!')).to.be.closeTo(0.906402477055477, delta);
+      expect(parser.evaluate('0.5!')).to.be.closeTo(0.886226925452758, delta);
+      expect(parser.evaluate('0.75!')).to.be.closeTo(0.9190625268488832, delta);
+      expect(parser.evaluate('1.5!')).to.be.closeTo(1.329340388179137, delta);
+      expect(parser.evaluate('84.9!')).to.be.closeTo(1.8056411593417e128, 1e115);
+      expect(parser.evaluate('85.1!')).to.be.closeTo(4.395670640362208e128, 1e115);
+      expect(parser.evaluate('98.6!')).to.be.closeTo(1.483280675613632e155, 1e142);
+      expect(parser.evaluate('171.35!')).to.equal(Infinity);
+      expect(parser.evaluate('172.5!')).to.equal(Infinity);
+    });
+
+    it('handles NaN and infinity correctly', function () {
+      expect(parser.evaluate('(0/0)!')).to.be.NaN;
+      expect(parser.evaluate('(1/0)!')).to.equal(Infinity);
+      expect(parser.evaluate('(-1/0)!')).to.be.NaN;
+    });
+  });
 });

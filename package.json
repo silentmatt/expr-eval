@@ -16,13 +16,14 @@
     "eslint-plugin-standard": "^2.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.0",
-    "rollup": "^0.36.0"
+    "rollup": "^0.36.0",
+    "rollup-plugin-uglify": "^1.0.1"
   },
   "scripts": {
     "test": "npm run build && mocha",
     "coverage": "npm run build && istanbul cover _mocha",
-    "lint": "eslint parser.js test",
-    "build": "rollup parser.js --format=umd --name=exprEval --output=dist/bundle.js",
+    "lint": "eslint parser.js test rollup.config.js rollup-min.config.js",
+    "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js",
     "prepublish": "npm run build"
   },
   "files": [

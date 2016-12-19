@@ -323,8 +323,8 @@ function expressionToString(tokens, toJS) {
   return nstack[0];
 }
 
-Expression.prototype.toString = function (toJS) {
-  return expressionToString(this.tokens, toJS);
+Expression.prototype.toString = function () {
+  return expressionToString(this.tokens, false);
 };
 
 function getSymbols(tokens, symbols) {
@@ -355,7 +355,7 @@ Expression.prototype.variables = function () {
 
 Expression.prototype.toJSFunction = function (param, variables) {
   var expr = this;
-  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
+  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + expressionToString(this.simplify(variables).tokens, true) + '; }'); // eslint-disable-line no-new-func
   return function () {
     return f.apply(expr, arguments);
   };

@@ -255,9 +255,9 @@ function expressionToString(tokens, toJS) {
         if (f === '^') {
           nstack.push('Math.pow(' + n1 + ', ' + n2 + ')');
         } else if (f === 'and') {
-          nstack.push('(' + n1 + ' && ' + n2 + ')');
+          nstack.push('(!!' + n1 + ' && !!' + n2 + ')');
         } else if (f === 'or') {
-          nstack.push('(' + n1 + ' || ' + n2 + ')');
+          nstack.push('(!!' + n1 + ' || !!' + n2 + ')');
         } else if (f === '||') {
           nstack.push('(String(' + n1 + ') + String(' + n2 + '))');
         } else if (f === '==') {

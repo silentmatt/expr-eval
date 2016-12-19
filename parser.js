@@ -9,24 +9,13 @@
  but don't feel like you have to let me know or ask permission.
 */
 
-//  Added by stlsmiths 6/13/2011
-//  re-define Array.indexOf, because IE doesn't know it ...
-function indexOf(array, obj, start) {
-  for (var i = (start || 0); i < array.length; i++) {
+function indexOf(array, obj) {
+  for (var i = 0; i < array.length; i++) {
     if (array[i] === obj) {
       return i;
     }
   }
   return -1;
-}
-
-function object(o) {
-  if (Object.create) {
-    return Object.create(o);
-  }
-  function F() {}
-  F.prototype = o;
-  return new F();
 }
 
 var INUMBER = 'INUMBER';
@@ -63,10 +52,10 @@ Instruction.prototype.toString = function () {
 function Expression(tokens, parser) {
   this.tokens = tokens;
   this.parser = parser;
-  this.unaryOps = object(parser.unaryOps);
-  this.binaryOps = object(parser.binaryOps);
-  this.ternaryOps = object(parser.ternaryOps);
-  this.functions = object(parser.functions);
+  this.unaryOps = parser.unaryOps;
+  this.binaryOps = parser.binaryOps;
+  this.ternaryOps = parser.ternaryOps;
+  this.functions = parser.functions;
 }
 
 function escapeValue(v) {
@@ -1038,7 +1027,7 @@ ParserState.prototype.next = function () {
 ParserState.prototype.tokenMatches = function (token, value) {
   if (typeof value === 'undefined') {
     return true;
-  } else if (Object.prototype.toString.call(value) === '[object Array]') {
+  } else if (Array.isArray(value)) {
     return indexOf(value, token.value) >= 0;
   } else if (typeof value === 'function') {
     return value(token);

@@ -9,24 +9,13 @@
  but don't feel like you have to let me know or ask permission.
 */
 
-//  Added by stlsmiths 6/13/2011
-//  re-define Array.indexOf, because IE doesn't know it ...
-function indexOf(array, obj, start) {
-  for (var i = (start || 0); i < array.length; i++) {
+function indexOf(array, obj) {
+  for (var i = 0; i < array.length; i++) {
     if (array[i] === obj) {
       return i;
     }
   }
   return -1;
-}
-
-function object(o) {
-  if (Object.create) {
-    return Object.create(o);
-  }
-  function F() {}
-  F.prototype = o;
-  return new F();
 }
 
 var INUMBER = 'INUMBER';
@@ -63,10 +52,10 @@ Instruction.prototype.toString = function () {
 function Expression(tokens, parser) {
   this.tokens = tokens;
   this.parser = parser;
-  this.unaryOps = object(parser.unaryOps);
-  this.binaryOps = object(parser.binaryOps);
-  this.ternaryOps = object(parser.ternaryOps);
-  this.functions = object(parser.functions);
+  this.unaryOps = parser.unaryOps;
+  this.binaryOps = parser.binaryOps;
+  this.ternaryOps = parser.ternaryOps;
+  this.functions = parser.functions;
 }
 
 function escapeValue(v) {
@@ -266,9 +255,9 @@ function expressionToString(tokens, toJS) {
         if (f === '^') {
           nstack.push('Math.pow(' + n1 + ', ' + n2 + ')');
         } else if (f === 'and') {
-          nstack.push('(' + n1 + ' && ' + n2 + ')');
+          nstack.push('(!!' + n1 + ' && !!' + n2 + ')');
         } else if (f === 'or') {
-          nstack.push('(' + n1 + ' || ' + n2 + ')');
+          nstack.push('(!!' + n1 + ' || !!' + n2 + ')');
         } else if (f === '||') {
           nstack.push('(String(' + n1 + ') + String(' + n2 + '))');
         } else if (f === '==') {
@@ -334,8 +323,8 @@ function expressionToString(tokens, toJS) {
   return nstack[0];
 }
 
-Expression.prototype.toString = function (toJS) {
-  return expressionToString(this.tokens, toJS);
+Expression.prototype.toString = function () {
+  return expressionToString(this.tokens, false);
 };
 
 function getSymbols(tokens, symbols) {
@@ -366,7 +355,7 @@ Expression.prototype.variables = function () {
 
 Expression.prototype.toJSFunction = function (param, variables) {
   var expr = this;
-  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + this.simplify(variables).toString(true) + '; }'); // eslint-disable-line no-new-func
+  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + expressionToString(this.simplify(variables).tokens, true) + '; }'); // eslint-disable-line no-new-func
   return function () {
     return f.apply(expr, arguments);
   };
@@ -965,22 +954,6 @@ TokenStream.prototype.isOperator = function () {
     } else {
       this.current = this.newToken(TOP, char);
     }
-  } else if (char === 'a') {
-    if (this.expression.charAt(this.pos + 1) === 'n' && this.expression.charAt(this.pos + 2) === 'd') {
-      this.current = this.newToken(TOP, 'and');
-      this.pos += 2;
-      this.column += 2;
-    } else {
-      return false;
-    }
-  } else if (char === 'o') {
-    if (this.expression.charAt(this.pos + 1) === 'r') {
-      this.current = this.newToken(TOP, 'or');
-      this.pos++;
-      this.column++;
-    } else {
-      return false;
-    }
   } else {
     return false;
   }
@@ -1038,7 +1011,7 @@ ParserState.prototype.next = function () {
 ParserState.prototype.tokenMatches = function (token, value) {
   if (typeof value === 'undefined') {
     return true;
-  } else if (Object.prototype.toString.call(value) === '[object Array]') {
+  } else if (Array.isArray(value)) {
     return indexOf(value, token.value) >= 0;
   } else if (typeof value === 'function') {
     return value(token);

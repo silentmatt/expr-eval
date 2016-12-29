@@ -195,32 +195,33 @@ precedence.
 
 Operator | Description
 :------- | :----------
-sin x    | Sine of x (x is in radians)
-cos x    | Cosine of x (x is in radians)
-tan x    | Tangent of x (x is in radians)
-asin x   | Arc sine of x (in radians)
-acos x   | Arc cosine of x (in radians)
-atan x   | Arc tangent of x (in radians)
-sinh x   | Hyperbolic sine of x (x is in radians)
-cosh x   | Hyperbolic cosine of x (x is in radians)
-tanh x   | Hyperbolic tangent of x (x is in radians)
-asinh x  | Hyperbolic arc sine of x (in radians)
-acosh x  | Hyperbolic arc cosine of x (in radians)
-atanh x  | Hyperbolic arc tangent of x (in radians)
-sqrt x   | Square root of x. Result is NaN (Not a Number) if x is negative.
-ln x     | Natural logarithm of x
-log x    | Natural logarithm of x (synonym for ln, not base-10)
-log10 x  | Base-10 logarithm of x
-abs x    | Absolute value (magnatude) of x
-ceil x   | Ceiling of x — the smallest integer that’s >= x
-floor x  | Floor of x — the largest integer that’s <= x
-round x  | X, rounded to the nearest integer, using "gradeschool rounding"
-trunc x  | Integral part of a X, looks like floor(x) unless for negative number
-exp x    | e^x (exponential/antilogarithm function with base e)
-length x | String length of x
 -x       | Negation
 +x       | Unary plus. This converts it's operand to a number, but has no other effect.
 x!       | Factorial (x * (x-1) * (x-2) * … * 2 * 1). gamma(x + 1) for non-integers.
+abs x    | Absolute value (magnatude) of x
+acos x   | Arc cosine of x (in radians)
+acosh x  | Hyperbolic arc cosine of x (in radians)
+asin x   | Arc sine of x (in radians)
+asinh x  | Hyperbolic arc sine of x (in radians)
+atan x   | Arc tangent of x (in radians)
+atanh x  | Hyperbolic arc tangent of x (in radians)
+ceil x   | Ceiling of x — the smallest integer that’s >= x
+cos x    | Cosine of x (x is in radians)
+cosh x   | Hyperbolic cosine of x (x is in radians)
+exp x    | e^x (exponential/antilogarithm function with base e)
+floor x  | Floor of x — the largest integer that’s <= x
+length x | String length of x
+ln x     | Natural logarithm of x
+log x    | Natural logarithm of x (synonym for ln, not base-10)
+log10 x  | Base-10 logarithm of x
+not x    | Logical NOT operator
+round x  | X, rounded to the nearest integer, using "gradeschool rounding"
+sin x    | Sine of x (x is in radians)
+sinh x   | Hyperbolic sine of x (x is in radians)
+sqrt x   | Square root of x. Result is NaN (Not a Number) if x is negative.
+tan x    | Tangent of x (x is in radians)
+tanh x   | Hyperbolic tangent of x (x is in radians)
+trunc x  | Integral part of a X, looks like floor(x) unless for negative number
 
 #### Pre-defined functions
 

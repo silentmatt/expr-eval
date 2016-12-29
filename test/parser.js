@@ -167,5 +167,11 @@ describe('Parser', function () {
       expect(parser.parse('2 ∙ 3').toString()).to.equal('(2 * 3)');
       expect(parser.parse('4 • 5').toString()).to.equal('(4 * 5)');
     });
+
+    it('should parse variables that start with operators', function () {
+      expect(parser.parse('org > 5').toString()).to.equal('(org > 5)');
+      expect(parser.parse('android * 2').toString()).to.equal('(android * 2)');
+      expect(parser.parse('single == 1').toString()).to.equal('(single == 1)');
+    });
   });
 });

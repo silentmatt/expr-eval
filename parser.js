@@ -954,22 +954,6 @@ TokenStream.prototype.isOperator = function () {
     } else {
       this.current = this.newToken(TOP, char);
     }
-  } else if (char === 'a') {
-    if (this.expression.charAt(this.pos + 1) === 'n' && this.expression.charAt(this.pos + 2) === 'd') {
-      this.current = this.newToken(TOP, 'and');
-      this.pos += 2;
-      this.column += 2;
-    } else {
-      return false;
-    }
-  } else if (char === 'o') {
-    if (this.expression.charAt(this.pos + 1) === 'r') {
-      this.current = this.newToken(TOP, 'or');
-      this.pos++;
-      this.column++;
-    } else {
-      return false;
-    }
   } else {
     return false;
   }

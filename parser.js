@@ -993,7 +993,7 @@ function ternaryInstruction(value) {
   return inst;
 }
 
-function ParserState(parser, tokenStream) {
+function ParserState(parser, tokenStream, options) {
   this.parser = parser;
   this.tokens = tokenStream;
   this.current = null;
@@ -1001,6 +1001,7 @@ function ParserState(parser, tokenStream) {
   this.next();
   this.savedCurrent = null;
   this.savedNextToken = null;
+  this.allowMemberAccess = options.allowMemberAccess !== false;
 }
 
 ParserState.prototype.next = function () {
@@ -1199,12 +1200,17 @@ ParserState.prototype.parseArgumentList = function (instr) {
 ParserState.prototype.parseMemberExpression = function (instr) {
   this.parseAtom(instr);
   while (this.accept(TOP, '.')) {
+    if (!this.allowMemberAccess) {
+      throw new Error('unexpected ".", member access is not permitted');
+    }
+
     this.expect(TNAME);
     instr.push(new Instruction(IMEMBER, this.current.value));
   }
 };
 
-function Parser() {
+function Parser(options) {
+  this.options = options || {};
   this.unaryOps = {
     sin: Math.sin,
     cos: Math.cos,
@@ -1290,7 +1296,12 @@ Parser.evaluate = function (expr, variables) {
 Parser.prototype = {
   parse: function (expr) {
     var instr = [];
-    var parserState = new ParserState(this, new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts));
+    var parserState = new ParserState(
+      this,
+      new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts),
+      { allowMemberAccess: this.options.allowMemberAccess }
+    );
+
     parserState.parseExpression(instr);
     parserState.expect(TEOF, 'EOF');
 

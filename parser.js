@@ -1285,32 +1285,32 @@ function Parser(options) {
   };
 }
 
+Parser.prototype.parse = function (expr) {
+  var instr = [];
+  var parserState = new ParserState(
+    this,
+    new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts),
+    { allowMemberAccess: this.options.allowMemberAccess }
+  );
+
+  parserState.parseExpression(instr);
+  parserState.expect(TEOF, 'EOF');
+
+  return new Expression(instr, this);
+};
+
+Parser.prototype.evaluate = function (expr, variables) {
+  return this.parse(expr).evaluate(variables);
+};
+
+var sharedParser = new Parser();
+
 Parser.parse = function (expr) {
-  return new Parser().parse(expr);
+  return sharedParser.parse(expr);
 };
 
 Parser.evaluate = function (expr, variables) {
-  return Parser.parse(expr).evaluate(variables);
-};
-
-Parser.prototype = {
-  parse: function (expr) {
-    var instr = [];
-    var parserState = new ParserState(
-      this,
-      new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts),
-      { allowMemberAccess: this.options.allowMemberAccess }
-    );
-
-    parserState.parseExpression(instr);
-    parserState.expect(TEOF, 'EOF');
-
-    return new Expression(instr, this);
-  },
-
-  evaluate: function (expr, variables) {
-    return this.parse(expr).evaluate(variables);
-  }
+  return sharedParser.parse(expr).evaluate(variables);
 };
 
 export default {

@@ -8,7 +8,7 @@ var Parser = require('../dist/bundle').Parser;
 describe('Parser', function () {
   [
     { name: 'normal parse()', parser: new Parser() },
-    { name: 'disallowing member access', parser: new Parser({ allowMemberAccess: false }) },
+    { name: 'disallowing member access', parser: new Parser({ allowMemberAccess: false }) }
   ].forEach(function (tcase) {
     var parser = tcase.parser;
     describe(tcase.name, function () {
@@ -177,13 +177,13 @@ describe('Parser', function () {
         expect(parser.parse('single == 1').toString()).to.equal('(single == 1)');
       });
     });
-  })
+  });
 
   it('should disallow member access', function () {
     var parser = new Parser({ allowMemberAccess: false });
     expect(function () { parser.evaluate('min.bind'); }).to.throw(/member access is not permitted/);
     expect(function () { parser.evaluate('min.bind()'); }).to.throw(/member access is not permitted/);
     expect(function () { parser.evaluate('32 + min.bind'); }).to.throw(/member access is not permitted/);
-    expect(function () { parser.evaluate('a.b', { a: { b: 2 }}); }).to.throw(/member access is not permitted/);
+    expect(function () { parser.evaluate('a.b', { a: { b: 2 } }); }).to.throw(/member access is not permitted/);
   });
 });

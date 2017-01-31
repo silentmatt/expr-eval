@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
+  "typings": "parser.d.ts",
   "directories": {
     "test": "test"
   },

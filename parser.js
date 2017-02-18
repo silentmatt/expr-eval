@@ -10,12 +10,12 @@
 */
 
 import { TEOF } from './src/token';
-import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './src/instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER } from './src/instruction';
 import { TokenStream } from './src/token-stream';
 import { ParserState } from './src/parser-state';
 import contains from './src/contains';
-
 import simplify from './src/simplify';
+import substitute from './src/substitute';
 
 function Expression(tokens, parser) {
   this.tokens = tokens;
@@ -37,35 +37,6 @@ Expression.prototype.simplify = function (values) {
   values = values || {};
   return new Expression(simplify(this.tokens, this.unaryOps, this.binaryOps, this.ternaryOps, values), this.parser);
 };
-
-function substitute(tokens, variable, expr) {
-  var newexpression = [];
-  for (var i = 0, L = tokens.length; i < L; i++) {
-    var item = tokens[i];
-    var type = item.type;
-    if (type === IVAR && item.value === variable) {
-      for (var j = 0; j < expr.tokens.length; j++) {
-        var expritem = expr.tokens[j];
-        var replitem;
-        if (expritem.type === IOP1) {
-          replitem = unaryInstruction(expritem.value);
-        } else if (expritem.type === IOP2) {
-          replitem = binaryInstruction(expritem.value);
-        } else if (expritem.type === IOP3) {
-          replitem = ternaryInstruction(expritem.value);
-        } else {
-          replitem = new Instruction(expritem.type, expritem.value);
-        }
-        newexpression.push(replitem);
-      }
-    } else if (type === IEXPR) {
-      newexpression.push(new Instruction(IEXPR, substitute(item.value, variable, expr)));
-    } else {
-      newexpression.push(item);
-    }
-  }
-  return newexpression;
-}
 
 Expression.prototype.substitute = function (variable, expr) {
   if (!(expr instanceof Expression)) {

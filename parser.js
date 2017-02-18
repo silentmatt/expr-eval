@@ -10,6 +10,7 @@
 */
 
 import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './src/token';
+import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER } from './src/instruction';
 
 function indexOf(array, obj) {
   for (var i = 0; i < array.length; i++) {
@@ -19,37 +20,6 @@ function indexOf(array, obj) {
   }
   return -1;
 }
-
-var INUMBER = 'INUMBER';
-var IOP1 = 'IOP1';
-var IOP2 = 'IOP2';
-var IOP3 = 'IOP3';
-var IVAR = 'IVAR';
-var IFUNCALL = 'IFUNCALL';
-var IEXPR = 'IEXPR';
-var IMEMBER = 'IMEMBER';
-
-function Instruction(type, value) {
-  this.type = type;
-  this.value = (value !== undefined && value !== null) ? value : 0;
-}
-
-Instruction.prototype.toString = function () {
-  switch (this.type) {
-    case INUMBER:
-    case IOP1:
-    case IOP2:
-    case IOP3:
-    case IVAR:
-      return this.value;
-    case IFUNCALL:
-      return 'CALL ' + this.value;
-    case IMEMBER:
-      return '.' + this.value;
-    default:
-      return 'Invalid Instruction';
-  }
-};
 
 function Expression(tokens, parser) {
   this.tokens = tokens;

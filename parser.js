@@ -9,6 +9,8 @@
  but don't feel like you have to let me know or ask permission.
 */
 
+import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './src/token';
+
 function indexOf(array, obj) {
   for (var i = 0; i < array.length; i++) {
     if (array[i] === obj) {
@@ -542,25 +544,6 @@ function gamma(n) {
   t = n + GAMMA_G + 0.5;
   return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
 }
-
-var TEOF = 'TEOF';
-var TOP = 'TOP';
-var TNUMBER = 'TNUMBER';
-var TSTRING = 'TSTRING';
-var TPAREN = 'TPAREN';
-var TCOMMA = 'TCOMMA';
-var TNAME = 'TNAME';
-
-function Token(type, value, line, column) {
-  this.type = type;
-  this.value = value;
-  this.line = line;
-  this.column = column;
-}
-
-Token.prototype.toString = function () {
-  return this.type + ': ' + this.value;
-};
 
 function TokenStream(expression, unaryOps, binaryOps, ternaryOps, consts) {
   this.pos = 0;

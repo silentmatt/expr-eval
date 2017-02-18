@@ -11,15 +11,7 @@
 
 import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './src/token';
 import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER } from './src/instruction';
-
-function indexOf(array, obj) {
-  for (var i = 0; i < array.length; i++) {
-    if (array[i] === obj) {
-      return i;
-    }
-  }
-  return -1;
-}
+import contains from './src/contains';
 
 function Expression(tokens, parser) {
   this.tokens = tokens;
@@ -302,7 +294,7 @@ Expression.prototype.toString = function () {
 function getSymbols(tokens, symbols) {
   for (var i = 0, L = tokens.length; i < L; i++) {
     var item = tokens[i];
-    if (item.type === IVAR && (indexOf(symbols, item.value) === -1)) {
+    if (item.type === IVAR && !contains(symbols, item.value)) {
       symbols.push(item.value);
     } else if (item.type === IEXPR) {
       getSymbols(item.value, symbols);
@@ -966,7 +958,7 @@ ParserState.prototype.tokenMatches = function (token, value) {
   if (typeof value === 'undefined') {
     return true;
   } else if (Array.isArray(value)) {
-    return indexOf(value, token.value) >= 0;
+    return contains(value, token.value);
   } else if (typeof value === 'function') {
     return value(token);
   } else {

@@ -28,3 +28,30 @@ Instruction.prototype.toString = function () {
       return 'Invalid Instruction';
   }
 };
+
+var unaryInstructionCache = {};
+export function unaryInstruction(value) {
+  var inst = unaryInstructionCache[value];
+  if (!inst) {
+    inst = unaryInstructionCache[value] = new Instruction(IOP1, value);
+  }
+  return inst;
+}
+
+var binaryInstructionCache = {};
+export function binaryInstruction(value) {
+  var inst = binaryInstructionCache[value];
+  if (!inst) {
+    inst = binaryInstructionCache[value] = new Instruction(IOP2, value);
+  }
+  return inst;
+}
+
+var ternaryInstructionCache = {};
+export function ternaryInstruction(value) {
+  var inst = ternaryInstructionCache[value];
+  if (!inst) {
+    inst = ternaryInstructionCache[value] = new Instruction(IOP3, value);
+  }
+  return inst;
+}

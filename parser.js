@@ -13,10 +13,10 @@ import { TEOF } from './src/token';
 import { INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER } from './src/instruction';
 import { TokenStream } from './src/token-stream';
 import { ParserState } from './src/parser-state';
-import contains from './src/contains';
 import simplify from './src/simplify';
 import substitute from './src/substitute';
 import expressionToString from './src/expression-to-string';
+import getSymbols from './src/get-symbols';
 
 function Expression(tokens, parser) {
   this.tokens = tokens;
@@ -114,17 +114,6 @@ Expression.prototype.evaluate = function (values) {
 Expression.prototype.toString = function () {
   return expressionToString(this.tokens, false);
 };
-
-function getSymbols(tokens, symbols) {
-  for (var i = 0, L = tokens.length; i < L; i++) {
-    var item = tokens[i];
-    if (item.type === IVAR && !contains(symbols, item.value)) {
-      symbols.push(item.value);
-    } else if (item.type === IEXPR) {
-      getSymbols(item.value, symbols);
-    }
-  }
-}
 
 Expression.prototype.symbols = function () {
   var vars = [];

@@ -115,7 +115,7 @@ Parser.prototype.parse = function (expr) {
   var instr = [];
   var parserState = new ParserState(
     this,
-    new TokenStream(expr, this.unaryOps, this.binaryOps, this.ternaryOps, this.consts),
+    new TokenStream(this, expr),
     { allowMemberAccess: this.options.allowMemberAccess }
   );
 

@@ -1,14 +1,14 @@
 import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
 
-export function TokenStream(expression, unaryOps, binaryOps, ternaryOps, consts) {
+export function TokenStream(parser, expression) {
   this.pos = 0;
   this.line = 0;
   this.column = 0;
   this.current = null;
-  this.unaryOps = unaryOps;
-  this.binaryOps = binaryOps;
-  this.ternaryOps = ternaryOps;
-  this.consts = consts;
+  this.unaryOps = parser.unaryOps;
+  this.binaryOps = parser.binaryOps;
+  this.ternaryOps = parser.ternaryOps;
+  this.consts = parser.consts;
   this.expression = expression;
   this.savedPosition = 0;
   this.savedCurrent = null;

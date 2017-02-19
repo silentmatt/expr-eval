@@ -2,7 +2,7 @@ import { IVAR, IEXPR } from './instruction';
 import contains from './contains';
 
 export default function getSymbols(tokens, symbols) {
-  for (var i = 0, L = tokens.length; i < L; i++) {
+  for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     if (item.type === IVAR && !contains(symbols, item.value)) {
       symbols.push(item.value);

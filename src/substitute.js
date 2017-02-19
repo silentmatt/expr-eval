@@ -2,7 +2,7 @@ import { Instruction, IOP1, IOP2, IOP3, IVAR, IEXPR, ternaryInstruction, binaryI
 
 export default function substitute(tokens, variable, expr) {
   var newexpression = [];
-  for (var i = 0, L = tokens.length; i < L; i++) {
+  for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
     if (type === IVAR && item.value === variable) {

@@ -185,7 +185,7 @@ export function stringLength(s) {
 export function hypot() {
   var sum = 0;
   var larg = 0;
-  for (var i = 0, L = arguments.length; i < L; i++) {
+  for (var i = 0; i < arguments.length; i++) {
     var arg = Math.abs(arguments[i]);
     var div;
     if (larg < arg) {

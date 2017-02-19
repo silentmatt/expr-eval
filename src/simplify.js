@@ -5,7 +5,7 @@ export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values
   var newexpression = [];
   var n1, n2, n3;
   var f;
-  for (var i = 0, L = tokens.length; i < L; i++) {
+  for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
     if (type === INUMBER) {

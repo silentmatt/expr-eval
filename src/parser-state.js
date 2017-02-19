@@ -105,27 +105,33 @@ ParserState.prototype.parseAndExpression = function (instr) {
   }
 };
 
+var COMPARISON_OPERATORS = ['==', '!=', '<', '<=', '>=', '>'];
+
 ParserState.prototype.parseComparison = function (instr) {
   this.parseAddSub(instr);
-  while (this.accept(TOP, ['==', '!=', '<', '<=', '>=', '>'])) {
+  while (this.accept(TOP, COMPARISON_OPERATORS)) {
     var op = this.current;
     this.parseAddSub(instr);
     instr.push(binaryInstruction(op.value));
   }
 };
 
+var ADD_SUB_OPERATORS = ['+', '-', '||'];
+
 ParserState.prototype.parseAddSub = function (instr) {
   this.parseTerm(instr);
-  while (this.accept(TOP, ['+', '-', '||'])) {
+  while (this.accept(TOP, ADD_SUB_OPERATORS)) {
     var op = this.current;
     this.parseTerm(instr);
     instr.push(binaryInstruction(op.value));
   }
 };
 
+var TERM_OPERATORS = ['*', '/', '%'];
+
 ParserState.prototype.parseTerm = function (instr) {
   this.parseFactor(instr);
-  while (this.accept(TOP, ['*', '/', '%'])) {
+  while (this.accept(TOP, TERM_OPERATORS)) {
     var op = this.current;
     this.parseFactor(instr);
     instr.push(binaryInstruction(op.value));

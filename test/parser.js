@@ -140,18 +140,18 @@ describe('Parser', function () {
       });
 
       it('should fail on bad strings', function () {
-        expect(function () { parser.evaluate('\'asdf"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"asdf\''); }).to.throw(Error);
-        expect(function () { parser.evaluate('"asdf'); }).to.throw(Error);
-        expect(function () { parser.evaluate('\'asdf'); }).to.throw(Error);
-        expect(function () { parser.evaluate('\'asdf\\'); }).to.throw(Error);
-        expect(function () { parser.evaluate('\''); }).to.throw(Error);
-        expect(function () { parser.evaluate('"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"\\x"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"\\u123"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"\\u12"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"\\u1"'); }).to.throw(Error);
-        expect(function () { parser.evaluate('"\\uGGGG"'); }).to.throw(Error);
+        expect(function () { parser.parse('\'asdf"'); }).to.throw(Error);
+        expect(function () { parser.parse('"asdf\''); }).to.throw(Error);
+        expect(function () { parser.parse('"asdf'); }).to.throw(Error);
+        expect(function () { parser.parse('\'asdf'); }).to.throw(Error);
+        expect(function () { parser.parse('\'asdf\\'); }).to.throw(Error);
+        expect(function () { parser.parse('\''); }).to.throw(Error);
+        expect(function () { parser.parse('"'); }).to.throw(Error);
+        expect(function () { parser.parse('"\\x"'); }).to.throw(Error);
+        expect(function () { parser.parse('"\\u123"'); }).to.throw(Error);
+        expect(function () { parser.parse('"\\u12"'); }).to.throw(Error);
+        expect(function () { parser.parse('"\\u1"'); }).to.throw(Error);
+        expect(function () { parser.parse('"\\uGGGG"'); }).to.throw(Error);
       });
 
       it('should parse operators that look like functions as function calls', function () {

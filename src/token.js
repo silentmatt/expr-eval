@@ -6,11 +6,10 @@ export var TPAREN = 'TPAREN';
 export var TCOMMA = 'TCOMMA';
 export var TNAME = 'TNAME';
 
-export function Token(type, value, line, column) {
+export function Token(type, value, index) {
   this.type = type;
   this.value = value;
-  this.line = line;
-  this.column = column;
+  this.index = index;
 }
 
 Token.prototype.toString = function () {

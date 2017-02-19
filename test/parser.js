@@ -176,6 +176,26 @@ describe('Parser', function () {
         expect(parser.parse('android * 2').toString()).to.equal('(android * 2)');
         expect(parser.parse('single == 1').toString()).to.equal('(single == 1)');
       });
+
+      it('should track token positions correctly', function () {
+        expect(function () { parser.parse('@23'); }).to.throw(/parse error \[1:1]/);
+        expect(function () { parser.parse('\n@23'); }).to.throw(/parse error \[2:1]/);
+        expect(function () { parser.parse('1@3'); }).to.throw(/parse error \[1:2]/);
+        expect(function () { parser.parse('12@'); }).to.throw(/parse error \[1:3]/);
+        expect(function () { parser.parse('12@\n'); }).to.throw(/parse error \[1:3]/);
+        expect(function () { parser.parse('@23 +\n45 +\n6789'); }).to.throw(/parse error \[1:1]/);
+        expect(function () { parser.parse('1@3 +\n45 +\n6789'); }).to.throw(/parse error \[1:2]/);
+        expect(function () { parser.parse('12@ +\n45 +\n6789'); }).to.throw(/parse error \[1:3]/);
+        expect(function () { parser.parse('123 +\n@5 +\n6789'); }).to.throw(/parse error \[2:1]/);
+        expect(function () { parser.parse('123 +\n4@ +\n6789'); }).to.throw(/parse error \[2:2]/);
+        expect(function () { parser.parse('123 +\n45@+\n6789'); }).to.throw(/parse error \[2:3]/);
+        expect(function () { parser.parse('123 +\n45 +\n@789'); }).to.throw(/parse error \[3:1]/);
+        expect(function () { parser.parse('123 +\n45 +\n6@89'); }).to.throw(/parse error \[3:2]/);
+        expect(function () { parser.parse('123 +\n45 +\n67@9'); }).to.throw(/parse error \[3:3]/);
+        expect(function () { parser.parse('123 +\n45 +\n679@'); }).to.throw(/parse error \[3:4]/);
+        expect(function () { parser.parse('123 +\n\n679@'); }).to.throw(/parse error \[3:4]/);
+        expect(function () { parser.parse('123 +\n\n\n\n\n679@'); }).to.throw(/parse error \[6:4]/);
+      });
     });
   });
 

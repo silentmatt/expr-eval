@@ -52,7 +52,8 @@ ParserState.prototype.accept = function (type, value) {
 
 ParserState.prototype.expect = function (type, value) {
   if (!this.accept(type, value)) {
-    throw new Error('parse error [' + this.tokens.line + ':' + this.tokens.column + ']: Expected ' + (value || type));
+    var coords = this.tokens.getCoordinates();
+    throw new Error('parse error [' + coords.line + ':' + coords.column + ']: Expected ' + (value || type));
   }
 };
 

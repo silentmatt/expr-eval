@@ -2,8 +2,6 @@ import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './tok
 
 export function TokenStream(parser, expression) {
   this.pos = 0;
-  this.line = 0;
-  this.column = 0;
   this.current = null;
   this.unaryOps = parser.unaryOps;
   this.binaryOps = parser.binaryOps;
@@ -12,26 +10,20 @@ export function TokenStream(parser, expression) {
   this.expression = expression;
   this.savedPosition = 0;
   this.savedCurrent = null;
-  this.savedLine = 0;
-  this.savedColumn = 0;
 }
 
-TokenStream.prototype.newToken = function (type, value, line, column) {
-  return new Token(type, value, line != null ? line : this.line, column != null ? column : this.column);
+TokenStream.prototype.newToken = function (type, value, pos) {
+  return new Token(type, value, pos != null ? pos : this.pos);
 };
 
 TokenStream.prototype.save = function () {
   this.savedPosition = this.pos;
   this.savedCurrent = this.current;
-  this.savedLine = this.line;
-  this.savedColumn = this.column;
 };
 
 TokenStream.prototype.restore = function () {
   this.pos = this.savedPosition;
   this.current = this.savedCurrent;
-  this.line = this.savedLine;
-  this.column = this.savedColumn;
 };
 
 TokenStream.prototype.next = function () {
@@ -57,29 +49,17 @@ TokenStream.prototype.next = function () {
 
 TokenStream.prototype.isString = function () {
   var r = false;
-  var startLine = this.line;
-  var startColumn = this.column;
   var startPos = this.pos;
   var quote = this.expression.charAt(startPos);
 
   if (quote === '\'' || quote === '"') {
     this.pos++;
-    this.column++;
     var index = this.expression.indexOf(quote, startPos + 1);
     while (index >= 0 && this.pos < this.expression.length) {
       this.pos = index + 1;
       if (this.expression.charAt(index - 1) !== '\\') {
         var rawString = this.expression.substring(startPos + 1, index);
-        this.current = this.newToken(TSTRING, this.unescape(rawString), startLine, startColumn);
-        var newLine = rawString.indexOf('\n');
-        var lastNewline = -1;
-        while (newLine >= 0) {
-          this.line++;
-          this.column = 0;
-          lastNewline = newLine;
-          newLine = rawString.indexOf('\n', newLine + 1);
-        }
-        this.column += rawString.length - lastNewline;
+        this.current = this.newToken(TSTRING, this.unescape(rawString), startPos);
         r = true;
         break;
       }
@@ -94,7 +74,6 @@ TokenStream.prototype.isParen = function () {
   if (c === '(' || c === ')') {
     this.current = this.newToken(TPAREN, c);
     this.pos++;
-    this.column++;
     return true;
   }
   return false;
@@ -105,7 +84,6 @@ TokenStream.prototype.isComma = function () {
   if (c === ',') {
     this.current = this.newToken(TCOMMA, ',');
     this.pos++;
-    this.column++;
     return true;
   }
   return false;
@@ -127,7 +105,6 @@ TokenStream.prototype.isConst = function () {
     if (str in this.consts) {
       this.current = this.newToken(TNUMBER, this.consts[str]);
       this.pos += str.length;
-      this.column += str.length;
       return true;
     }
   }
@@ -150,7 +127,6 @@ TokenStream.prototype.isNamedOp = function () {
     if (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps) {
       this.current = this.newToken(TOP, str);
       this.pos += str.length;
-      this.column += str.length;
       return true;
     }
   }
@@ -172,7 +148,6 @@ TokenStream.prototype.isName = function () {
     var str = this.expression.substring(startPos, i);
     this.current = this.newToken(TNAME, str);
     this.pos += str.length;
-    this.column += str.length;
     return true;
   }
   return false;
@@ -184,11 +159,6 @@ TokenStream.prototype.isWhitespace = function () {
   while (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
     r = true;
     this.pos++;
-    this.column++;
-    if (c === '\n') {
-      this.line++;
-      this.column = 0;
-    }
     if (this.pos >= this.expression.length) {
       break;
     }
@@ -260,17 +230,9 @@ TokenStream.prototype.unescape = function (v) {
 TokenStream.prototype.isComment = function () {
   var c = this.expression.charAt(this.pos);
   if (c === '/' && this.expression.charAt(this.pos + 1) === '*') {
-    var startPos = this.pos;
     this.pos = this.expression.indexOf('*/', this.pos) + 2;
     if (this.pos === 1) {
       this.pos = this.expression.length;
-    }
-    var comment = this.expression.substring(startPos, this.pos);
-    var newline = comment.indexOf('\n');
-    while (newline >= 0) {
-      this.line++;
-      this.column = comment.length - newline;
-      newline = comment.indexOf('\n', newline + 1);
     }
     return true;
   }
@@ -282,8 +244,6 @@ TokenStream.prototype.isNumber = function () {
   var pos = this.pos;
   var startPos = pos;
   var resetPos = pos;
-  var column = this.column;
-  var resetColumn = column;
   var foundDot = false;
   var foundDigits = false;
   var c;
@@ -297,7 +257,6 @@ TokenStream.prototype.isNumber = function () {
         foundDigits = true;
       }
       pos++;
-      column++;
       valid = foundDigits;
     } else {
       break;
@@ -306,12 +265,10 @@ TokenStream.prototype.isNumber = function () {
 
   if (valid) {
     resetPos = pos;
-    resetColumn = column;
   }
 
   if (c === 'e' || c === 'E') {
     pos++;
-    column++;
     var acceptSign = true;
     var validExponent = false;
     while (pos < this.expression.length) {
@@ -325,22 +282,18 @@ TokenStream.prototype.isNumber = function () {
         break;
       }
       pos++;
-      column++;
     }
 
     if (!validExponent) {
       pos = resetPos;
-      column = resetColumn;
     }
   }
 
   if (valid) {
     this.current = this.newToken(TNUMBER, parseFloat(this.expression.substring(startPos, pos)));
     this.pos = pos;
-    this.column = column;
   } else {
     this.pos = resetPos;
-    this.column = resetColumn;
   }
   return valid;
 };
@@ -356,7 +309,6 @@ TokenStream.prototype.isOperator = function () {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '>=');
       this.pos++;
-      this.column++;
     } else {
       this.current = this.newToken(TOP, '>');
     }
@@ -364,7 +316,6 @@ TokenStream.prototype.isOperator = function () {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '<=');
       this.pos++;
-      this.column++;
     } else {
       this.current = this.newToken(TOP, '<');
     }
@@ -372,7 +323,6 @@ TokenStream.prototype.isOperator = function () {
     if (this.expression.charAt(this.pos + 1) === '|') {
       this.current = this.newToken(TOP, '||');
       this.pos++;
-      this.column++;
     } else {
       return false;
     }
@@ -380,7 +330,6 @@ TokenStream.prototype.isOperator = function () {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '==');
       this.pos++;
-      this.column++;
     } else {
       return false;
     }
@@ -388,7 +337,6 @@ TokenStream.prototype.isOperator = function () {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '!=');
       this.pos++;
-      this.column++;
     } else {
       this.current = this.newToken(TOP, c);
     }
@@ -396,10 +344,26 @@ TokenStream.prototype.isOperator = function () {
     return false;
   }
   this.pos++;
-  this.column++;
   return true;
 };
 
+TokenStream.prototype.getCoordinates = function () {
+  var line = 0;
+  var column;
+  var newline = -1;
+  do {
+    line++;
+    column = this.pos - newline;
+    newline = this.expression.indexOf('\n', newline + 1);
+  } while (newline >= 0 && newline < this.pos);
+
+  return {
+    line: line,
+    column: column
+  };
+};
+
 TokenStream.prototype.parseError = function (msg) {
-  throw new Error('parse error [' + (this.line + 1) + ':' + (this.column + 1) + ']: ' + msg);
+  var coords = this.getCoordinates();
+  throw new Error('parse error [' + coords.line + ':' + coords.column + ']: ' + msg);
 };

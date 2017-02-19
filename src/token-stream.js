@@ -90,9 +90,9 @@ TokenStream.prototype.isString = function () {
 };
 
 TokenStream.prototype.isParen = function () {
-  var char = this.expression.charAt(this.pos);
-  if (char === '(' || char === ')') {
-    this.current = this.newToken(TPAREN, char);
+  var c = this.expression.charAt(this.pos);
+  if (c === '(' || c === ')') {
+    this.current = this.newToken(TPAREN, c);
     this.pos++;
     this.column++;
     return true;
@@ -101,8 +101,8 @@ TokenStream.prototype.isParen = function () {
 };
 
 TokenStream.prototype.isComma = function () {
-  var char = this.expression.charAt(this.pos);
-  if (char === ',') {
+  var c = this.expression.charAt(this.pos);
+  if (c === ',') {
     this.current = this.newToken(TCOMMA, ',');
     this.pos++;
     this.column++;
@@ -180,19 +180,19 @@ TokenStream.prototype.isName = function () {
 
 TokenStream.prototype.isWhitespace = function () {
   var r = false;
-  var char = this.expression.charAt(this.pos);
-  while (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+  var c = this.expression.charAt(this.pos);
+  while (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
     r = true;
     this.pos++;
     this.column++;
-    if (char === '\n') {
+    if (c === '\n') {
       this.line++;
       this.column = 0;
     }
     if (this.pos >= this.expression.length) {
       break;
     }
-    char = this.expression.charAt(this.pos);
+    c = this.expression.charAt(this.pos);
   }
   return r;
 };
@@ -258,8 +258,8 @@ TokenStream.prototype.unescape = function (v) {
 };
 
 TokenStream.prototype.isComment = function () {
-  var char = this.expression.charAt(this.pos);
-  if (char === '/' && this.expression.charAt(this.pos + 1) === '*') {
+  var c = this.expression.charAt(this.pos);
+  if (c === '/' && this.expression.charAt(this.pos + 1) === '*') {
     var startPos = this.pos;
     this.pos = this.expression.indexOf('*/', this.pos) + 2;
     if (this.pos === 1) {
@@ -286,12 +286,12 @@ TokenStream.prototype.isNumber = function () {
   var resetColumn = column;
   var foundDot = false;
   var foundDigits = false;
-  var char;
+  var c;
 
   while (pos < this.expression.length) {
-    char = this.expression.charAt(pos);
-    if ((char >= '0' && char <= '9') || (!foundDot && char === '.')) {
-      if (char === '.') {
+    c = this.expression.charAt(pos);
+    if ((c >= '0' && c <= '9') || (!foundDot && c === '.')) {
+      if (c === '.') {
         foundDot = true;
       } else {
         foundDigits = true;
@@ -309,16 +309,16 @@ TokenStream.prototype.isNumber = function () {
     resetColumn = column;
   }
 
-  if (char === 'e' || char === 'E') {
+  if (c === 'e' || c === 'E') {
     pos++;
     column++;
     var acceptSign = true;
     var validExponent = false;
     while (pos < this.expression.length) {
-      char = this.expression.charAt(pos);
-      if (acceptSign && (char === '+' || char === '-')) {
+      c = this.expression.charAt(pos);
+      if (acceptSign && (c === '+' || c === '-')) {
         acceptSign = false;
-      } else if (char >= '0' && char <= '9') {
+      } else if (c >= '0' && c <= '9') {
         validExponent = true;
         acceptSign = false;
       } else {
@@ -346,13 +346,13 @@ TokenStream.prototype.isNumber = function () {
 };
 
 TokenStream.prototype.isOperator = function () {
-  var char = this.expression.charAt(this.pos);
+  var c = this.expression.charAt(this.pos);
 
-  if (char === '+' || char === '-' || char === '*' || char === '/' || char === '%' || char === '^' || char === '?' || char === ':' || char === '.') {
-    this.current = this.newToken(TOP, char);
-  } else if (char === '∙' || char === '•') {
+  if (c === '+' || c === '-' || c === '*' || c === '/' || c === '%' || c === '^' || c === '?' || c === ':' || c === '.') {
+    this.current = this.newToken(TOP, c);
+  } else if (c === '∙' || c === '•') {
     this.current = this.newToken(TOP, '*');
-  } else if (char === '>') {
+  } else if (c === '>') {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '>=');
       this.pos++;
@@ -360,7 +360,7 @@ TokenStream.prototype.isOperator = function () {
     } else {
       this.current = this.newToken(TOP, '>');
     }
-  } else if (char === '<') {
+  } else if (c === '<') {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '<=');
       this.pos++;
@@ -368,7 +368,7 @@ TokenStream.prototype.isOperator = function () {
     } else {
       this.current = this.newToken(TOP, '<');
     }
-  } else if (char === '|') {
+  } else if (c === '|') {
     if (this.expression.charAt(this.pos + 1) === '|') {
       this.current = this.newToken(TOP, '||');
       this.pos++;
@@ -376,7 +376,7 @@ TokenStream.prototype.isOperator = function () {
     } else {
       return false;
     }
-  } else if (char === '=') {
+  } else if (c === '=') {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '==');
       this.pos++;
@@ -384,13 +384,13 @@ TokenStream.prototype.isOperator = function () {
     } else {
       return false;
     }
-  } else if (char === '!') {
+  } else if (c === '!') {
     if (this.expression.charAt(this.pos + 1) === '=') {
       this.current = this.newToken(TOP, '!=');
       this.pos++;
       this.column++;
     } else {
-      this.current = this.newToken(TOP, char);
+      this.current = this.newToken(TOP, c);
     }
   } else {
     return false;

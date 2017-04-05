@@ -183,10 +183,10 @@ describe('Functions', function () {
     });
 
     it('handles NaN and infinity correctly', function () {
-      expect(parser.evaluate('gamma(0/0)')).to.be.NaN;
-      expect(parser.evaluate('gamma()')).to.be.NaN;
+      expect(parser.evaluate('gamma(0/0)')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('gamma()')).to.be.NaN; // eslint-disable-line no-unused-expressions
       expect(parser.evaluate('gamma(1/0)')).to.equal(Infinity);
-      expect(parser.evaluate('gamma(-1/0)')).to.be.NaN;
+      expect(parser.evaluate('gamma(-1/0)')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 });

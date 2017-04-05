@@ -70,11 +70,11 @@ export function tanh(a) {
 
 export function asinh(a) {
   if (a === -Infinity) return a;
-  return Math.log(a + Math.sqrt(a * a + 1));
+  return Math.log(a + Math.sqrt((a * a) + 1));
 }
 
 export function acosh(a) {
-  return Math.log(a + Math.sqrt(a * a - 1));
+  return Math.log(a + Math.sqrt((a * a) - 1));
 }
 
 export function atanh(a) {
@@ -163,9 +163,9 @@ export function gamma(n) {
     var fourN = threeN * n;
     var fiveN = fourN * n;
     return Math.sqrt(2 * Math.PI / n) * Math.pow((n / Math.E), n) *
-      (1 + 1 / (12 * n) + 1 / (288 * twoN) - 139 / (51840 * threeN) -
-      571 / (2488320 * fourN) + 163879 / (209018880 * fiveN) +
-      5246819 / (75246796800 * fiveN * n));
+      (1 + (1 / (12 * n)) + (1 / (288 * twoN)) - (139 / (51840 * threeN)) -
+      (571 / (2488320 * fourN)) + (163879 / (209018880 * fiveN)) +
+      (5246819 / (75246796800 * fiveN * n)));
   }
 
   --n;
@@ -190,7 +190,7 @@ export function hypot() {
     var div;
     if (larg < arg) {
       div = larg / arg;
-      sum = sum * div * div + 1;
+      sum = (sum * div * div) + 1;
       larg = arg;
     } else if (arg > 0) {
       div = arg / larg;

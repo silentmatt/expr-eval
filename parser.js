@@ -313,7 +313,7 @@ define(['./seedrandom'],function(seedrandom){
 					    nstack.push({text: "Math.pow(" + n1.text + "," + n2.text + ")", prio: 0});
 					} else {
 				            nonAssociative = naOps[f]?1:0;
-					    nstack.push({text: wrap(prio2[f],n1) + f + wrap(prio2[f]-nonAssociative,n2), prio: prio2[f]});
+					    nstack.push({text: wrap(prio2[f],n1) + " " + f + " " + wrap(prio2[f]-nonAssociative,n2), prio: prio2[f]});
 					}
 				}
 				else if (type_ === TVAR) {

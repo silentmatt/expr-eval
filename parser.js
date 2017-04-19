@@ -146,6 +146,7 @@ define(['./seedrandom'],function(seedrandom){
 			if (!(expr instanceof Expression)) {
 				expr = new Parser().parse(String(expr));
 			}
+			console.log(expr);
 			var newexpression = [];
 			var L = this.tokens.length;
 			var item;
@@ -166,6 +167,46 @@ define(['./seedrandom'],function(seedrandom){
 			}
 
 		        this.tokens = newexpression;
+		},
+
+		substitutePrior: function (expr) {
+			console.log("input expr is",expr);
+			var inputExpr = expr;
+			if (!(expr instanceof Expression)) {
+				expr = new Parser().parse(String(expr));
+			}
+			var newexpression = [];
+			var L = this.tokens.length;
+			var item;
+			var i = 0;
+			for (i = 0; i < L; i++) {
+				item = this.tokens[i];
+				var type_ = item.type_;
+				var exprSplitArr = inputExpr.split("_");
+				var priorNodeId = exprSplitArr[0];
+				console.log("input expression details", exprSplitArr, priorNodeId);
+				//console.log("item types", item.type_, item.index_);
+				//current token has to be prior (type TVAR), 
+				//the next token has to match with input expr string (if id9_initial is the input expr, token index has tobe id9)
+				//and the next next token has to be type TFUNCALL (=4)
+				 
+				if (type_ === TVAR && item.index_ === "prior" && this.tokens[i+1].index_ === priorNodeId && this.tokens[i+2].type_ === TFUNCALL) {
+					console.log("prior tapped");
+					for (var j = 0; j < expr.tokens.length; j++) {
+						var expritem = expr.tokens[j];
+						var replitem = new Token(expritem.type_, expritem.index_, expritem.prio_, expritem.number_);
+						newexpression.push(replitem);
+					}
+					console.log("replitem",replitem);
+					i=i+2;
+				}
+				else {
+					newexpression.push(item);
+				}
+			}
+
+		        this.tokens = newexpression;
+		        console.log("substitute prior", this.tokens);
 		},
 
 		evaluate: function (values, time, seed) {
@@ -305,7 +346,7 @@ define(['./seedrandom'],function(seedrandom){
 
 		variables: function () {
 			var L = this.tokens.length;
-                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain", "sinewave", "if"];
+                        var functions = [ "random","fac","min","max","pyt","pow","atan2","pulse", "pulsetrain", "sinewave", "if", "prior"];
                         var vars = [];
                         for (var i = 0; i < L; i++) {
                                 var item = this.tokens[i];
@@ -348,6 +389,30 @@ define(['./seedrandom'],function(seedrandom){
 			    }
 			}
 			return counts;
+		},
+
+		priors: function (){
+			//this function is to retreive any prior variables inside the current parsed equation, exclusive function for topomath tutor
+			var tokLen = this.tokens.length;
+			var priorArr = []; //to be returned, lists all variables inside prior function
+			for(var i = 0; i < tokLen; i++){
+				var currentTok = this.tokens[i];
+				if(currentTok.type_ === TVAR && currentTok.index_ === "prior"){
+					//we need to extract whats inside prior(""), so we need next token
+					//next token has to be of type_ == 3 (TVAR = 3)
+					//the next-next-token has to be of type_ == 4 (TFUNCCALL = 4, indicates a function call)
+					var nextTok = this.tokens[i+1];
+					var lastTok = this.tokens[i+2];
+					console.log("next, last tokens", nextTok, lastTok);
+					if(nextTok.type_ == 3 && priorArr.indexOf(nextTok.index_) == -1 && lastTok.type_ == 4){
+						priorArr.push(nextTok.index_);
+					}
+					else{
+						throw new Error("Please check expression syntax");
+					} 
+				}
+			}
+			return priorArr;
 		}
 	};
 
@@ -484,6 +549,10 @@ define(['./seedrandom'],function(seedrandom){
 		a = a.slice();
 		a.push(b);
 		return a;
+	}
+
+	function prior(a) {
+		//this function can be used by solver to retrieve prior value ( while evaluating the prior(a))
 	}
 
 	function Parser() {

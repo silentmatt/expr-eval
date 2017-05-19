@@ -39,7 +39,7 @@ describe('Functions', function () {
       expect(parser.evaluate('fac(2.5)')).to.be.closeTo(3.323350970447843, 1e-14);
       expect(parser.evaluate('fac(3)')).to.equal(6);
       expect(parser.evaluate('fac(4)')).to.equal(24);
-      expect(parser.evaluate('fac(4.9)')).to.equal(101.27019121310335, 1e-12);
+      expect(parser.evaluate('fac(4.9)')).to.be.closeTo(101.27019121310335, 1e-12);
       expect(parser.evaluate('fac(5)')).to.equal(120);
       expect(parser.evaluate('fac(6)')).to.equal(720);
       expect(parser.evaluate('fac(7)')).to.equal(5040);
@@ -167,7 +167,7 @@ describe('Functions', function () {
       expect(parser.evaluate('gamma(-2)')).to.equal(Infinity);
       expect(parser.evaluate('gamma(-1.5)')).to.be.closeTo(2.36327180120735, delta);
       expect(parser.evaluate('gamma(-1)')).to.equal(Infinity);
-      expect(parser.evaluate('gamma(-0.75)')).to.equal(-4.834146544295878, delta);
+      expect(parser.evaluate('gamma(-0.75)')).to.be.closeTo(-4.834146544295878, delta);
       expect(parser.evaluate('gamma(-0.5)')).to.be.closeTo(-3.54490770181103, delta);
       expect(parser.evaluate('gamma(-0.25)')).to.be.closeTo(-4.901666809860711, delta);
       expect(parser.evaluate('gamma(0.25)')).to.be.closeTo(3.62560990822191, delta);

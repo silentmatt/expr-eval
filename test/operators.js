@@ -807,7 +807,7 @@ describe('Operators', function () {
       var delta = 1e-14;
       expect(parser.evaluate('(-2.5)!')).to.be.closeTo(2.36327180120735, delta);
       expect(parser.evaluate('(-1.5)!')).to.be.closeTo(-3.54490770181103, delta);
-      expect(parser.evaluate('(-0.75)!')).to.equal(3.625609908221908, delta);
+      expect(parser.evaluate('(-0.75)!')).to.be.closeTo(3.625609908221908, delta);
       expect(parser.evaluate('(-0.5)!')).to.be.closeTo(1.772453850905516, delta);
       expect(parser.evaluate('(-0.25)!')).to.be.closeTo(1.225416702465177, delta);
       expect(parser.evaluate('0.25!')).to.be.closeTo(0.906402477055477, delta);

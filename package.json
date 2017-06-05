@@ -9,7 +9,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "eslint": "^3.16.1",
     "eslint-config-semistandard": "^8.0.0",
     "eslint-config-standard": "^7.0.0",

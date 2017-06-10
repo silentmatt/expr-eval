@@ -966,31 +966,16 @@ TokenStream.prototype.parseError = function (msg) {
   throw new Error('parse error [' + (this.line + 1) + ':' + (this.column + 1) + ']: ' + msg);
 };
 
-var unaryInstructionCache = {};
 function unaryInstruction(value) {
-  var inst = unaryInstructionCache[value];
-  if (!inst) {
-    inst = unaryInstructionCache[value] = new Instruction(IOP1, value);
-  }
-  return inst;
+  return new Instruction(IOP1, value);
 }
 
-var binaryInstructionCache = {};
 function binaryInstruction(value) {
-  var inst = binaryInstructionCache[value];
-  if (!inst) {
-    inst = binaryInstructionCache[value] = new Instruction(IOP2, value);
-  }
-  return inst;
+  return new Instruction(IOP2, value);
 }
 
-var ternaryInstructionCache = {};
 function ternaryInstruction(value) {
-  var inst = ternaryInstructionCache[value];
-  if (!inst) {
-    inst = ternaryInstructionCache[value] = new Instruction(IOP3, value);
-  }
-  return inst;
+  return new Instruction(IOP3, value);
 }
 
 function ParserState(parser, tokenStream) {

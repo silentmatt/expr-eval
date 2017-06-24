@@ -10,7 +10,7 @@
   "dependencies": {},
   "devDependencies": {
     "chai": "^4.0.2",
-    "eslint": "^3.16.1",
+    "eslint": "^4.1.0",
     "eslint-config-semistandard": "^8.0.0",
     "eslint-config-standard": "^7.0.0",
     "eslint-plugin-promise": "^3.3.1",

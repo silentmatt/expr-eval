@@ -146,7 +146,6 @@ define(['./seedrandom'],function(seedrandom){
 			if (!(expr instanceof Expression)) {
 				expr = new Parser().parse(String(expr));
 			}
-			console.log(expr);
 			var newexpression = [];
 			var L = this.tokens.length;
 			var item;

@@ -54,6 +54,14 @@ export function orOperator(a, b) {
   return Boolean(a || b);
 }
 
+export function inOperator(a, b) {
+  if (!b['indexOf']) {
+    // b is not like an array
+    return false;
+  }
+  return b.indexOf(a) != -1;
+}
+
 export function sinh(a) {
   return ((Math.exp(a) - Math.exp(-a)) / 2);
 }

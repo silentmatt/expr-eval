@@ -176,6 +176,32 @@ describe('Operators', function () {
     });
   });
 
+  describe('in operator', function () {
+    it("'a' in ['a', 'b']", function () {
+      expect(Parser.evaluate("'a' in toto", {"toto": ['a', 'b']})).to.equal(true);
+    });
+
+    it("'a' in ['b', 'a']", function () {
+      expect(Parser.evaluate("'a' in toto", {"toto": ['b', 'a']})).to.equal(true);
+    });
+
+    it("3 in [4, 3]", function () {
+      expect(Parser.evaluate("3 in toto", {"toto": [4, 3]})).to.equal(true);
+    });
+
+    it("'c' in ['a', 'b']", function () {
+      expect(Parser.evaluate("'c' in toto", {"toto": ['a', 'b']})).to.equal(false);
+    });
+
+    it("'c' in ['b', 'a']", function () {
+      expect(Parser.evaluate("'c' in toto", {"toto": ['b', 'a']})).to.equal(false);
+    });
+
+    it("3 in [1, 2]", function () {
+      expect(Parser.evaluate("3 in toto", {"toto": [1, 2]})).to.equal(false);
+    });
+  });
+
   describe('not operator', function () {
     it('not 1', function () {
       expect(Parser.evaluate('not 1')).to.equal(false);

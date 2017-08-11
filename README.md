@@ -180,6 +180,7 @@ f(), x.y              | Left          | Function call, property access
 ==, !=, >=, <=, >, <  | Left          | Equals, not equals, etc.
 and                   | Left          | Logical AND
 or                    | Left          | Logical OR
+in                    | Left          | Is left operand is included in the right one?
 x ? y : z             | Right         | Ternary conditional (if x then y else z)
 
 #### Unary operators

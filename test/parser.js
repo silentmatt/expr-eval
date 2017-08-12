@@ -177,6 +177,58 @@ describe('Parser', function () {
         expect(parser.parse('single == 1').toString()).to.equal('(single == 1)');
       });
 
+      it('should parse valid variable names correctly', function () {
+        expect(parser.parse('a').variables()).to.deep.equal([ 'a' ]);
+        expect(parser.parse('abc').variables()).to.deep.equal([ 'abc' ]);
+        expect(parser.parse('a+b').variables()).to.deep.equal([ 'a', 'b' ]);
+        expect(parser.parse('ab+c').variables()).to.deep.equal([ 'ab', 'c' ]);
+        expect(parser.parse('a1').variables()).to.deep.equal([ 'a1' ]);
+        expect(parser.parse('a_1').variables()).to.deep.equal([ 'a_1' ]);
+        expect(parser.parse('a_').variables()).to.deep.equal([ 'a_' ]);
+        expect(parser.parse('a_c').variables()).to.deep.equal([ 'a_c' ]);
+        expect(parser.parse('A').variables()).to.deep.equal([ 'A' ]);
+        expect(parser.parse('ABC').variables()).to.deep.equal([ 'ABC' ]);
+        expect(parser.parse('A+B').variables()).to.deep.equal([ 'A', 'B' ]);
+        expect(parser.parse('AB+C').variables()).to.deep.equal([ 'AB', 'C' ]);
+        expect(parser.parse('A1').variables()).to.deep.equal([ 'A1' ]);
+        expect(parser.parse('A_1').variables()).to.deep.equal([ 'A_1' ]);
+        expect(parser.parse('A_C').variables()).to.deep.equal([ 'A_C' ]);
+        expect(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables()).to.deep.equal([ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
+        expect(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables()).to.deep.equal([ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
+        expect(parser.parse('abc123+def456*ghi789/jkl0').variables()).to.deep.equal([ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
+        expect(parser.parse('$x').variables()).to.deep.equal([ '$x' ]);
+        expect(parser.parse('$xyz').variables()).to.deep.equal([ '$xyz' ]);
+        expect(parser.parse('$a_sdf').variables()).to.deep.equal([ '$a_sdf' ]);
+        expect(parser.parse('$xyz_123').variables()).to.deep.equal([ '$xyz_123' ]);
+      });
+
+      it('should not parse invalid variables', function () {
+        expect(function () { parser.parse('a$x'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('ab$'); }).to.throw(/parse error/);
+      });
+
+      it('should not parse a single $ as a variable', function () {
+        expect(function () { parser.parse('$'); }).to.throw(/parse error/);
+      });
+
+      it('should not allow leading _ in variable names', function () {
+        expect(function () { parser.parse('_'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('_ab'); }).to.throw(/parse error/);
+      });
+
+      it('should not allow leading digits in variable names', function () {
+        expect(function () { parser.parse('1a'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('1_'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('1_a'); }).to.throw(/parse error/);
+      });
+
+      it('should not allow leading digits or _ after $ in variable names', function () {
+        expect(function () { parser.parse('$0'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('$1a'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('$_'); }).to.throw(/parse error/);
+        expect(function () { parser.parse('$_x'); }).to.throw(/parse error/);
+      });
+
       it('should track token positions correctly', function () {
         expect(function () { parser.parse('@23'); }).to.throw(/parse error \[1:1]/);
         expect(function () { parser.parse('\n@23'); }).to.throw(/parse error \[2:1]/);

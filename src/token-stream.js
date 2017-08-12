@@ -135,15 +135,20 @@ TokenStream.prototype.isNamedOp = function () {
 TokenStream.prototype.isName = function () {
   var startPos = this.pos;
   var i = startPos;
+  var hasLetter = false;
   for (; i < this.expression.length; i++) {
     var c = this.expression.charAt(i);
     if (c.toUpperCase() === c.toLowerCase()) {
-      if (i === this.pos || (c !== '_' && (c < '0' || c > '9'))) {
+      if (i === this.pos && c === '$') {
+        continue;
+      } else if (i === this.pos || !hasLetter || (c !== '_' && (c < '0' || c > '9'))) {
         break;
       }
+    } else {
+      hasLetter = true;
     }
   }
-  if (i > startPos) {
+  if (hasLetter) {
     var str = this.expression.substring(startPos, i);
     this.current = this.newToken(TNAME, str);
     this.pos += str.length;

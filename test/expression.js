@@ -102,6 +102,10 @@ describe('Expression', function () {
     it('should fail trying to call a non-function', function () {
       expect(function () { Parser.evaluate('f()', { f: 2 }); }).to.throw(Error);
     });
+
+    it('$x * $y_+$a1*$z - $b2', function () {
+      expect(Parser.evaluate('$x * $y_+$a1*$z - $b2', { $a1: 3, $b2: 5, $x: 7, $y_: 9, $z: 11 })).to.equal(91);
+    });
   });
 
   describe('substitute()', function () {
@@ -187,6 +191,10 @@ describe('Expression', function () {
 
     it('a or b ? c + d : e * f', function () {
       expect(Parser.parse('a or b ? c + d : e * f').variables()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
+    });
+
+    it('$x * $y_+$a1*$z - $b2', function () {
+      expect(Parser.parse('$x * $y_+$a1*$z - $b2').variables()).to.include.members(['$a1', '$b2', '$x', '$y_', '$z']);
     });
   });
 

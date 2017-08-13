@@ -33,7 +33,8 @@ TokenStream.prototype.next = function () {
 
   if (this.isWhitespace() || this.isComment()) {
     return this.next();
-  } else if (this.isNumber() ||
+  } else if (this.isRadixInteger() ||
+      this.isNumber() ||
       this.isOperator() ||
       this.isString() ||
       this.isParen() ||
@@ -241,6 +242,48 @@ TokenStream.prototype.isComment = function () {
     return true;
   }
   return false;
+};
+
+TokenStream.prototype.isRadixInteger = function () {
+  var pos = this.pos;
+
+  if (pos >= this.expression.length - 2 || this.expression.charAt(pos) !== '0') {
+    return false;
+  }
+  ++pos;
+
+  var radix;
+  var validDigit;
+  if (this.expression.charAt(pos) === 'x') {
+    radix = 16;
+    validDigit = /^[0-9a-f]$/i;
+    ++pos;
+  } else if (this.expression.charAt(pos) === 'b') {
+    radix = 2;
+    validDigit = /^[01]$/i;
+    ++pos;
+  } else {
+    return false;
+  }
+
+  var valid = false;
+  var startPos = pos;
+
+  while (pos < this.expression.length) {
+    var c = this.expression.charAt(pos);
+    if (validDigit.test(c)) {
+      pos++;
+      valid = true;
+    } else {
+      break;
+    }
+  }
+
+  if (valid) {
+    this.current = this.newToken(TNUMBER, parseInt(this.expression.substring(startPos, pos), radix));
+    this.pos = pos;
+  }
+  return valid;
 };
 
 TokenStream.prototype.isNumber = function () {

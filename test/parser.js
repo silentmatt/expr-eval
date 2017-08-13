@@ -100,6 +100,63 @@ describe('Parser', function () {
         expect(function () { parser.parse('123e.4'); }).to.throw(Error);
       });
 
+      it('should parse hexadecimal integers correctly', function () {
+        expect(parser.evaluate('0x0')).to.equal(0x0);
+        expect(parser.evaluate('0x1')).to.equal(0x1);
+        expect(parser.evaluate('0xA')).to.equal(0xA);
+        expect(parser.evaluate('0xF')).to.equal(0xF);
+        expect(parser.evaluate('0x123')).to.equal(0x123);
+        expect(parser.evaluate('0x123ABCD')).to.equal(0x123ABCD);
+        expect(parser.evaluate('0xDEADBEEF')).to.equal(0xDEADBEEF);
+        expect(parser.evaluate('0xdeadbeef')).to.equal(0xdeadbeef);
+        expect(parser.evaluate('0xABCDEF')).to.equal(0xABCDEF);
+        expect(parser.evaluate('0xabcdef')).to.equal(0xABCDEF);
+        expect(parser.evaluate('0x1e+4')).to.equal(0x1e + 4);
+        expect(parser.evaluate('0x1E+4')).to.equal(0x1e + 4);
+        expect(parser.evaluate('0x1e-4')).to.equal(0x1e - 4);
+        expect(parser.evaluate('0x1E-4')).to.equal(0x1e - 4);
+        expect(parser.evaluate('0xFFFFFFFF')).to.equal(Math.pow(2, 32) - 1);
+        expect(parser.evaluate('0x100000000')).to.equal(Math.pow(2, 32));
+        expect(parser.evaluate('0x1FFFFFFFFFFFFF')).to.equal(Math.pow(2, 53) - 1);
+        expect(parser.evaluate('0x20000000000000')).to.equal(Math.pow(2, 53));
+      });
+
+      it('should parse binary integers correctly', function () {
+        expect(parser.evaluate('0b0')).to.equal(0);
+        expect(parser.evaluate('0b1')).to.equal(1);
+        expect(parser.evaluate('0b01')).to.equal(1);
+        expect(parser.evaluate('0b10')).to.equal(2);
+        expect(parser.evaluate('0b100')).to.equal(4);
+        expect(parser.evaluate('0b101')).to.equal(5);
+        expect(parser.evaluate('0b10101')).to.equal(21);
+        expect(parser.evaluate('0b10111')).to.equal(23);
+        expect(parser.evaluate('0b11111')).to.equal(31);
+        expect(parser.evaluate('0b11111111111111111111111111111111')).to.equal(Math.pow(2, 32) - 1);
+        expect(parser.evaluate('0b100000000000000000000000000000000')).to.equal(Math.pow(2, 32));
+        expect(parser.evaluate('0b11111111111111111111111111111111111111111111111111111')).to.equal(Math.pow(2, 53) - 1);
+        expect(parser.evaluate('0b100000000000000000000000000000000000000000000000000000')).to.equal(Math.pow(2, 53));
+      });
+
+      it('should fail on invalid hexadecimal numbers', function () {
+        expect(function () { parser.parse('0x'); }).to.throw(Error);
+        expect(function () { parser.parse('0x + 1'); }).to.throw(Error);
+        expect(function () { parser.parse('0x1.23'); }).to.throw(Error);
+        expect(function () { parser.parse('0xG'); }).to.throw(Error);
+        expect(function () { parser.parse('0xx0'); }).to.throw(Error);
+        expect(function () { parser.parse('0x1g'); }).to.throw(Error);
+        expect(function () { parser.parse('1x0'); }).to.throw(Error);
+      });
+
+      it('should fail on invalid binary numbers', function () {
+        expect(function () { parser.parse('0b'); }).to.throw(Error);
+        expect(function () { parser.parse('0b + 1'); }).to.throw(Error);
+        expect(function () { parser.parse('0b1.1'); }).to.throw(Error);
+        expect(function () { parser.parse('0b2'); }).to.throw(Error);
+        expect(function () { parser.parse('0bb0'); }).to.throw(Error);
+        expect(function () { parser.parse('0b1e+1'); }).to.throw(Error);
+        expect(function () { parser.parse('1b0'); }).to.throw(Error);
+      });
+
       it('should fail on unknown characters', function () {
         expect(function () { parser.parse('1 + @'); }).to.throw(Error);
       });

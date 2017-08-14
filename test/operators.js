@@ -177,6 +177,8 @@ describe('Operators', function () {
   });
 
   describe('in operator', function () {
+    var parser = new Parser({ operators: { 'in': true } });
+
     it('"a" in ["a", "b"]', function () {
       expect(parser.evaluate('"a" in toto', {'toto': ['a', 'b']})).to.equal(true);
     });

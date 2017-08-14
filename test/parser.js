@@ -305,6 +305,38 @@ describe('Parser', function () {
         expect(function () { parser.parse('123 +\n\n679@'); }).to.throw(/parse error \[3:4]/);
         expect(function () { parser.parse('123 +\n\n\n\n\n679@'); }).to.throw(/parse error \[6:4]/);
       });
+
+      it('should allow operators to be disabled', function () {
+        var parser = new Parser({
+          operators: {
+            add: false,
+            sin: false,
+            remainder: false,
+            divide: false
+          }
+        });
+        expect(function () { parser.parse('+1'); }).to.throw(/\+/);
+        expect(function () { parser.parse('1 + 2'); }).to.throw(/\+/);
+        expect(parser.parse('sin(0)').toString()).to.equal('sin(0)');
+        expect(function () { parser.evaluate('sin(0)'); }).to.throw(/sin/);
+        expect(function () { parser.parse('4 % 5'); }).to.throw(/%/);
+        expect(function () { parser.parse('4 / 5'); }).to.throw(/\//);
+      });
+
+      it('should allow operators to be explicitly enabled', function () {
+        var parser = new Parser({
+          operators: {
+            add: true,
+            sqrt: true,
+            divide: true,
+            'in': true
+          }
+        });
+        expect(parser.evaluate('+(-1)')).to.equal(-1);
+        expect(parser.evaluate('sqrt(16)')).to.equal(4);
+        expect(parser.evaluate('4 / 6')).to.equal(2 / 3);
+        expect(parser.evaluate('3 in array', { array: [ 1, 2, 3 ] })).to.equal(true);
+      });
     });
   });
 

@@ -10,6 +10,7 @@ export function TokenStream(parser, expression) {
   this.expression = expression;
   this.savedPosition = 0;
   this.savedCurrent = null;
+  this.options = parser.options;
 }
 
 TokenStream.prototype.newToken = function (type, value, pos) {
@@ -124,7 +125,7 @@ TokenStream.prototype.isNamedOp = function () {
   }
   if (i > startPos) {
     var str = this.expression.substring(startPos, i);
-    if (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps) {
+    if (this.isOperatorEnabled(str) && (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps)) {
       this.current = this.newToken(TOP, str);
       this.pos += str.length;
       return true;
@@ -346,6 +347,7 @@ TokenStream.prototype.isNumber = function () {
 };
 
 TokenStream.prototype.isOperator = function () {
+  var startPos = this.pos;
   var c = this.expression.charAt(this.pos);
 
   if (c === '+' || c === '-' || c === '*' || c === '/' || c === '%' || c === '^' || c === '?' || c === ':' || c === '.') {
@@ -391,7 +393,51 @@ TokenStream.prototype.isOperator = function () {
     return false;
   }
   this.pos++;
-  return true;
+
+  if (this.isOperatorEnabled(this.current.value)) {
+    return true;
+  } else {
+    this.pos = startPos;
+    return false;
+  }
+};
+
+var optionNameMap = {
+  '+': 'add',
+  '-': 'subtract',
+  '*': 'multiply',
+  '/': 'divide',
+  '%': 'remainder',
+  '^': 'power',
+  '!': 'factorial',
+  '<': 'comparison',
+  '>': 'comparison',
+  '<=': 'comparison',
+  '>=': 'comparison',
+  '==': 'comparison',
+  '!=': 'comparison',
+  '||': 'concatenate',
+  'and': 'logical',
+  'or': 'logical',
+  'not': 'logical',
+  '?': 'conditional',
+  ':': 'conditional'
+};
+
+function getOptionName(op) {
+  return optionNameMap.hasOwnProperty(op) ? optionNameMap[op] : op;
+}
+
+TokenStream.prototype.isOperatorEnabled = function (op) {
+  var optionName = getOptionName(op);
+  var operators = this.options.operators || {};
+
+  // in is a special case for now because it's disabled by default
+  if (optionName === 'in') {
+    return !!operators['in'];
+  }
+
+  return !(optionName in operators) || !!operators[optionName];
 };
 
 TokenStream.prototype.getCoordinates = function () {

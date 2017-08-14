@@ -54,12 +54,9 @@ export function orOperator(a, b) {
   return Boolean(a || b);
 }
 
+import contains from './contains';
 export function inOperator(a, b) {
-  if (!b['indexOf']) {
-    // b is not like an array
-    return false;
-  }
-  return b.indexOf(a) != -1;
+  return contains(b, a);
 }
 
 export function sinh(a) {

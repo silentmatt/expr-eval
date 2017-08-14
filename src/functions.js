@@ -1,3 +1,5 @@
+import contains from './contains';
+
 export function add(a, b) {
   return Number(a) + Number(b);
 }
@@ -54,7 +56,6 @@ export function orOperator(a, b) {
   return Boolean(a || b);
 }
 
-import contains from './contains';
 export function inOperator(a, b) {
   return contains(b, a);
 }

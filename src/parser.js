@@ -17,6 +17,7 @@ import {
   lessThanEqual,
   andOperator,
   orOperator,
+  inOperator,
   sinh,
   cosh,
   tanh,
@@ -83,7 +84,8 @@ export function Parser(options) {
     '>=': greaterThanEqual,
     '<=': lessThanEqual,
     and: andOperator,
-    or: orOperator
+    or: orOperator,
+    'in': inOperator
   };
 
   this.ternaryOps = {

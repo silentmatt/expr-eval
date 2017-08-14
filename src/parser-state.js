@@ -106,7 +106,7 @@ ParserState.prototype.parseAndExpression = function (instr) {
   }
 };
 
-var COMPARISON_OPERATORS = ['==', '!=', '<', '<=', '>=', '>'];
+var COMPARISON_OPERATORS = ['==', '!=', '<', '<=', '>=', '>', 'in'];
 
 ParserState.prototype.parseComparison = function (instr) {
   this.parseAddSub(instr);

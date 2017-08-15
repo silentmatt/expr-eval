@@ -35,15 +35,17 @@ Expression.prototype.toString = function () {
   return expressionToString(this.tokens, false);
 };
 
-Expression.prototype.symbols = function () {
+Expression.prototype.symbols = function (with_members) {
+  with_members = with_members || false;
   var vars = [];
-  getSymbols(this.tokens, vars);
+  getSymbols(this.tokens, vars, with_members);
   return vars;
 };
 
-Expression.prototype.variables = function () {
+Expression.prototype.variables = function (with_members) {
+  with_members = with_members || false;
   var vars = [];
-  getSymbols(this.tokens, vars);
+  getSymbols(this.tokens, vars, with_members);
   var functions = this.functions;
   return vars.filter(function (name) {
     return !(name in functions);

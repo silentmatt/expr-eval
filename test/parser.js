@@ -338,6 +338,147 @@ describe('Parser', function () {
         expect(parser.evaluate('3 in array', { array: [ 1, 2, 3 ] })).to.equal(true);
       });
     });
+
+    it('should allow addition operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          add: false
+        }
+      });
+
+      expect(function () { parser.parse('2 + 3'); }).to.throw(/\+/);
+    });
+
+    it('should allow comparison operators to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          comparison: false
+        }
+      });
+
+      expect(function () { parser.parse('1 == 1'); }).to.throw(/=/);
+      expect(function () { parser.parse('1 != 2'); }).to.throw(/!/);
+      expect(function () { parser.parse('1 > 0'); }).to.throw(/>/);
+      expect(function () { parser.parse('1 >= 0'); }).to.throw(/>/);
+      expect(function () { parser.parse('1 < 2'); }).to.throw(/</);
+      expect(function () { parser.parse('1 <= 2'); }).to.throw(/</);
+    });
+
+    it('should allow concatenate operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          concatenate: false
+        }
+      });
+
+      expect(function () { parser.parse('"as" || "df"'); }).to.throw(/\|/);
+    });
+
+    it('should allow conditional operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          conditional: false
+        }
+      });
+
+      expect(function () { parser.parse('true ? 1 : 0'); }).to.throw(/\?/);
+    });
+
+    it('should allow division operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          divide: false
+        }
+      });
+
+      expect(function () { parser.parse('2 / 3'); }).to.throw(/\//);
+    });
+
+    it('should allow factorial operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          factorial: false
+        }
+      });
+
+      expect(function () { parser.parse('5!'); }).to.throw(/!/);
+    });
+
+    it('should allow in operator to be enabled', function () {
+      var parser = new Parser({
+        operators: {
+          'in': true
+        }
+      });
+
+      expect(function () { parser.parse('5 * in'); }).to.throw(Error);
+      expect(parser.evaluate('5 in a', { a: [ 2, 3, 5 ] })).to.equal(true);
+    });
+
+    it('should allow in operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          'in': false
+        }
+      });
+
+      expect(function () { parser.parse('5 in a'); }).to.throw(Error);
+      expect(parser.evaluate('5 * in', { 'in': 3 })).to.equal(15);
+    });
+
+    it('should allow logical operators to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          logical: false
+        }
+      });
+
+      expect(function () { parser.parse('true and true'); }).to.throw(Error);
+      expect(function () { parser.parse('true or false'); }).to.throw(Error);
+      expect(function () { parser.parse('not false'); }).to.throw(Error);
+
+      expect(parser.evaluate('and * or + not', { and: 3, or: 5, not: 2 })).to.equal(17);
+    });
+
+    it('should allow multiplication operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          multiply: false
+        }
+      });
+
+      expect(function () { parser.parse('3 * 4'); }).to.throw(/\*/);
+    });
+
+    it('should allow power operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          power: false
+        }
+      });
+
+      expect(function () { parser.parse('3 ^ 4'); }).to.throw(/\^/);
+    });
+
+    it('should allow remainder operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          remainder: false
+        }
+      });
+
+      expect(function () { parser.parse('3 % 2'); }).to.throw(/%/);
+    });
+
+    it('should allow subtraction operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          subtract: false
+        }
+      });
+
+      expect(function () { parser.parse('5 - 3'); }).to.throw(/-/);
+    });
   });
 
   it('should disallow member access', function () {

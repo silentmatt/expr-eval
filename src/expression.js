@@ -35,17 +35,17 @@ Expression.prototype.toString = function () {
   return expressionToString(this.tokens, false);
 };
 
-Expression.prototype.symbols = function (with_members) {
-  with_members = with_members || false;
+Expression.prototype.symbols = function (options) {
+  options = options || {}
   var vars = [];
-  getSymbols(this.tokens, vars, with_members);
+  getSymbols(this.tokens, vars, options);
   return vars;
 };
 
-Expression.prototype.variables = function (with_members) {
-  with_members = with_members || false;
+Expression.prototype.variables = function (options) {
+  options = options || {}
   var vars = [];
-  getSymbols(this.tokens, vars, with_members);
+  getSymbols(this.tokens, vars, options);
   var functions = this.functions;
   return vars.filter(function (name) {
     return !(name in functions);

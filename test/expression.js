@@ -217,6 +217,15 @@ describe('Expression', function () {
     it('a or b ? c + d : e * f', function () {
       expect(Parser.parse('a or b ? c + d : e * f').symbols()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
     });
+
+    it('user.age + 2', function () {
+      expect(Parser.parse('user.age + 2').symbols()).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age + 2')
+      expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
+    });
   });
 
   describe('toString()', function () {

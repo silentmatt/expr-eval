@@ -201,6 +201,32 @@ describe('Operators', function () {
       expect(Parser.evaluate("3 in toto", {"toto": [1, 2]})).to.equal(false);
     });
   });
+  
+  describe('contains operator', function () {
+    it("['a', 'b'] contains 'a'", function () {
+      expect(Parser.evaluate("toto contains 'a'", {"toto": ['a', 'b']})).to.equal(true);
+    });
+
+    it("['b', 'a'] contains 'a'", function () {
+      expect(Parser.evaluate("toto contains 'a'", {"toto": ['b', 'a']})).to.equal(true);
+    });
+
+    it("[4, 3] contains 3", function () {
+      expect(Parser.evaluate("toto contains 3", {"toto": [4, 3]})).to.equal(true);
+    });
+
+    it("['a', 'b'] contains 'c'", function () {
+      expect(Parser.evaluate("toto contains 'c'", {"toto": ['a', 'b']})).to.equal(false);
+    });
+
+    it("['b', 'a'] contains 'c'", function () {
+      expect(Parser.evaluate("toto contains 'c'", {"toto": ['b', 'a']})).to.equal(false);
+    });
+
+    it("[1, 2] contains 3", function () {
+      expect(Parser.evaluate("toto contains 3", {"toto": [1, 2]})).to.equal(false);
+    });
+  });
 
   describe('not operator', function () {
     it('not 1', function () {

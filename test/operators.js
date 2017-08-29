@@ -180,27 +180,27 @@ describe('Operators', function () {
     var parser = new Parser({ operators: { 'in': true } });
 
     it('"a" in ["a", "b"]', function () {
-      expect(parser.evaluate('"a" in toto', {'toto': ['a', 'b']})).to.equal(true);
+      expect(parser.evaluate('"a" in array', {'array': ['a', 'b']})).to.equal(true);
     });
 
     it('"a" in ["b", "a"]', function () {
-      expect(parser.evaluate('"a" in toto', {'toto': ['b', 'a']})).to.equal(true);
+      expect(parser.evaluate('"a" in array', {'array': ['b', 'a']})).to.equal(true);
     });
 
     it('3 in [4, 3]', function () {
-      expect(parser.evaluate('3 in toto', {'toto': [4, 3]})).to.equal(true);
+      expect(parser.evaluate('3 in array', {'array': [4, 3]})).to.equal(true);
     });
 
     it('"c" in ["a", "b"]', function () {
-      expect(parser.evaluate('"c" in toto', {'toto': ['a', 'b']})).to.equal(false);
+      expect(parser.evaluate('"c" in array', {'array': ['a', 'b']})).to.equal(false);
     });
 
     it('"c" in ["b", "a"]', function () {
-      expect(parser.evaluate('"c" in toto', {'toto': ['b', 'a']})).to.equal(false);
+      expect(parser.evaluate('"c" in array', {'array': ['b', 'a']})).to.equal(false);
     });
 
     it('3 in [1, 2]', function () {
-      expect(parser.evaluate('3 in toto', {'toto': [1, 2]})).to.equal(false);
+      expect(parser.evaluate('3 in array', {'array': [1, 2]})).to.equal(false);
     });
   });
 

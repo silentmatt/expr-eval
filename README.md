@@ -2,6 +2,7 @@ JavaScript Expression Evaluator
 ===============================
 
 [![npm](https://img.shields.io/npm/v/expr-eval.svg)](https://www.npmjs.com/package/expr-eval)
+[![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg)](https://cdnjs.com/libraries/expr-eval)
 [![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
 
 Description
@@ -43,6 +44,29 @@ Parser is the main class in the library. It has as single `parse` method, and
 #### Parser()
 
 Constructs a new `Parser` instance.
+
+The constructor takes an optional `options` parameter that allows you to enable or disable operators.
+
+For example, the following will create a `Parser` that does not allow comparison or logical operators:
+
+    var parser = new Parser({
+      operators: {
+        // These default to true, but are included to be explicit
+        add: true,
+        concatenate: true,
+        conditional: true,
+        divide: true,
+        factorial: true,
+        multiply: true,
+        power: true,
+        remainder: true,
+        subtract: true,
+
+        // Disable and, or, not, <, ==, !=, etc.
+        logical: false,
+        comparison: false
+      }
+    });
 
 #### parse(expression: string)
 
@@ -111,7 +135,7 @@ replaced with "8", resulting in `((8*x)+1)`.
     js> expr.evaluate({ x: 2 });
     6.283185307179586
 
-#### variables()
+#### variables(options?: object)
 
 Get an array of the unbound variables in the expression.
 
@@ -122,7 +146,9 @@ Get an array of the unbound variables in the expression.
     js> expr.simplify({ y: 4 }).variables();
     x
 
-#### symbols()
+By default, `variables` will return "top-level" objects, so for example, `Parser.parse(x.y.z).variables()` returns `['x']`. If you want to get the whole chain of object members, you can call it with `{ withMembers: true }`. So `Parser.parse(x.y.z).variables({ withMembers: true })` would return `['x.y.z']`.
+
+#### symbols(options?: object)
 
 Get an array of variables, including any built-in functions used in the
 expression.
@@ -133,6 +159,8 @@ expression.
     min,x,y,z
     js> expr.simplify({ y: 4, z: 5 }).variables();
     min,x
+
+Like `variables`, `symbols` accepts an option argument `{ withMembers: true }` to include object members.
 
 #### toString()
 
@@ -179,6 +207,7 @@ f(), x.y              | Left          | Function call, property access
 ==, !=, >=, <=, >, <  | Left          | Equals, not equals, etc.
 and                   | Left          | Logical AND
 or                    | Left          | Logical OR
+in                    | Left          | Is left operand is included in the right one?
 x ? y : z             | Right         | Ternary conditional (if x then y else z)
 
 #### Unary operators

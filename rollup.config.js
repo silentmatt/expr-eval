@@ -1,7 +1,9 @@
 export default {
-  entry: 'parser.js',
-  dest: 'dist/bundle.js',
-  format: 'umd',
-  moduleName: 'exprEval',
+  input: 'index.js',
+  output: {
+    file: 'dist/bundle.js',
+    format: 'umd'
+  },
+  name: 'exprEval',
   plugins: []
 };

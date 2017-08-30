@@ -176,6 +176,34 @@ describe('Operators', function () {
     });
   });
 
+  describe('in operator', function () {
+    var parser = new Parser({ operators: { 'in': true } });
+
+    it('"a" in ["a", "b"]', function () {
+      expect(parser.evaluate('"a" in toto', {'toto': ['a', 'b']})).to.equal(true);
+    });
+
+    it('"a" in ["b", "a"]', function () {
+      expect(parser.evaluate('"a" in toto', {'toto': ['b', 'a']})).to.equal(true);
+    });
+
+    it('3 in [4, 3]', function () {
+      expect(parser.evaluate('3 in toto', {'toto': [4, 3]})).to.equal(true);
+    });
+
+    it('"c" in ["a", "b"]', function () {
+      expect(parser.evaluate('"c" in toto', {'toto': ['a', 'b']})).to.equal(false);
+    });
+
+    it('"c" in ["b", "a"]', function () {
+      expect(parser.evaluate('"c" in toto', {'toto': ['b', 'a']})).to.equal(false);
+    });
+
+    it('3 in [1, 2]', function () {
+      expect(parser.evaluate('3 in toto', {'toto': [1, 2]})).to.equal(false);
+    });
+  });
+
   describe('not operator', function () {
     it('not 1', function () {
       expect(Parser.evaluate('not 1')).to.equal(false);
@@ -295,9 +323,9 @@ describe('Operators', function () {
     });
 
     it('returns NaN for 0 divisor', function () {
-      expect(parser.evaluate('0 % 0')).to.be.NaN;
-      expect(parser.evaluate('1 % 0')).to.be.NaN;
-      expect(parser.evaluate('-1 % 0')).to.be.NaN;
+      expect(parser.evaluate('0 % 0')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('1 % 0')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('-1 % 0')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -364,8 +392,8 @@ describe('Operators', function () {
       expect(parser.evaluate('asin 1')).to.be.closeTo(Math.PI / 2, delta);
       expect(parser.evaluate('asin -1')).to.be.closeTo(-Math.PI / 2, delta);
       expect(parser.evaluate('asin(PI/4)')).to.be.closeTo(0.9033391107665127, delta);
-      expect(parser.evaluate('asin 1.1')).to.be.NaN;
-      expect(parser.evaluate('asin -1.1')).to.be.NaN;
+      expect(parser.evaluate('asin 1.1')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('asin -1.1')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -378,8 +406,8 @@ describe('Operators', function () {
       expect(parser.evaluate('acos 1')).to.be.closeTo(0, delta);
       expect(parser.evaluate('acos -1')).to.be.closeTo(Math.PI, delta);
       expect(parser.evaluate('acos(PI/4)')).to.be.closeTo(0.6674572160283838, delta);
-      expect(parser.evaluate('acos 1.1')).to.be.NaN;
-      expect(parser.evaluate('acos -1.1')).to.be.NaN;
+      expect(parser.evaluate('acos 1.1')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('acos -1.1')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -435,11 +463,11 @@ describe('Operators', function () {
       expect(parser.evaluate('cosh(PI/4)')).to.be.closeTo(1.324609089252006, delta);
       expect(parser.evaluate('cosh(PI/2)')).to.be.closeTo(2.509178478658057, delta);
       expect(parser.evaluate('cosh(3*PI/4)')).to.be.closeTo(5.3227521495199595, delta);
-      expect(parser.evaluate('cosh PI')).to.be.closeTo(11.591953275521522, delta);
-      expect(parser.evaluate('cosh(2*PI)')).to.be.closeTo(267.7467614837483, delta);
-      expect(parser.evaluate('cosh -PI')).to.be.closeTo(11.591953275521522, delta);
-      expect(parser.evaluate('cosh(3*PI/2)')).to.be.closeTo(55.663380890438695, delta);
-      expect(parser.evaluate('cosh 15')).to.be.closeTo(1634508.6862362078, delta);
+      expect(parser.evaluate('cosh PI')).to.be.closeTo(11.591953275521522, delta * 10);
+      expect(parser.evaluate('cosh(2*PI)')).to.be.closeTo(267.7467614837483, delta * 1000);
+      expect(parser.evaluate('cosh -PI')).to.be.closeTo(11.591953275521522, delta * 10);
+      expect(parser.evaluate('cosh(3*PI/2)')).to.be.closeTo(55.663380890438695, delta * 100);
+      expect(parser.evaluate('cosh 15')).to.be.closeTo(1634508.6862362078, delta * 1e7);
       expect(parser.evaluate('cosh(1 / 0)')).to.equal(Infinity);
       expect(parser.evaluate('cosh(-1 / 0)')).to.equal(Infinity);
     });
@@ -500,10 +528,10 @@ describe('Operators', function () {
   describe('acosh(x)', function () {
     it('returns the correct value', function () {
       var delta = 1e-15;
-      expect(parser.evaluate('acosh 0')).to.be.NaN;
-      expect(parser.evaluate('acosh 0.5')).to.be.NaN;
-      expect(parser.evaluate('acosh -0.5')).to.be.NaN;
-      expect(parser.evaluate('acosh -1')).to.be.NaN;
+      expect(parser.evaluate('acosh 0')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('acosh 0.5')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('acosh -0.5')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('acosh -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
       expect(parser.evaluate('acosh 1')).to.equal(0);
       expect(parser.evaluate('acosh(PI/2)')).to.be.closeTo(1.0232274785475506, delta);
       expect(parser.evaluate('acosh(3*PI/4)')).to.be.closeTo(1.5017757950235857, delta);
@@ -514,7 +542,7 @@ describe('Operators', function () {
       expect(parser.evaluate('acosh 100')).to.be.closeTo(5.298292365610485, delta);
       expect(parser.evaluate('acosh 1000')).to.be.closeTo(7.600902209541989, delta);
       expect(parser.evaluate('acosh(1 / 0)')).to.equal(Infinity);
-      expect(parser.evaluate('acosh(-1 / 0)')).to.be.NaN;
+      expect(parser.evaluate('acosh(-1 / 0)')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -528,10 +556,10 @@ describe('Operators', function () {
       expect(parser.evaluate('atanh -0.5')).to.be.closeTo(-0.5493061443340549, delta);
       expect(parser.evaluate('atanh 1')).to.equal(Infinity);
       expect(parser.evaluate('atanh -1')).to.equal(-Infinity);
-      expect(parser.evaluate('atanh 1.001')).to.be.NaN;
-      expect(parser.evaluate('atanh -1.001')).to.be.NaN;
-      expect(parser.evaluate('atanh(1 / 0)')).to.be.NaN;
-      expect(parser.evaluate('atanh(-1 / 0)')).to.be.NaN;
+      expect(parser.evaluate('atanh 1.001')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('atanh -1.001')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('atanh(1 / 0)')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(parser.evaluate('atanh(-1 / 0)')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -548,7 +576,7 @@ describe('Operators', function () {
       expect(parser.evaluate('sqrt 81')).to.equal(9);
       expect(parser.evaluate('sqrt 100')).to.equal(10);
       expect(parser.evaluate('sqrt 1000')).to.equal(31.622776601683793);
-      expect(parser.evaluate('sqrt -1')).to.be.NaN;
+      expect(parser.evaluate('sqrt -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -570,8 +598,8 @@ describe('Operators', function () {
       expect(Parser.evaluate('ln 10')).to.be.closeTo(2.302585092994046, delta);
       expect(Parser.evaluate('log 10')).to.be.closeTo(2.302585092994046, delta);
       expect(Parser.evaluate('ln 100')).to.be.closeTo(4.605170185988092, delta);
-      expect(Parser.evaluate('ln -1')).to.be.NaN;
-      expect(Parser.evaluate('log -1')).to.be.NaN;
+      expect(Parser.evaluate('ln -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(Parser.evaluate('log -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -598,8 +626,8 @@ describe('Operators', function () {
       expect(Parser.evaluate('lg 1000')).to.equal(3);
       expect(Parser.evaluate('log10 10000000000')).to.equal(10);
       expect(Parser.evaluate('lg 10000000000')).to.equal(10);
-      expect(Parser.evaluate('log10 -1')).to.be.NaN;
-      expect(Parser.evaluate('lg -1')).to.be.NaN;
+      expect(Parser.evaluate('log10 -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
+      expect(Parser.evaluate('lg -1')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 
@@ -716,11 +744,11 @@ describe('Operators', function () {
       expect(parser.evaluate('exp -1.5')).to.be.closeTo(0.22313016014842982, delta);
       expect(parser.evaluate('exp 2')).to.be.closeTo(7.3890560989306495, delta);
       expect(parser.evaluate('exp -2')).to.be.closeTo(0.1353352832366127, delta);
-      expect(parser.evaluate('exp 2.5')).to.be.closeTo(12.182493960703471, delta);
+      expect(parser.evaluate('exp 2.5')).to.be.closeTo(12.182493960703471, delta * 10);
       expect(parser.evaluate('exp -2.5')).to.be.closeTo(0.0820849986238988, delta);
       expect(parser.evaluate('exp 3')).to.be.closeTo(20.085536923187668, delta);
-      expect(parser.evaluate('exp 4')).to.be.closeTo(54.59815003314423, delta);
-      expect(parser.evaluate('exp 10')).to.be.closeTo(22026.46579480671, delta);
+      expect(parser.evaluate('exp 4')).to.be.closeTo(54.59815003314423, delta * 10);
+      expect(parser.evaluate('exp 10')).to.be.closeTo(22026.46579480671, delta * 10000);
       expect(parser.evaluate('exp -10')).to.be.closeTo(0.00004539992976248486, delta);
       expect(parser.evaluate('exp(1/0)')).to.equal(Infinity);
       expect(parser.evaluate('exp(-1/0)')).to.equal(0);
@@ -807,7 +835,7 @@ describe('Operators', function () {
       var delta = 1e-14;
       expect(parser.evaluate('(-2.5)!')).to.be.closeTo(2.36327180120735, delta);
       expect(parser.evaluate('(-1.5)!')).to.be.closeTo(-3.54490770181103, delta);
-      expect(parser.evaluate('(-0.75)!')).to.equal(3.625609908221908, delta);
+      expect(parser.evaluate('(-0.75)!')).to.be.closeTo(3.625609908221908, delta);
       expect(parser.evaluate('(-0.5)!')).to.be.closeTo(1.772453850905516, delta);
       expect(parser.evaluate('(-0.25)!')).to.be.closeTo(1.225416702465177, delta);
       expect(parser.evaluate('0.25!')).to.be.closeTo(0.906402477055477, delta);
@@ -822,9 +850,9 @@ describe('Operators', function () {
     });
 
     it('handles NaN and infinity correctly', function () {
-      expect(parser.evaluate('(0/0)!')).to.be.NaN;
+      expect(parser.evaluate('(0/0)!')).to.be.NaN; // eslint-disable-line no-unused-expressions
       expect(parser.evaluate('(1/0)!')).to.equal(Infinity);
-      expect(parser.evaluate('(-1/0)!')).to.be.NaN;
+      expect(parser.evaluate('(-1/0)!')).to.be.NaN; // eslint-disable-line no-unused-expressions
     });
   });
 });

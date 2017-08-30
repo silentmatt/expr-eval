@@ -1,28 +1,31 @@
 {
   "name": "expr-eval",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
+  "typings": "parser.d.ts",
   "directories": {
     "test": "test"
   },
   "dependencies": {},
   "devDependencies": {
-    "chai": "^3.5.0",
-    "eslint": "^3.4.0",
-    "eslint-config-semistandard": "^7.0.0-beta.0",
-    "eslint-config-standard": "^6.0.0",
-    "eslint-plugin-promise": "^3.3.1",
-    "eslint-plugin-standard": "^2.0.0",
+    "chai": "^4.1.1",
+    "eslint": "^4.5.0",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "istanbul": "^0.4.5",
-    "mocha": "^3.1.0",
-    "rollup": "^0.36.0",
-    "rollup-plugin-uglify": "^1.0.1"
+    "mocha": "^3.5.0",
+    "rollup": "^0.49.2",
+    "rollup-plugin-uglify": "^2.0.1"
   },
   "scripts": {
     "test": "npm run build && mocha",
     "coverage": "npm run build && istanbul cover _mocha",
-    "lint": "eslint parser.js test rollup.config.js rollup-min.config.js",
+    "lint": "eslint index.js src test rollup.config.js rollup-min.config.js",
     "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js",
     "prepublish": "npm run build"
   },

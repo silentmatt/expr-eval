@@ -102,6 +102,10 @@ describe('Expression', function () {
     it('should fail trying to call a non-function', function () {
       expect(function () { Parser.evaluate('f()', { f: 2 }); }).to.throw(Error);
     });
+
+    it('$x * $y_+$a1*$z - $b2', function () {
+      expect(Parser.evaluate('$x * $y_+$a1*$z - $b2', { $a1: 3, $b2: 5, $x: 7, $y_: 9, $z: 11 })).to.equal(91);
+    });
   });
 
   describe('substitute()', function () {
@@ -188,6 +192,48 @@ describe('Expression', function () {
     it('a or b ? c + d : e * f', function () {
       expect(Parser.parse('a or b ? c + d : e * f').variables()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
     });
+
+    it('$x * $y_+$a1*$z - $b2', function () {
+      expect(Parser.parse('$x * $y_+$a1*$z - $b2').variables()).to.include.members(['$a1', '$b2', '$x', '$y_', '$z']);
+    });
+
+    it('user.age + 2', function () {
+      expect(Parser.parse('user.age + 2').variables()).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: false } option', function () {
+      expect(Parser.parse('user.age + 2').variables({ withMembers: false })).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age + 2');
+      expect(expr.variables({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y ? x.y.z : default.z');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('user.age with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age');
+      expect(expr.variables({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x with { withMembers: true } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x']);
+    });
+
+    it('x with { withMembers: false } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.variables({ withMembers: false })).to.include.members(['x']);
+    });
   });
 
   describe('symbols()', function () {
@@ -208,6 +254,44 @@ describe('Expression', function () {
 
     it('a or b ? c + d : e * f', function () {
       expect(Parser.parse('a or b ? c + d : e * f').symbols()).to.include.members(['a', 'b', 'c', 'd', 'e', 'f']);
+    });
+
+    it('user.age + 2', function () {
+      expect(Parser.parse('user.age + 2').symbols()).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: false } option', function () {
+      expect(Parser.parse('user.age + 2').symbols({ withMembers: false })).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age + 2');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y ? x.y.z : default.z');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('user.age with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x with { withMembers: true } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x']);
+    });
+
+    it('x with { withMembers: false } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.symbols({ withMembers: false })).to.include.members(['x']);
     });
   });
 

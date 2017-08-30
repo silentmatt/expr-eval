@@ -1,5 +1,6 @@
 language: node_js
 node_js:
+  - "7"
   - "6"
   - "6.1"
   - "6.0"
@@ -12,3 +13,18 @@ node_js:
   - "0.12"
   - "0.11"
   - "iojs"
+
+before_install:
+  - if [ "$TRAVIS_NODE_VERSION" = "iojs" ]; then nvm install 6; fi
+  - if [ "$TRAVIS_NODE_VERSION" = "0.11" ]; then nvm install 6; fi
+  - if [ "$TRAVIS_NODE_VERSION" = "0.12" ]; then nvm install 6; fi
+
+install:
+  - npm install
+  - npm run build
+
+before_script:
+  - nvm use $TRAVIS_NODE_VERSION
+
+script:
+  - mocha

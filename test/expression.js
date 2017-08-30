@@ -223,7 +223,7 @@ describe('Expression', function () {
     });
 
     it('user.age + 2 with { withMembers: true } option', function () {
-      var expr = Parser.parse('user.age + 2')
+      var expr = Parser.parse('user.age + 2');
       expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
     });
   });

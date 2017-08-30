@@ -36,14 +36,14 @@ Expression.prototype.toString = function () {
 };
 
 Expression.prototype.symbols = function (options) {
-  options = options || {}
+  options = options || {};
   var vars = [];
   getSymbols(this.tokens, vars, options);
   return vars;
 };
 
 Expression.prototype.variables = function (options) {
-  options = options || {}
+  options = options || {};
   var vars = [];
   getSymbols(this.tokens, vars, options);
   var functions = this.functions;

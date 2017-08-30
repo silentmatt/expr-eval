@@ -196,6 +196,44 @@ describe('Expression', function () {
     it('$x * $y_+$a1*$z - $b2', function () {
       expect(Parser.parse('$x * $y_+$a1*$z - $b2').variables()).to.include.members(['$a1', '$b2', '$x', '$y_', '$z']);
     });
+
+    it('user.age + 2', function () {
+      expect(Parser.parse('user.age + 2').variables()).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: false } option', function () {
+      expect(Parser.parse('user.age + 2').variables({ withMembers: false })).to.include.members(['user']);
+    });
+
+    it('user.age + 2 with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age + 2');
+      expect(expr.variables({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y ? x.y.z : default.z');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('user.age with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age');
+      expect(expr.variables({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x with { withMembers: true } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.variables({ withMembers: true })).to.include.members(['x']);
+    });
+
+    it('x with { withMembers: false } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.variables({ withMembers: false })).to.include.members(['x']);
+    });
   });
 
   describe('symbols()', function () {
@@ -222,9 +260,38 @@ describe('Expression', function () {
       expect(Parser.parse('user.age + 2').symbols()).to.include.members(['user']);
     });
 
+    it('user.age + 2 with { withMembers: false } option', function () {
+      expect(Parser.parse('user.age + 2').symbols({ withMembers: false })).to.include.members(['user']);
+    });
+
     it('user.age + 2 with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age + 2');
       expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y ? x.y.z : default.z');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
+      var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x.y', 'x.y.z', 'default.z']);
+    });
+
+    it('user.age with { withMembers: true } option', function () {
+      var expr = Parser.parse('user.age');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['user.age']);
+    });
+
+    it('x with { withMembers: true } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.symbols({ withMembers: true })).to.include.members(['x']);
+    });
+
+    it('x with { withMembers: false } option', function () {
+      var expr = Parser.parse('x');
+      expect(expr.symbols({ withMembers: false })).to.include.members(['x']);
     });
   });
 

@@ -25,4 +25,8 @@ export default function getSymbols(tokens, symbols, options) {
       prevVar = null;
     }
   }
+
+  if (prevVar !== null && !contains(symbols, prevVar)) {
+    symbols.push(prevVar);
+  }
 }

@@ -59,6 +59,7 @@ export function orOperator(a, b) {
 export function inOperator(a, b) {
   return contains(b, a);
 }
+export { contains };
 
 export function sinh(a) {
   return ((Math.exp(a) - Math.exp(-a)) / 2);

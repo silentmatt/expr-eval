@@ -9,8 +9,13 @@ export default function getSymbols(tokens, symbols, options) {
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     if (item.type === IVAR && !contains(symbols, item.value)) {
-      if (prevVar !== null || !withMembers) {
+      if (!withMembers) {
         symbols.push(item.value);
+      } else if (prevVar !== null) {
+        if (!contains(symbols, prevVar)) {
+          symbols.push(prevVar);
+        }
+        prevVar = item.value;
       } else {
         prevVar = item.value;
       }

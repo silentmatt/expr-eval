@@ -106,6 +106,14 @@ describe('Expression', function () {
     it('$x * $y_+$a1*$z - $b2', function () {
       expect(Parser.evaluate('$x * $y_+$a1*$z - $b2', { $a1: 3, $b2: 5, $x: 7, $y_: 9, $z: 11 })).to.equal(91);
     });
+
+    it('max(conf.limits.lower, conf.limits.upper)', function () {
+      expect(Parser.evaluate('max(conf.limits.lower, conf.limits.upper)', { conf: { limits: { lower: 4, upper: 9 } } })).to.equal(9);
+    });
+
+    it('fn.max(conf.limits.lower, conf.limits.upper)', function () {
+      expect(Parser.evaluate('fn.max(conf.limits.lower, conf.limits.upper)', { fn: { max: Math.max }, conf: { limits: { lower: 4, upper: 9 } } })).to.equal(9);
+    });
   });
 
   describe('substitute()', function () {
@@ -233,6 +241,26 @@ describe('Expression', function () {
     it('x with { withMembers: false } option', function () {
       var expr = Parser.parse('x');
       expect(expr.variables({ withMembers: false })).to.include.members(['x']);
+    });
+
+    it('max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
+      var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
+      expect(expr.variables({ withMembers: false })).to.include.members(['conf']);
+    });
+
+    it('max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
+      var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
+      expect(expr.variables({ withMembers: true })).to.include.members(['conf.limits.lower', 'conf.limits.upper']);
+    });
+
+    it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
+      var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
+      expect(expr.variables({ withMembers: false })).to.include.members(['fn', 'conf']);
+    });
+
+    it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
+      var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
+      expect(expr.variables({ withMembers: true })).to.include.members(['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
     });
   });
 

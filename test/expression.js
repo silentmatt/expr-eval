@@ -183,138 +183,138 @@ describe('Expression', function () {
   describe('variables()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function () {
-      assert.deepStrictEqual(expr.variables(), ['x', 'y', 'z']);
+      assert.deepEqual(expr.variables(), ['x', 'y', 'z']);
     });
 
     it('["x", "z.y.x"]', function () {
-      assert.deepStrictEqual(expr.simplify({y: 4}).variables(), ['x', 'z']);
+      assert.deepEqual(expr.simplify({y: 4}).variables(), ['x', 'z']);
     });
 
     it('["x"]', function () {
-      assert.deepStrictEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables(), ['x']);
+      assert.deepEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables(), ['x']);
     });
 
     it('a or b ? c + d : e * f', function () {
-      assert.deepStrictEqual(Parser.parse('a or b ? c + d : e * f').variables(), ['a', 'b', 'c', 'd', 'e', 'f']);
+      assert.deepEqual(Parser.parse('a or b ? c + d : e * f').variables(), ['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
     it('$x * $y_+$a1*$z - $b2', function () {
-      assert.deepStrictEqual(Parser.parse('$x * $y_+$a1*$z - $b2').variables(), ['$x', '$y_', '$a1', '$z', '$b2']);
+      assert.deepEqual(Parser.parse('$x * $y_+$a1*$z - $b2').variables(), ['$x', '$y_', '$a1', '$z', '$b2']);
     });
 
     it('user.age + 2', function () {
-      assert.deepStrictEqual(Parser.parse('user.age + 2').variables(), ['user']);
+      assert.deepEqual(Parser.parse('user.age + 2').variables(), ['user']);
     });
 
     it('user.age + 2 with { withMembers: false } option', function () {
-      assert.deepStrictEqual(Parser.parse('user.age + 2').variables({ withMembers: false }), ['user']);
+      assert.deepEqual(Parser.parse('user.age + 2').variables({ withMembers: false }), ['user']);
     });
 
     it('user.age + 2 with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age + 2');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['user.age']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['user.age']);
     });
 
     it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y ? x.y.z : default.z');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
     });
 
     it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
     });
 
     it('user.age with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['user.age']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['user.age']);
     });
 
     it('x with { withMembers: true } option', function () {
       var expr = Parser.parse('x');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['x']);
     });
 
     it('x with { withMembers: false } option', function () {
       var expr = Parser.parse('x');
-      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['x']);
+      assert.deepEqual(expr.variables({ withMembers: false }), ['x']);
     });
 
     it('max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
       var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
-      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['conf']);
+      assert.deepEqual(expr.variables({ withMembers: false }), ['conf']);
     });
 
     it('max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
       var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['conf.limits.lower', 'conf.limits.upper']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['conf.limits.lower', 'conf.limits.upper']);
     });
 
     it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
       var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
-      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['fn', 'conf']);
+      assert.deepEqual(expr.variables({ withMembers: false }), ['fn', 'conf']);
     });
 
     it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
       var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
-      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
+      assert.deepEqual(expr.variables({ withMembers: true }), ['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
     });
   });
 
   describe('symbols()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function () {
-      assert.deepStrictEqual(expr.symbols(), ['x', 'y', 'atan2', 'z']);
+      assert.deepEqual(expr.symbols(), ['x', 'y', 'atan2', 'z']);
     });
 
     it('["x", "z.y.x"]', function () {
-      assert.deepStrictEqual(expr.simplify({y: 4}).symbols(), ['x', 'atan2', 'z']);
+      assert.deepEqual(expr.simplify({y: 4}).symbols(), ['x', 'atan2', 'z']);
     });
 
     it('["x"]', function () {
-      assert.deepStrictEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols(), ['x', 'atan2']);
+      assert.deepEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols(), ['x', 'atan2']);
     });
 
     it('a or b ? c + d : e * f', function () {
-      assert.deepStrictEqual(Parser.parse('a or b ? c + d : e * f').symbols(), ['a', 'b', 'c', 'd', 'e', 'f']);
+      assert.deepEqual(Parser.parse('a or b ? c + d : e * f').symbols(), ['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
     it('user.age + 2', function () {
-      assert.deepStrictEqual(Parser.parse('user.age + 2').symbols(), ['user']);
+      assert.deepEqual(Parser.parse('user.age + 2').symbols(), ['user']);
     });
 
     it('user.age + 2 with { withMembers: false } option', function () {
-      assert.deepStrictEqual(Parser.parse('user.age + 2').symbols({ withMembers: false }), ['user']);
+      assert.deepEqual(Parser.parse('user.age + 2').symbols({ withMembers: false }), ['user']);
     });
 
     it('user.age + 2 with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age + 2');
-      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['user.age']);
+      assert.deepEqual(expr.symbols({ withMembers: true }), ['user.age']);
     });
 
     it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y ? x.y.z : default.z');
-      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
+      assert.deepEqual(expr.symbols({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
     });
 
     it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
-      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
+      assert.deepEqual(expr.symbols({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
     });
 
     it('user.age with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age');
-      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['user.age']);
+      assert.deepEqual(expr.symbols({ withMembers: true }), ['user.age']);
     });
 
     it('x with { withMembers: true } option', function () {
       var expr = Parser.parse('x');
-      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x']);
+      assert.deepEqual(expr.symbols({ withMembers: true }), ['x']);
     });
 
     it('x with { withMembers: false } option', function () {
       var expr = Parser.parse('x');
-      assert.deepStrictEqual(expr.symbols({ withMembers: false }), ['x']);
+      assert.deepEqual(expr.symbols({ withMembers: false }), ['x']);
     });
   });
 
@@ -559,7 +559,7 @@ describe('Expression', function () {
         for (i = 0; i < 10; i++) {
           assert.ok(counts[i] >= 85 && counts[i] <= 115);
         }
-        assert.deepStrictEqual(Object.keys(counts).sort(), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        assert.deepEqual(Object.keys(counts).sort(), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
       });
     });
 

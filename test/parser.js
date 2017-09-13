@@ -235,28 +235,28 @@ describe('Parser', function () {
       });
 
       it('should parse valid variable names correctly', function () {
-        assert.deepStrictEqual(parser.parse('a').variables(), [ 'a' ]);
-        assert.deepStrictEqual(parser.parse('abc').variables(), [ 'abc' ]);
-        assert.deepStrictEqual(parser.parse('a+b').variables(), [ 'a', 'b' ]);
-        assert.deepStrictEqual(parser.parse('ab+c').variables(), [ 'ab', 'c' ]);
-        assert.deepStrictEqual(parser.parse('a1').variables(), [ 'a1' ]);
-        assert.deepStrictEqual(parser.parse('a_1').variables(), [ 'a_1' ]);
-        assert.deepStrictEqual(parser.parse('a_').variables(), [ 'a_' ]);
-        assert.deepStrictEqual(parser.parse('a_c').variables(), [ 'a_c' ]);
-        assert.deepStrictEqual(parser.parse('A').variables(), [ 'A' ]);
-        assert.deepStrictEqual(parser.parse('ABC').variables(), [ 'ABC' ]);
-        assert.deepStrictEqual(parser.parse('A+B').variables(), [ 'A', 'B' ]);
-        assert.deepStrictEqual(parser.parse('AB+C').variables(), [ 'AB', 'C' ]);
-        assert.deepStrictEqual(parser.parse('A1').variables(), [ 'A1' ]);
-        assert.deepStrictEqual(parser.parse('A_1').variables(), [ 'A_1' ]);
-        assert.deepStrictEqual(parser.parse('A_C').variables(), [ 'A_C' ]);
-        assert.deepStrictEqual(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables(), [ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
-        assert.deepStrictEqual(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables(), [ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
-        assert.deepStrictEqual(parser.parse('abc123+def456*ghi789/jkl0').variables(), [ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
-        assert.deepStrictEqual(parser.parse('$x').variables(), [ '$x' ]);
-        assert.deepStrictEqual(parser.parse('$xyz').variables(), [ '$xyz' ]);
-        assert.deepStrictEqual(parser.parse('$a_sdf').variables(), [ '$a_sdf' ]);
-        assert.deepStrictEqual(parser.parse('$xyz_123').variables(), [ '$xyz_123' ]);
+        assert.deepEqual(parser.parse('a').variables(), [ 'a' ]);
+        assert.deepEqual(parser.parse('abc').variables(), [ 'abc' ]);
+        assert.deepEqual(parser.parse('a+b').variables(), [ 'a', 'b' ]);
+        assert.deepEqual(parser.parse('ab+c').variables(), [ 'ab', 'c' ]);
+        assert.deepEqual(parser.parse('a1').variables(), [ 'a1' ]);
+        assert.deepEqual(parser.parse('a_1').variables(), [ 'a_1' ]);
+        assert.deepEqual(parser.parse('a_').variables(), [ 'a_' ]);
+        assert.deepEqual(parser.parse('a_c').variables(), [ 'a_c' ]);
+        assert.deepEqual(parser.parse('A').variables(), [ 'A' ]);
+        assert.deepEqual(parser.parse('ABC').variables(), [ 'ABC' ]);
+        assert.deepEqual(parser.parse('A+B').variables(), [ 'A', 'B' ]);
+        assert.deepEqual(parser.parse('AB+C').variables(), [ 'AB', 'C' ]);
+        assert.deepEqual(parser.parse('A1').variables(), [ 'A1' ]);
+        assert.deepEqual(parser.parse('A_1').variables(), [ 'A_1' ]);
+        assert.deepEqual(parser.parse('A_C').variables(), [ 'A_C' ]);
+        assert.deepEqual(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables(), [ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
+        assert.deepEqual(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables(), [ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
+        assert.deepEqual(parser.parse('abc123+def456*ghi789/jkl0').variables(), [ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
+        assert.deepEqual(parser.parse('$x').variables(), [ '$x' ]);
+        assert.deepEqual(parser.parse('$xyz').variables(), [ '$xyz' ]);
+        assert.deepEqual(parser.parse('$a_sdf').variables(), [ '$a_sdf' ]);
+        assert.deepEqual(parser.parse('$xyz_123').variables(), [ '$xyz_123' ]);
       });
 
       it('should not parse invalid variables', function () {

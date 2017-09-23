@@ -8,7 +8,7 @@ export interface Values {
 }
 
 export interface ParserOptions {
-  allowMemberAccess?: boolean,
+  allowMemberAccess?: boolean;
   operators?: {
     add?: boolean,
     comparison?: boolean,
@@ -46,7 +46,7 @@ export interface ParserOptions {
     exp?: boolean,
     length?: boolean,
     in?: boolean
-  }
+  };
 }
 
 export class Parser {

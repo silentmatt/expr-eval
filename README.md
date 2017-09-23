@@ -269,6 +269,7 @@ pyt(a, b)    | Alias for hypot
 pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
 atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 if(c, a, b)  | Function form of c ? a : b
+roundTo(x, n)  | Rounds x to n places after the decimal point.
 
 ### Tests ###
 

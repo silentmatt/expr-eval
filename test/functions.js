@@ -6,6 +6,61 @@ var assert = require('assert');
 var Parser = require('../dist/bundle').Parser;
 
 describe('Functions', function () {
+  describe('roundTo()', function () {
+    // Simple cases
+    it('should handle roundTo(663)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(663)'), 663);
+    });
+    it('should handle roundTo(663, 0)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(663, 0)'), 663);
+    });
+    it('should handle roundTo(662.79)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(662.79)'), 663);
+    });
+    it('should handle roundTo(662.79, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(662.79, 1)'), 662.8);
+    });
+    it('should handle roundTo(662.5, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(662.5, 1)'), 662.5);
+    });
+
+    // Negative values and exponents
+    it('should handle roundTo(54.1, -1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(54.1, -1)'), 50);
+    });
+    it('should handle roundTo(-23.67, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(-23.67, 1)'), -23.7);
+    });
+    it('should handle roundTo(-23.67, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(-23.67, 3)'), -23.670);
+    });
+
+    // Big numbers
+    it('should handle roundTo(3000000000000000000000000.1233, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(3000000000000000000000000.1233, 1)'), 3000000000000000000000000.1);
+    });
+    it('should handle roundTo(-3000000000000000000000000.1233, 1)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(-3000000000000000000000000.1233, 1)'), -3000000000000000000000000.1);
+    });
+    it('should handle roundTo(3.12345e14, -13)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(3.12345e14, -13)'), 3.1e14);
+    });
+
+    // Known problems in other parsers
+    // https://stackoverflow.com/a/12830454
+    it('should handle roundTo(1.005, 2)', function () {
+      assert.strictEqual(Parser.evaluate('roundTo(1.005, 2)'), 1.01);
+    });
+
+    // Failure to parse (NaN)
+    it('should make roundTo(-23, 1.2) NaN', function () {
+      assert.ok(isNaN(Parser.evaluate('roundTo(-23, 1.2)')));
+    });
+    it('should make roundTo(-23, "blah") NaN', function () {
+      assert.ok(isNaN(Parser.evaluate('roundTo(-23, "blah")')));
+    });
+  });
+
   describe('random()', function () {
     it('should return a number from zero to 1', function () {
       var expr = Parser.parse('random()');

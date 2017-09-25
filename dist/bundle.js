@@ -284,7 +284,7 @@ function expressionToString(tokens, toJS) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0];
+  return String(nstack[0]);
 }
 
 function escapeValue(v) {
@@ -1308,6 +1308,33 @@ function condition(cond, yep, nope) {
   return cond ? yep : nope;
 }
 
+/**
+* Decimal adjustment of a number.
+* From @escopecz.
+*
+* @param {Number} value The number.
+* @param {Integer} exp  The exponent (the 10 logarithm of the adjustment base).
+* @return {Number} The adjusted value.
+*/
+function roundTo(value, exp) {
+  // If the exp is undefined or zero...
+  if (typeof exp === 'undefined' || +exp === 0) {
+    return Math.round(value);
+  }
+  value = +value;
+  exp = -(+exp);
+  // If the value is not a number or the exp is not an integer...
+  if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+    return NaN;
+  }
+  // Shift
+  value = value.toString().split('e');
+  value = Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+  // Shift back
+  value = value.toString().split('e');
+  return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+}
+
 function Parser(options) {
   this.options = options || {};
   this.unaryOps = {
@@ -1374,7 +1401,8 @@ function Parser(options) {
     pow: Math.pow,
     atan2: Math.atan2,
     'if': condition,
-    gamma: gamma
+    gamma: gamma,
+    roundTo: roundTo
   };
 
   this.consts = {

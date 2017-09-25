@@ -2,7 +2,7 @@
 
 'use strict';
 
-var expect = require('chai').expect;
+var assert = require('assert');
 var Parser = require('../dist/bundle').Parser;
 
 describe('Parser', function () {
@@ -13,297 +13,297 @@ describe('Parser', function () {
     var parser = tcase.parser;
     describe(tcase.name, function () {
       it('should skip comments', function () {
-        expect(parser.evaluate('2/* comment */+/* another comment */3')).to.equal(5);
-        expect(parser.evaluate('2/* comment *///* another comment */3')).to.equal(2 / 3);
-        expect(parser.evaluate('/* comment at the beginning */2 + 3/* unterminated comment')).to.equal(5);
-        expect(parser.evaluate('2 +/* comment\n with\n multiple\n lines */3')).to.equal(5);
+        assert.strictEqual(parser.evaluate('2/* comment */+/* another comment */3'), 5);
+        assert.strictEqual(parser.evaluate('2/* comment *///* another comment */3'), 2 / 3);
+        assert.strictEqual(parser.evaluate('/* comment at the beginning */2 + 3/* unterminated comment'), 5);
+        assert.strictEqual(parser.evaluate('2 +/* comment\n with\n multiple\n lines */3'), 5);
       });
 
       it('should ignore whitespace', function () {
-        expect(parser.evaluate(' 3\r + \n \t 4 ')).to.equal(7);
+        assert.strictEqual(parser.evaluate(' 3\r + \n \t 4 '), 7);
       });
 
       it('should accept variables starting with E', function () {
-        expect(parser.parse('2 * ERGONOMIC').evaluate({ ERGONOMIC: 1000 })).to.equal(2000);
+        assert.strictEqual(parser.parse('2 * ERGONOMIC').evaluate({ ERGONOMIC: 1000 }), 2000);
       });
 
       it('should accept variables starting with PI', function () {
-        expect(parser.parse('1 / PITTSBURGH').evaluate({ PITTSBURGH: 2 })).to.equal(0.5);
+        assert.strictEqual(parser.parse('1 / PITTSBURGH').evaluate({ PITTSBURGH: 2 }), 0.5);
       });
 
       it('should fail on empty parentheses', function () {
-        expect(function () { parser.parse('5/()'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('5/()'); }, Error);
       });
 
       it('should fail on 5/', function () {
-        expect(function () { parser.parse('5/'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('5/'); }, Error);
       });
 
       it('should parse numbers', function () {
-        expect(parser.evaluate('123')).to.equal(123);
-        expect(parser.evaluate('123.')).to.equal(123);
-        expect(parser.evaluate('123.456')).to.equal(123.456);
-        expect(parser.evaluate('.456')).to.equal(0.456);
-        expect(parser.evaluate('0.456')).to.equal(0.456);
-        expect(parser.evaluate('0.')).to.equal(0);
-        expect(parser.evaluate('.0')).to.equal(0);
-        expect(parser.evaluate('123.+3')).to.equal(126);
-        expect(parser.evaluate('2/123')).to.equal(2 / 123);
+        assert.strictEqual(parser.evaluate('123'), 123);
+        assert.strictEqual(parser.evaluate('123.'), 123);
+        assert.strictEqual(parser.evaluate('123.456'), 123.456);
+        assert.strictEqual(parser.evaluate('.456'), 0.456);
+        assert.strictEqual(parser.evaluate('0.456'), 0.456);
+        assert.strictEqual(parser.evaluate('0.'), 0);
+        assert.strictEqual(parser.evaluate('.0'), 0);
+        assert.strictEqual(parser.evaluate('123.+3'), 126);
+        assert.strictEqual(parser.evaluate('2/123'), 2 / 123);
       });
 
       it('should parse numbers using scientific notation', function () {
-        expect(parser.evaluate('123e2')).to.equal(12300);
-        expect(parser.evaluate('123E2')).to.equal(12300);
-        expect(parser.evaluate('123e12')).to.equal(123000000000000);
-        expect(parser.evaluate('123e+12')).to.equal(123000000000000);
-        expect(parser.evaluate('123E+12')).to.equal(123000000000000);
-        expect(parser.evaluate('123e-12')).to.equal(0.000000000123);
-        expect(parser.evaluate('123E-12')).to.equal(0.000000000123);
-        expect(parser.evaluate('1.7e308')).to.equal(1.7e308);
-        expect(parser.evaluate('1.7e-308')).to.equal(1.7e-308);
-        expect(parser.evaluate('123.e3')).to.equal(123000);
-        expect(parser.evaluate('123.456e+1')).to.equal(1234.56);
-        expect(parser.evaluate('.456e-3')).to.equal(0.000456);
-        expect(parser.evaluate('0.456')).to.equal(0.456);
-        expect(parser.evaluate('0e3')).to.equal(0);
-        expect(parser.evaluate('0e-3')).to.equal(0);
-        expect(parser.evaluate('0e+3')).to.equal(0);
-        expect(parser.evaluate('.0e+3')).to.equal(0);
-        expect(parser.evaluate('.0e-3')).to.equal(0);
-        expect(parser.evaluate('123e5+4')).to.equal(12300004);
-        expect(parser.evaluate('123e+5+4')).to.equal(12300004);
-        expect(parser.evaluate('123e-5+4')).to.equal(4.00123);
-        expect(parser.evaluate('123e0')).to.equal(123);
-        expect(parser.evaluate('123e01')).to.equal(1230);
-        expect(parser.evaluate('123e+00000000002')).to.equal(12300);
-        expect(parser.evaluate('123e-00000000002')).to.equal(1.23);
-        expect(parser.evaluate('e1', { e1: 42 })).to.equal(42);
-        expect(parser.evaluate('e+1', { e: 12 })).to.equal(13);
+        assert.strictEqual(parser.evaluate('123e2'), 12300);
+        assert.strictEqual(parser.evaluate('123E2'), 12300);
+        assert.strictEqual(parser.evaluate('123e12'), 123000000000000);
+        assert.strictEqual(parser.evaluate('123e+12'), 123000000000000);
+        assert.strictEqual(parser.evaluate('123E+12'), 123000000000000);
+        assert.strictEqual(parser.evaluate('123e-12'), 0.000000000123);
+        assert.strictEqual(parser.evaluate('123E-12'), 0.000000000123);
+        assert.strictEqual(parser.evaluate('1.7e308'), 1.7e308);
+        assert.strictEqual(parser.evaluate('1.7e-308'), 1.7e-308);
+        assert.strictEqual(parser.evaluate('123.e3'), 123000);
+        assert.strictEqual(parser.evaluate('123.456e+1'), 1234.56);
+        assert.strictEqual(parser.evaluate('.456e-3'), 0.000456);
+        assert.strictEqual(parser.evaluate('0.456'), 0.456);
+        assert.strictEqual(parser.evaluate('0e3'), 0);
+        assert.strictEqual(parser.evaluate('0e-3'), 0);
+        assert.strictEqual(parser.evaluate('0e+3'), 0);
+        assert.strictEqual(parser.evaluate('.0e+3'), 0);
+        assert.strictEqual(parser.evaluate('.0e-3'), 0);
+        assert.strictEqual(parser.evaluate('123e5+4'), 12300004);
+        assert.strictEqual(parser.evaluate('123e+5+4'), 12300004);
+        assert.strictEqual(parser.evaluate('123e-5+4'), 4.00123);
+        assert.strictEqual(parser.evaluate('123e0'), 123);
+        assert.strictEqual(parser.evaluate('123e01'), 1230);
+        assert.strictEqual(parser.evaluate('123e+00000000002'), 12300);
+        assert.strictEqual(parser.evaluate('123e-00000000002'), 1.23);
+        assert.strictEqual(parser.evaluate('e1', { e1: 42 }), 42);
+        assert.strictEqual(parser.evaluate('e+1', { e: 12 }), 13);
       });
 
       it('should fail on invalid numbers', function () {
-        expect(function () { parser.parse('123..'); }).to.throw(Error);
-        expect(function () { parser.parse('0..123'); }).to.throw(Error);
-        expect(function () { parser.parse('0..'); }).to.throw(Error);
-        expect(function () { parser.parse('.0.'); }).to.throw(Error);
-        expect(function () { parser.parse('.'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e+'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e-'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e++4'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e--4'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e+-4'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e4-'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23ee4'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23ee.4'); }).to.throw(Error);
-        expect(function () { parser.parse('1.23e4.0'); }).to.throw(Error);
-        expect(function () { parser.parse('123e.4'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('123..'); }, Error);
+        assert.throws(function () { parser.parse('0..123'); }, Error);
+        assert.throws(function () { parser.parse('0..'); }, Error);
+        assert.throws(function () { parser.parse('.0.'); }, Error);
+        assert.throws(function () { parser.parse('.'); }, Error);
+        assert.throws(function () { parser.parse('1.23e'); }, Error);
+        assert.throws(function () { parser.parse('1.23e+'); }, Error);
+        assert.throws(function () { parser.parse('1.23e-'); }, Error);
+        assert.throws(function () { parser.parse('1.23e++4'); }, Error);
+        assert.throws(function () { parser.parse('1.23e--4'); }, Error);
+        assert.throws(function () { parser.parse('1.23e+-4'); }, Error);
+        assert.throws(function () { parser.parse('1.23e4-'); }, Error);
+        assert.throws(function () { parser.parse('1.23ee4'); }, Error);
+        assert.throws(function () { parser.parse('1.23ee.4'); }, Error);
+        assert.throws(function () { parser.parse('1.23e4.0'); }, Error);
+        assert.throws(function () { parser.parse('123e.4'); }, Error);
       });
 
       it('should parse hexadecimal integers correctly', function () {
-        expect(parser.evaluate('0x0')).to.equal(0x0);
-        expect(parser.evaluate('0x1')).to.equal(0x1);
-        expect(parser.evaluate('0xA')).to.equal(0xA);
-        expect(parser.evaluate('0xF')).to.equal(0xF);
-        expect(parser.evaluate('0x123')).to.equal(0x123);
-        expect(parser.evaluate('0x123ABCD')).to.equal(0x123ABCD);
-        expect(parser.evaluate('0xDEADBEEF')).to.equal(0xDEADBEEF);
-        expect(parser.evaluate('0xdeadbeef')).to.equal(0xdeadbeef);
-        expect(parser.evaluate('0xABCDEF')).to.equal(0xABCDEF);
-        expect(parser.evaluate('0xabcdef')).to.equal(0xABCDEF);
-        expect(parser.evaluate('0x1e+4')).to.equal(0x1e + 4);
-        expect(parser.evaluate('0x1E+4')).to.equal(0x1e + 4);
-        expect(parser.evaluate('0x1e-4')).to.equal(0x1e - 4);
-        expect(parser.evaluate('0x1E-4')).to.equal(0x1e - 4);
-        expect(parser.evaluate('0xFFFFFFFF')).to.equal(Math.pow(2, 32) - 1);
-        expect(parser.evaluate('0x100000000')).to.equal(Math.pow(2, 32));
-        expect(parser.evaluate('0x1FFFFFFFFFFFFF')).to.equal(Math.pow(2, 53) - 1);
-        expect(parser.evaluate('0x20000000000000')).to.equal(Math.pow(2, 53));
+        assert.strictEqual(parser.evaluate('0x0'), 0x0);
+        assert.strictEqual(parser.evaluate('0x1'), 0x1);
+        assert.strictEqual(parser.evaluate('0xA'), 0xA);
+        assert.strictEqual(parser.evaluate('0xF'), 0xF);
+        assert.strictEqual(parser.evaluate('0x123'), 0x123);
+        assert.strictEqual(parser.evaluate('0x123ABCD'), 0x123ABCD);
+        assert.strictEqual(parser.evaluate('0xDEADBEEF'), 0xDEADBEEF);
+        assert.strictEqual(parser.evaluate('0xdeadbeef'), 0xdeadbeef);
+        assert.strictEqual(parser.evaluate('0xABCDEF'), 0xABCDEF);
+        assert.strictEqual(parser.evaluate('0xabcdef'), 0xABCDEF);
+        assert.strictEqual(parser.evaluate('0x1e+4'), 0x1e + 4);
+        assert.strictEqual(parser.evaluate('0x1E+4'), 0x1e + 4);
+        assert.strictEqual(parser.evaluate('0x1e-4'), 0x1e - 4);
+        assert.strictEqual(parser.evaluate('0x1E-4'), 0x1e - 4);
+        assert.strictEqual(parser.evaluate('0xFFFFFFFF'), Math.pow(2, 32) - 1);
+        assert.strictEqual(parser.evaluate('0x100000000'), Math.pow(2, 32));
+        assert.strictEqual(parser.evaluate('0x1FFFFFFFFFFFFF'), Math.pow(2, 53) - 1);
+        assert.strictEqual(parser.evaluate('0x20000000000000'), Math.pow(2, 53));
       });
 
       it('should parse binary integers correctly', function () {
-        expect(parser.evaluate('0b0')).to.equal(0);
-        expect(parser.evaluate('0b1')).to.equal(1);
-        expect(parser.evaluate('0b01')).to.equal(1);
-        expect(parser.evaluate('0b10')).to.equal(2);
-        expect(parser.evaluate('0b100')).to.equal(4);
-        expect(parser.evaluate('0b101')).to.equal(5);
-        expect(parser.evaluate('0b10101')).to.equal(21);
-        expect(parser.evaluate('0b10111')).to.equal(23);
-        expect(parser.evaluate('0b11111')).to.equal(31);
-        expect(parser.evaluate('0b11111111111111111111111111111111')).to.equal(Math.pow(2, 32) - 1);
-        expect(parser.evaluate('0b100000000000000000000000000000000')).to.equal(Math.pow(2, 32));
-        expect(parser.evaluate('0b11111111111111111111111111111111111111111111111111111')).to.equal(Math.pow(2, 53) - 1);
-        expect(parser.evaluate('0b100000000000000000000000000000000000000000000000000000')).to.equal(Math.pow(2, 53));
+        assert.strictEqual(parser.evaluate('0b0'), 0);
+        assert.strictEqual(parser.evaluate('0b1'), 1);
+        assert.strictEqual(parser.evaluate('0b01'), 1);
+        assert.strictEqual(parser.evaluate('0b10'), 2);
+        assert.strictEqual(parser.evaluate('0b100'), 4);
+        assert.strictEqual(parser.evaluate('0b101'), 5);
+        assert.strictEqual(parser.evaluate('0b10101'), 21);
+        assert.strictEqual(parser.evaluate('0b10111'), 23);
+        assert.strictEqual(parser.evaluate('0b11111'), 31);
+        assert.strictEqual(parser.evaluate('0b11111111111111111111111111111111'), Math.pow(2, 32) - 1);
+        assert.strictEqual(parser.evaluate('0b100000000000000000000000000000000'), Math.pow(2, 32));
+        assert.strictEqual(parser.evaluate('0b11111111111111111111111111111111111111111111111111111'), Math.pow(2, 53) - 1);
+        assert.strictEqual(parser.evaluate('0b100000000000000000000000000000000000000000000000000000'), Math.pow(2, 53));
       });
 
       it('should fail on invalid hexadecimal numbers', function () {
-        expect(function () { parser.parse('0x'); }).to.throw(Error);
-        expect(function () { parser.parse('0x + 1'); }).to.throw(Error);
-        expect(function () { parser.parse('0x1.23'); }).to.throw(Error);
-        expect(function () { parser.parse('0xG'); }).to.throw(Error);
-        expect(function () { parser.parse('0xx0'); }).to.throw(Error);
-        expect(function () { parser.parse('0x1g'); }).to.throw(Error);
-        expect(function () { parser.parse('1x0'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('0x'); }, Error);
+        assert.throws(function () { parser.parse('0x + 1'); }, Error);
+        assert.throws(function () { parser.parse('0x1.23'); }, Error);
+        assert.throws(function () { parser.parse('0xG'); }, Error);
+        assert.throws(function () { parser.parse('0xx0'); }, Error);
+        assert.throws(function () { parser.parse('0x1g'); }, Error);
+        assert.throws(function () { parser.parse('1x0'); }, Error);
       });
 
       it('should fail on invalid binary numbers', function () {
-        expect(function () { parser.parse('0b'); }).to.throw(Error);
-        expect(function () { parser.parse('0b + 1'); }).to.throw(Error);
-        expect(function () { parser.parse('0b1.1'); }).to.throw(Error);
-        expect(function () { parser.parse('0b2'); }).to.throw(Error);
-        expect(function () { parser.parse('0bb0'); }).to.throw(Error);
-        expect(function () { parser.parse('0b1e+1'); }).to.throw(Error);
-        expect(function () { parser.parse('1b0'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('0b'); }, Error);
+        assert.throws(function () { parser.parse('0b + 1'); }, Error);
+        assert.throws(function () { parser.parse('0b1.1'); }, Error);
+        assert.throws(function () { parser.parse('0b2'); }, Error);
+        assert.throws(function () { parser.parse('0bb0'); }, Error);
+        assert.throws(function () { parser.parse('0b1e+1'); }, Error);
+        assert.throws(function () { parser.parse('1b0'); }, Error);
       });
 
       it('should fail on unknown characters', function () {
-        expect(function () { parser.parse('1 + @'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('1 + @'); }, Error);
       });
 
       it('should fail with partial operators', function () {
-        expect(function () { parser.parse('"a" | "b"'); }).to.throw(Error);
-        expect(function () { parser.parse('2 = 2'); }).to.throw(Error);
-        expect(function () { parser.parse('2 ! 3'); }).to.throw(Error);
-        expect(function () { parser.parse('1 o 0'); }).to.throw(Error);
-        expect(function () { parser.parse('1 an 2'); }).to.throw(Error);
-        expect(function () { parser.parse('1 a 2'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('"a" | "b"'); }, Error);
+        assert.throws(function () { parser.parse('2 = 2'); }, Error);
+        assert.throws(function () { parser.parse('2 ! 3'); }, Error);
+        assert.throws(function () { parser.parse('1 o 0'); }, Error);
+        assert.throws(function () { parser.parse('1 an 2'); }, Error);
+        assert.throws(function () { parser.parse('1 a 2'); }, Error);
       });
 
       it('should parse strings', function () {
-        expect(parser.evaluate('\'asdf\'')).to.equal('asdf');
-        expect(parser.evaluate('"asdf"')).to.equal('asdf');
-        expect(parser.evaluate('""')).to.equal('');
-        expect(parser.evaluate('\'\'')).to.equal('');
-        expect(parser.evaluate('"  "')).to.equal('  ');
-        expect(parser.evaluate('"a\nb\tc"')).to.equal('a\nb\tc');
-        expect(parser.evaluate('"Nested \'single quotes\'"')).to.equal('Nested \'single quotes\'');
-        expect(parser.evaluate('\'Nested "double quotes"\'')).to.equal('Nested "double quotes"');
-        expect(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\'')).to.equal('Single quotes \'inside\' single quotes');
-        expect(parser.evaluate('"Double quotes \\"inside\\" double quotes"')).to.equal('Double quotes "inside" double quotes');
-        expect(parser.evaluate('"\n"')).to.equal('\n');
-        expect(parser.evaluate('"\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"')).to.equal('\'"\\/\b\f\n\r\t\u1234');
-        expect(parser.evaluate('"\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"')).to.equal('\'"\\/\b\f\n\r\t\u1234');
-        expect(parser.evaluate('\'\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234\'')).to.equal('\'"\\/\b\f\n\r\t\u1234');
-        expect(parser.evaluate('\'\\\'"\\\\\\/\\b\\f\\n\\r\\t\\u1234\'')).to.equal('\'"\\/\b\f\n\r\t\u1234');
-        expect(parser.evaluate('"\\uFFFF"')).to.equal('\uFFFF');
-        expect(parser.evaluate('"\\u0123"')).to.equal('\u0123');
-        expect(parser.evaluate('"\\u4567"')).to.equal('\u4567');
-        expect(parser.evaluate('"\\u89ab"')).to.equal('\u89ab');
-        expect(parser.evaluate('"\\ucdef"')).to.equal('\ucdef');
-        expect(parser.evaluate('"\\uABCD"')).to.equal('\uABCD');
-        expect(parser.evaluate('"\\uEF01"')).to.equal('\uEF01');
-        expect(parser.evaluate('"\\u11111"')).to.equal('\u11111');
+        assert.strictEqual(parser.evaluate('\'asdf\''), 'asdf');
+        assert.strictEqual(parser.evaluate('"asdf"'), 'asdf');
+        assert.strictEqual(parser.evaluate('""'), '');
+        assert.strictEqual(parser.evaluate('\'\''), '');
+        assert.strictEqual(parser.evaluate('"  "'), '  ');
+        assert.strictEqual(parser.evaluate('"a\nb\tc"'), 'a\nb\tc');
+        assert.strictEqual(parser.evaluate('"Nested \'single quotes\'"'), 'Nested \'single quotes\'');
+        assert.strictEqual(parser.evaluate('\'Nested "double quotes"\''), 'Nested "double quotes"');
+        assert.strictEqual(parser.evaluate('\'Single quotes \\\'inside\\\' single quotes\''), 'Single quotes \'inside\' single quotes');
+        assert.strictEqual(parser.evaluate('"Double quotes \\"inside\\" double quotes"'), 'Double quotes "inside" double quotes');
+        assert.strictEqual(parser.evaluate('"\n"'), '\n');
+        assert.strictEqual(parser.evaluate('"\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"'), '\'"\\/\b\f\n\r\t\u1234');
+        assert.strictEqual(parser.evaluate('"\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234"'), '\'"\\/\b\f\n\r\t\u1234');
+        assert.strictEqual(parser.evaluate('\'\\\'\\"\\\\\\/\\b\\f\\n\\r\\t\\u1234\''), '\'"\\/\b\f\n\r\t\u1234');
+        assert.strictEqual(parser.evaluate('\'\\\'"\\\\\\/\\b\\f\\n\\r\\t\\u1234\''), '\'"\\/\b\f\n\r\t\u1234');
+        assert.strictEqual(parser.evaluate('"\\uFFFF"'), '\uFFFF');
+        assert.strictEqual(parser.evaluate('"\\u0123"'), '\u0123');
+        assert.strictEqual(parser.evaluate('"\\u4567"'), '\u4567');
+        assert.strictEqual(parser.evaluate('"\\u89ab"'), '\u89ab');
+        assert.strictEqual(parser.evaluate('"\\ucdef"'), '\ucdef');
+        assert.strictEqual(parser.evaluate('"\\uABCD"'), '\uABCD');
+        assert.strictEqual(parser.evaluate('"\\uEF01"'), '\uEF01');
+        assert.strictEqual(parser.evaluate('"\\u11111"'), '\u11111');
       });
 
       it('should fail on bad strings', function () {
-        expect(function () { parser.parse('\'asdf"'); }).to.throw(Error);
-        expect(function () { parser.parse('"asdf\''); }).to.throw(Error);
-        expect(function () { parser.parse('"asdf'); }).to.throw(Error);
-        expect(function () { parser.parse('\'asdf'); }).to.throw(Error);
-        expect(function () { parser.parse('\'asdf\\'); }).to.throw(Error);
-        expect(function () { parser.parse('\''); }).to.throw(Error);
-        expect(function () { parser.parse('"'); }).to.throw(Error);
-        expect(function () { parser.parse('"\\x"'); }).to.throw(Error);
-        expect(function () { parser.parse('"\\u123"'); }).to.throw(Error);
-        expect(function () { parser.parse('"\\u12"'); }).to.throw(Error);
-        expect(function () { parser.parse('"\\u1"'); }).to.throw(Error);
-        expect(function () { parser.parse('"\\uGGGG"'); }).to.throw(Error);
+        assert.throws(function () { parser.parse('\'asdf"'); }, Error);
+        assert.throws(function () { parser.parse('"asdf\''); }, Error);
+        assert.throws(function () { parser.parse('"asdf'); }, Error);
+        assert.throws(function () { parser.parse('\'asdf'); }, Error);
+        assert.throws(function () { parser.parse('\'asdf\\'); }, Error);
+        assert.throws(function () { parser.parse('\''); }, Error);
+        assert.throws(function () { parser.parse('"'); }, Error);
+        assert.throws(function () { parser.parse('"\\x"'); }, Error);
+        assert.throws(function () { parser.parse('"\\u123"'); }, Error);
+        assert.throws(function () { parser.parse('"\\u12"'); }, Error);
+        assert.throws(function () { parser.parse('"\\u1"'); }, Error);
+        assert.throws(function () { parser.parse('"\\uGGGG"'); }, Error);
       });
 
       it('should parse operators that look like functions as function calls', function () {
-        expect(parser.parse('sin 2^3').toString()).to.equal('(sin (2 ^ 3))');
-        expect(parser.parse('sin(2)^3').toString()).to.equal('((sin 2) ^ 3)');
-        expect(parser.parse('sin 2^3').evaluate()).to.equal(Math.sin(Math.pow(2, 3)));
-        expect(parser.parse('sin(2)^3').evaluate()).to.equal(Math.pow(Math.sin(2), 3));
+        assert.strictEqual(parser.parse('sin 2^3').toString(), '(sin (2 ^ 3))');
+        assert.strictEqual(parser.parse('sin(2)^3').toString(), '((sin 2) ^ 3)');
+        assert.strictEqual(parser.parse('sin 2^3').evaluate(), Math.sin(Math.pow(2, 3)));
+        assert.strictEqual(parser.parse('sin(2)^3').evaluate(), Math.pow(Math.sin(2), 3));
       });
 
       it('unary + and - should not be parsed as function calls', function () {
-        expect(parser.parse('-2^3').toString()).to.equal('(-(2 ^ 3))');
-        expect(parser.parse('-(2)^3').toString()).to.equal('(-(2 ^ 3))');
+        assert.strictEqual(parser.parse('-2^3').toString(), '(-(2 ^ 3))');
+        assert.strictEqual(parser.parse('-(2)^3').toString(), '(-(2 ^ 3))');
       });
 
       it('should treat ∙ and • as * operators', function () {
-        expect(parser.parse('2 ∙ 3').toString()).to.equal('(2 * 3)');
-        expect(parser.parse('4 • 5').toString()).to.equal('(4 * 5)');
+        assert.strictEqual(parser.parse('2 ∙ 3').toString(), '(2 * 3)');
+        assert.strictEqual(parser.parse('4 • 5').toString(), '(4 * 5)');
       });
 
       it('should parse variables that start with operators', function () {
-        expect(parser.parse('org > 5').toString()).to.equal('(org > 5)');
-        expect(parser.parse('android * 2').toString()).to.equal('(android * 2)');
-        expect(parser.parse('single == 1').toString()).to.equal('(single == 1)');
+        assert.strictEqual(parser.parse('org > 5').toString(), '(org > 5)');
+        assert.strictEqual(parser.parse('android * 2').toString(), '(android * 2)');
+        assert.strictEqual(parser.parse('single == 1').toString(), '(single == 1)');
       });
 
       it('should parse valid variable names correctly', function () {
-        expect(parser.parse('a').variables()).to.deep.equal([ 'a' ]);
-        expect(parser.parse('abc').variables()).to.deep.equal([ 'abc' ]);
-        expect(parser.parse('a+b').variables()).to.deep.equal([ 'a', 'b' ]);
-        expect(parser.parse('ab+c').variables()).to.deep.equal([ 'ab', 'c' ]);
-        expect(parser.parse('a1').variables()).to.deep.equal([ 'a1' ]);
-        expect(parser.parse('a_1').variables()).to.deep.equal([ 'a_1' ]);
-        expect(parser.parse('a_').variables()).to.deep.equal([ 'a_' ]);
-        expect(parser.parse('a_c').variables()).to.deep.equal([ 'a_c' ]);
-        expect(parser.parse('A').variables()).to.deep.equal([ 'A' ]);
-        expect(parser.parse('ABC').variables()).to.deep.equal([ 'ABC' ]);
-        expect(parser.parse('A+B').variables()).to.deep.equal([ 'A', 'B' ]);
-        expect(parser.parse('AB+C').variables()).to.deep.equal([ 'AB', 'C' ]);
-        expect(parser.parse('A1').variables()).to.deep.equal([ 'A1' ]);
-        expect(parser.parse('A_1').variables()).to.deep.equal([ 'A_1' ]);
-        expect(parser.parse('A_C').variables()).to.deep.equal([ 'A_C' ]);
-        expect(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables()).to.deep.equal([ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
-        expect(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables()).to.deep.equal([ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
-        expect(parser.parse('abc123+def456*ghi789/jkl0').variables()).to.deep.equal([ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
-        expect(parser.parse('$x').variables()).to.deep.equal([ '$x' ]);
-        expect(parser.parse('$xyz').variables()).to.deep.equal([ '$xyz' ]);
-        expect(parser.parse('$a_sdf').variables()).to.deep.equal([ '$a_sdf' ]);
-        expect(parser.parse('$xyz_123').variables()).to.deep.equal([ '$xyz_123' ]);
+        assert.deepEqual(parser.parse('a').variables(), [ 'a' ]);
+        assert.deepEqual(parser.parse('abc').variables(), [ 'abc' ]);
+        assert.deepEqual(parser.parse('a+b').variables(), [ 'a', 'b' ]);
+        assert.deepEqual(parser.parse('ab+c').variables(), [ 'ab', 'c' ]);
+        assert.deepEqual(parser.parse('a1').variables(), [ 'a1' ]);
+        assert.deepEqual(parser.parse('a_1').variables(), [ 'a_1' ]);
+        assert.deepEqual(parser.parse('a_').variables(), [ 'a_' ]);
+        assert.deepEqual(parser.parse('a_c').variables(), [ 'a_c' ]);
+        assert.deepEqual(parser.parse('A').variables(), [ 'A' ]);
+        assert.deepEqual(parser.parse('ABC').variables(), [ 'ABC' ]);
+        assert.deepEqual(parser.parse('A+B').variables(), [ 'A', 'B' ]);
+        assert.deepEqual(parser.parse('AB+C').variables(), [ 'AB', 'C' ]);
+        assert.deepEqual(parser.parse('A1').variables(), [ 'A1' ]);
+        assert.deepEqual(parser.parse('A_1').variables(), [ 'A_1' ]);
+        assert.deepEqual(parser.parse('A_C').variables(), [ 'A_C' ]);
+        assert.deepEqual(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables(), [ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
+        assert.deepEqual(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables(), [ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
+        assert.deepEqual(parser.parse('abc123+def456*ghi789/jkl0').variables(), [ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
+        assert.deepEqual(parser.parse('$x').variables(), [ '$x' ]);
+        assert.deepEqual(parser.parse('$xyz').variables(), [ '$xyz' ]);
+        assert.deepEqual(parser.parse('$a_sdf').variables(), [ '$a_sdf' ]);
+        assert.deepEqual(parser.parse('$xyz_123').variables(), [ '$xyz_123' ]);
       });
 
       it('should not parse invalid variables', function () {
-        expect(function () { parser.parse('a$x'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('ab$'); }).to.throw(/parse error/);
+        assert.throws(function () { parser.parse('a$x'); }, /parse error/);
+        assert.throws(function () { parser.parse('ab$'); }, /parse error/);
       });
 
       it('should not parse a single $ as a variable', function () {
-        expect(function () { parser.parse('$'); }).to.throw(/parse error/);
+        assert.throws(function () { parser.parse('$'); }, /parse error/);
       });
 
       it('should not allow leading _ in variable names', function () {
-        expect(function () { parser.parse('_'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('_ab'); }).to.throw(/parse error/);
+        assert.throws(function () { parser.parse('_'); }, /parse error/);
+        assert.throws(function () { parser.parse('_ab'); }, /parse error/);
       });
 
       it('should not allow leading digits in variable names', function () {
-        expect(function () { parser.parse('1a'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('1_'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('1_a'); }).to.throw(/parse error/);
+        assert.throws(function () { parser.parse('1a'); }, /parse error/);
+        assert.throws(function () { parser.parse('1_'); }, /parse error/);
+        assert.throws(function () { parser.parse('1_a'); }, /parse error/);
       });
 
       it('should not allow leading digits or _ after $ in variable names', function () {
-        expect(function () { parser.parse('$0'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('$1a'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('$_'); }).to.throw(/parse error/);
-        expect(function () { parser.parse('$_x'); }).to.throw(/parse error/);
+        assert.throws(function () { parser.parse('$0'); }, /parse error/);
+        assert.throws(function () { parser.parse('$1a'); }, /parse error/);
+        assert.throws(function () { parser.parse('$_'); }, /parse error/);
+        assert.throws(function () { parser.parse('$_x'); }, /parse error/);
       });
 
       it('should track token positions correctly', function () {
-        expect(function () { parser.parse('@23'); }).to.throw(/parse error \[1:1]/);
-        expect(function () { parser.parse('\n@23'); }).to.throw(/parse error \[2:1]/);
-        expect(function () { parser.parse('1@3'); }).to.throw(/parse error \[1:2]/);
-        expect(function () { parser.parse('12@'); }).to.throw(/parse error \[1:3]/);
-        expect(function () { parser.parse('12@\n'); }).to.throw(/parse error \[1:3]/);
-        expect(function () { parser.parse('@23 +\n45 +\n6789'); }).to.throw(/parse error \[1:1]/);
-        expect(function () { parser.parse('1@3 +\n45 +\n6789'); }).to.throw(/parse error \[1:2]/);
-        expect(function () { parser.parse('12@ +\n45 +\n6789'); }).to.throw(/parse error \[1:3]/);
-        expect(function () { parser.parse('123 +\n@5 +\n6789'); }).to.throw(/parse error \[2:1]/);
-        expect(function () { parser.parse('123 +\n4@ +\n6789'); }).to.throw(/parse error \[2:2]/);
-        expect(function () { parser.parse('123 +\n45@+\n6789'); }).to.throw(/parse error \[2:3]/);
-        expect(function () { parser.parse('123 +\n45 +\n@789'); }).to.throw(/parse error \[3:1]/);
-        expect(function () { parser.parse('123 +\n45 +\n6@89'); }).to.throw(/parse error \[3:2]/);
-        expect(function () { parser.parse('123 +\n45 +\n67@9'); }).to.throw(/parse error \[3:3]/);
-        expect(function () { parser.parse('123 +\n45 +\n679@'); }).to.throw(/parse error \[3:4]/);
-        expect(function () { parser.parse('123 +\n\n679@'); }).to.throw(/parse error \[3:4]/);
-        expect(function () { parser.parse('123 +\n\n\n\n\n679@'); }).to.throw(/parse error \[6:4]/);
+        assert.throws(function () { parser.parse('@23'); }, /parse error \[1:1]/);
+        assert.throws(function () { parser.parse('\n@23'); }, /parse error \[2:1]/);
+        assert.throws(function () { parser.parse('1@3'); }, /parse error \[1:2]/);
+        assert.throws(function () { parser.parse('12@'); }, /parse error \[1:3]/);
+        assert.throws(function () { parser.parse('12@\n'); }, /parse error \[1:3]/);
+        assert.throws(function () { parser.parse('@23 +\n45 +\n6789'); }, /parse error \[1:1]/);
+        assert.throws(function () { parser.parse('1@3 +\n45 +\n6789'); }, /parse error \[1:2]/);
+        assert.throws(function () { parser.parse('12@ +\n45 +\n6789'); }, /parse error \[1:3]/);
+        assert.throws(function () { parser.parse('123 +\n@5 +\n6789'); }, /parse error \[2:1]/);
+        assert.throws(function () { parser.parse('123 +\n4@ +\n6789'); }, /parse error \[2:2]/);
+        assert.throws(function () { parser.parse('123 +\n45@+\n6789'); }, /parse error \[2:3]/);
+        assert.throws(function () { parser.parse('123 +\n45 +\n@789'); }, /parse error \[3:1]/);
+        assert.throws(function () { parser.parse('123 +\n45 +\n6@89'); }, /parse error \[3:2]/);
+        assert.throws(function () { parser.parse('123 +\n45 +\n67@9'); }, /parse error \[3:3]/);
+        assert.throws(function () { parser.parse('123 +\n45 +\n679@'); }, /parse error \[3:4]/);
+        assert.throws(function () { parser.parse('123 +\n\n679@'); }, /parse error \[3:4]/);
+        assert.throws(function () { parser.parse('123 +\n\n\n\n\n679@'); }, /parse error \[6:4]/);
       });
 
       it('should allow operators to be disabled', function () {
@@ -315,12 +315,12 @@ describe('Parser', function () {
             divide: false
           }
         });
-        expect(function () { parser.parse('+1'); }).to.throw(/\+/);
-        expect(function () { parser.parse('1 + 2'); }).to.throw(/\+/);
-        expect(parser.parse('sin(0)').toString()).to.equal('sin(0)');
-        expect(function () { parser.evaluate('sin(0)'); }).to.throw(/sin/);
-        expect(function () { parser.parse('4 % 5'); }).to.throw(/%/);
-        expect(function () { parser.parse('4 / 5'); }).to.throw(/\//);
+        assert.throws(function () { parser.parse('+1'); }, /\+/);
+        assert.throws(function () { parser.parse('1 + 2'); }, /\+/);
+        assert.strictEqual(parser.parse('sin(0)').toString(), 'sin(0)');
+        assert.throws(function () { parser.evaluate('sin(0)'); }, /sin/);
+        assert.throws(function () { parser.parse('4 % 5'); }, /%/);
+        assert.throws(function () { parser.parse('4 / 5'); }, /\//);
       });
 
       it('should allow operators to be explicitly enabled', function () {
@@ -332,10 +332,10 @@ describe('Parser', function () {
             'in': true
           }
         });
-        expect(parser.evaluate('+(-1)')).to.equal(-1);
-        expect(parser.evaluate('sqrt(16)')).to.equal(4);
-        expect(parser.evaluate('4 / 6')).to.equal(2 / 3);
-        expect(parser.evaluate('3 in array', { array: [ 1, 2, 3 ] })).to.equal(true);
+        assert.strictEqual(parser.evaluate('+(-1)'), -1);
+        assert.strictEqual(parser.evaluate('sqrt(16)'), 4);
+        assert.strictEqual(parser.evaluate('4 / 6'), 2 / 3);
+        assert.strictEqual(parser.evaluate('3 in array', { array: [ 1, 2, 3 ] }), true);
       });
     });
 
@@ -346,7 +346,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('2 + 3'); }).to.throw(/\+/);
+      assert.throws(function () { parser.parse('2 + 3'); }, /\+/);
     });
 
     it('should allow comparison operators to be disabled', function () {
@@ -356,12 +356,12 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('1 == 1'); }).to.throw(/=/);
-      expect(function () { parser.parse('1 != 2'); }).to.throw(/!/);
-      expect(function () { parser.parse('1 > 0'); }).to.throw(/>/);
-      expect(function () { parser.parse('1 >= 0'); }).to.throw(/>/);
-      expect(function () { parser.parse('1 < 2'); }).to.throw(/</);
-      expect(function () { parser.parse('1 <= 2'); }).to.throw(/</);
+      assert.throws(function () { parser.parse('1 == 1'); }, /=/);
+      assert.throws(function () { parser.parse('1 != 2'); }, /!/);
+      assert.throws(function () { parser.parse('1 > 0'); }, />/);
+      assert.throws(function () { parser.parse('1 >= 0'); }, />/);
+      assert.throws(function () { parser.parse('1 < 2'); }, /</);
+      assert.throws(function () { parser.parse('1 <= 2'); }, /</);
     });
 
     it('should allow concatenate operator to be disabled', function () {
@@ -371,7 +371,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('"as" || "df"'); }).to.throw(/\|/);
+      assert.throws(function () { parser.parse('"as" || "df"'); }, /\|/);
     });
 
     it('should allow conditional operator to be disabled', function () {
@@ -381,7 +381,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('true ? 1 : 0'); }).to.throw(/\?/);
+      assert.throws(function () { parser.parse('true ? 1 : 0'); }, /\?/);
     });
 
     it('should allow division operator to be disabled', function () {
@@ -391,7 +391,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('2 / 3'); }).to.throw(/\//);
+      assert.throws(function () { parser.parse('2 / 3'); }, /\//);
     });
 
     it('should allow factorial operator to be disabled', function () {
@@ -401,7 +401,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('5!'); }).to.throw(/!/);
+      assert.throws(function () { parser.parse('5!'); }, /!/);
     });
 
     it('should allow in operator to be enabled', function () {
@@ -411,8 +411,8 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('5 * in'); }).to.throw(Error);
-      expect(parser.evaluate('5 in a', { a: [ 2, 3, 5 ] })).to.equal(true);
+      assert.throws(function () { parser.parse('5 * in'); }, Error);
+      assert.strictEqual(parser.evaluate('5 in a', { a: [ 2, 3, 5 ] }), true);
     });
 
     it('should allow in operator to be disabled', function () {
@@ -422,8 +422,8 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('5 in a'); }).to.throw(Error);
-      expect(parser.evaluate('5 * in', { 'in': 3 })).to.equal(15);
+      assert.throws(function () { parser.parse('5 in a'); }, Error);
+      assert.strictEqual(parser.evaluate('5 * in', { 'in': 3 }), 15);
     });
 
     it('should allow logical operators to be disabled', function () {
@@ -433,11 +433,11 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('true and true'); }).to.throw(Error);
-      expect(function () { parser.parse('true or false'); }).to.throw(Error);
-      expect(function () { parser.parse('not false'); }).to.throw(Error);
+      assert.throws(function () { parser.parse('true and true'); }, Error);
+      assert.throws(function () { parser.parse('true or false'); }, Error);
+      assert.throws(function () { parser.parse('not false'); }, Error);
 
-      expect(parser.evaluate('and * or + not', { and: 3, or: 5, not: 2 })).to.equal(17);
+      assert.strictEqual(parser.evaluate('and * or + not', { and: 3, or: 5, not: 2 }), 17);
     });
 
     it('should allow multiplication operator to be disabled', function () {
@@ -447,7 +447,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('3 * 4'); }).to.throw(/\*/);
+      assert.throws(function () { parser.parse('3 * 4'); }, /\*/);
     });
 
     it('should allow power operator to be disabled', function () {
@@ -457,7 +457,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('3 ^ 4'); }).to.throw(/\^/);
+      assert.throws(function () { parser.parse('3 ^ 4'); }, /\^/);
     });
 
     it('should allow remainder operator to be disabled', function () {
@@ -467,7 +467,7 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('3 % 2'); }).to.throw(/%/);
+      assert.throws(function () { parser.parse('3 % 2'); }, /%/);
     });
 
     it('should allow subtraction operator to be disabled', function () {
@@ -477,15 +477,15 @@ describe('Parser', function () {
         }
       });
 
-      expect(function () { parser.parse('5 - 3'); }).to.throw(/-/);
+      assert.throws(function () { parser.parse('5 - 3'); }, /-/);
     });
   });
 
   it('should disallow member access', function () {
     var parser = new Parser({ allowMemberAccess: false });
-    expect(function () { parser.evaluate('min.bind'); }).to.throw(/member access is not permitted/);
-    expect(function () { parser.evaluate('min.bind()'); }).to.throw(/member access is not permitted/);
-    expect(function () { parser.evaluate('32 + min.bind'); }).to.throw(/member access is not permitted/);
-    expect(function () { parser.evaluate('a.b', { a: { b: 2 } }); }).to.throw(/member access is not permitted/);
+    assert.throws(function () { parser.evaluate('min.bind'); }, /member access is not permitted/);
+    assert.throws(function () { parser.evaluate('min.bind()'); }, /member access is not permitted/);
+    assert.throws(function () { parser.evaluate('32 + min.bind'); }, /member access is not permitted/);
+    assert.throws(function () { parser.evaluate('a.b', { a: { b: 2 } }); }, /member access is not permitted/);
   });
 });

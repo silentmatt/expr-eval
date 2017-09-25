@@ -86,7 +86,7 @@ export default function expressionToString(tokens, toJS) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0];
+  return String(nstack[0]);
 }
 
 function escapeValue(v) {

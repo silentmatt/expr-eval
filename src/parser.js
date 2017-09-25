@@ -33,7 +33,8 @@ import {
   gamma,
   stringLength,
   hypot,
-  condition
+  condition,
+  roundTo
 } from './functions';
 
 export function Parser(options) {
@@ -102,7 +103,8 @@ export function Parser(options) {
     pow: Math.pow,
     atan2: Math.atan2,
     'if': condition,
-    gamma: gamma
+    gamma: gamma,
+    roundTo: roundTo
   };
 
   this.consts = {

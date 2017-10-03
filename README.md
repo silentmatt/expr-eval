@@ -4,6 +4,7 @@ JavaScript Expression Evaluator
 [![npm](https://img.shields.io/npm/v/expr-eval.svg)](https://www.npmjs.com/package/expr-eval)
 [![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg)](https://cdnjs.com/libraries/expr-eval)
 [![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsilentmatt%2Fexpr-eval.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsilentmatt%2Fexpr-eval?ref=badge_shield)
 
 Description
 -------------------------------------
@@ -279,3 +280,7 @@ To run tests, you need:
 2. Install Mocha `npm install -g mocha`
 3. Install Chai `npm install chai`
 4. Execute `mocha`
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsilentmatt%2Fexpr-eval.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsilentmatt%2Fexpr-eval?ref=badge_large)

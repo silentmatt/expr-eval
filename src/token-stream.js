@@ -142,7 +142,9 @@ TokenStream.prototype.isName = function () {
     var c = this.expression.charAt(i);
     if (c.toUpperCase() === c.toLowerCase()) {
       if (i === this.pos && (c === '$' || c === '_')) {
-        if (c === '_') hasLetter = true
+        if (c === '_') {
+          hasLetter = true;
+        }
         continue;
       } else if (i === this.pos || !hasLetter || (c !== '_' && (c < '0' || c > '9'))) {
         break;

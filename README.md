@@ -285,9 +285,6 @@ roundTo(x, n)  | Rounds x to n places after the decimal point.
 
 ### Tests ###
 
-To run tests, you need:
-
-1. [Install NodeJS](https://github.com/nodejs/node)
-2. Install Mocha `npm install -g mocha`
-3. Install Chai `npm install chai`
-4. Execute `mocha`
+1. `cd` to the project directory
+2. Install development dependencies: `npm install`
+3. Run the tests: `npm test`

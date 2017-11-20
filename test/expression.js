@@ -406,12 +406,12 @@ describe('Expression', function () {
     });
 
     it('not 0 or 1 and 2', function () {
-      assert.strictEqual(parser.parse('not 0 or 1 and 2').toString(), '((not 0) or (1 and 2))');
+      assert.strictEqual(parser.parse('not 0 or 1 and 2').toString(), '((not 0) or ((1 and (2))))');
     });
 
     it('a < b or c > d and e <= f or g >= h and i == j or k != l', function () {
       assert.strictEqual(parser.parse('a < b or c > d and e <= f or g >= h and i == j or k != l').toString(),
-        '((((a < b) or ((c > d) and (e <= f))) or ((g >= h) and (i == j))) or (k != l))');
+        '((((a < b) or (((c > d) and ((e <= f))))) or (((g >= h) and ((i == j))))) or ((k != l)))');
     });
 
     it('\'as\' || \'df\'', function () {
@@ -598,6 +598,14 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('i == j or k != l').toJSFunction('i,j,k,l')(1, 2, 4, 4), false);
       assert.strictEqual(parser.parse('i == j or k != l').toJSFunction('i,j,k,l')('2', 2, 4, 4), false);
       assert.strictEqual(parser.parse('i == j or k != l').toJSFunction('i,j,k,l')('2', 2, '4', 4), true);
+    });
+
+    it('short-circuits and', function () {
+      assert.strictEqual(parser.parse('a and fail()').toJSFunction('a')(false), false);
+    });
+
+    it('short-circuits or', function () {
+      assert.strictEqual(parser.parse('a or fail()').toJSFunction('a')(true), true);
     });
 
     it('\'as\' || s', function () {

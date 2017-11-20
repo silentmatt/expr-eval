@@ -152,6 +152,28 @@ describe('Operators', function () {
     it('1 and 1 and 0', function () {
       assert.strictEqual(Parser.evaluate('1 and 1 and 0'), false);
     });
+
+    it('skips rhs when lhs is false', function () {
+      var wasCalled = false;
+      function notCalled() {
+        wasCalled = true;
+        return false;
+      }
+
+      assert.strictEqual(Parser.evaluate('false and notCalled()', { notCalled: notCalled }), false);
+      assert.strictEqual(wasCalled, false);
+    });
+
+    it('evaluates rhs when lhs is true', function () {
+      var wasCalled = false;
+      function called() {
+        wasCalled = true;
+        return false;
+      }
+
+      assert.strictEqual(Parser.evaluate('true and called()', { called: called }), false);
+      assert.strictEqual(wasCalled, true);
+    });
   });
 
   describe('or operator', function () {
@@ -177,6 +199,28 @@ describe('Operators', function () {
 
     it('1 or 1 or 0', function () {
       assert.strictEqual(Parser.evaluate('1 or 1 or 0'), true);
+    });
+
+    it('skips rhs when lhs is true', function () {
+      var wasCalled = false;
+      function notCalled() {
+        wasCalled = true;
+        return false;
+      }
+
+      assert.strictEqual(Parser.evaluate('true or notCalled()', { notCalled: notCalled }), true);
+      assert.strictEqual(wasCalled, false);
+    });
+
+    it('evaluates rhs when lhs is false', function () {
+      var wasCalled = false;
+      function called() {
+        wasCalled = true;
+        return true;
+      }
+
+      assert.strictEqual(Parser.evaluate('false or called()', { called: called }), true);
+      assert.strictEqual(wasCalled, true);
     });
   });
 

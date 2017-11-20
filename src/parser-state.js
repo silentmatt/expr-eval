@@ -93,7 +93,9 @@ ParserState.prototype.parseConditionalExpression = function (instr) {
 ParserState.prototype.parseOrExpression = function (instr) {
   this.parseAndExpression(instr);
   while (this.accept(TOP, 'or')) {
-    this.parseAndExpression(instr);
+    var falseBranch = [];
+    this.parseAndExpression(falseBranch);
+    instr.push(new Instruction(IEXPR, falseBranch));
     instr.push(binaryInstruction('or'));
   }
 };
@@ -101,7 +103,9 @@ ParserState.prototype.parseOrExpression = function (instr) {
 ParserState.prototype.parseAndExpression = function (instr) {
   this.parseComparison(instr);
   while (this.accept(TOP, 'and')) {
-    this.parseComparison(instr);
+    var trueBranch = [];
+    this.parseComparison(trueBranch);
+    instr.push(new Instruction(IEXPR, trueBranch));
     instr.push(binaryInstruction('and'));
   }
 };

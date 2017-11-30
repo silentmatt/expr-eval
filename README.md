@@ -47,7 +47,7 @@ Constructs a new `Parser` instance.
 
 The constructor takes an optional `options` parameter that allows you to enable or disable operators.
 
-For example, the following will create a `Parser` that does not allow comparison or logical operators:
+For example, the following will create a `Parser` that does not allow comparison or logical operators, but does allow `in`:
 
     var parser = new Parser({
       operators: {
@@ -64,7 +64,10 @@ For example, the following will create a `Parser` that does not allow comparison
 
         // Disable and, or, not, <, ==, !=, etc.
         logical: false,
-        comparison: false
+        comparison: false,
+
+        // The in operator is disabled by default in the current version
+        'in': true
       }
     });
 
@@ -195,20 +198,29 @@ exponentiation, not xor.
 
 #### Operator Precedence
 
-Operator              | Associativity | Description
-:-------------------- | :------------ | :----------
-(...)                 | None          | Grouping
-f(), x.y              | Left          | Function call, property access
-!                     | Left          | Factorial
-^                     | Right         | Exponentiation
-+, -, not, sqrt, etc. | Right         | Unary prefix operators (see below for the full list)
-\*, /, %              | Left          | Multiplication, division, remainder
-+, -, \|\|            | Left          | Addition, subtraction, concatenation
-==, !=, >=, <=, >, <  | Left          | Equals, not equals, etc.
-and                   | Left          | Logical AND
-or                    | Left          | Logical OR
-in                    | Left          | Is left operand is included in the right one?
-x ? y : z             | Right         | Ternary conditional (if x then y else z)
+Operator                 | Associativity | Description
+:----------------------- | :------------ | :----------
+(...)                    | None          | Grouping
+f(), x.y                 | Left          | Function call, property access
+!                        | Left          | Factorial
+^                        | Right         | Exponentiation
++, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list)
+\*, /, %                 | Left          | Multiplication, division, remainder
++, -, \|\|               | Left          | Addition, subtraction, concatenation
+==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?" (disabled by default)
+and                      | Left          | Logical AND
+or                       | Left          | Logical OR
+x ? y : z                | Right         | Ternary conditional (if x then y else z)
+
+The `in` operator is disabled by default in the current version. To use it,
+construct a `Parser` instance with `operators.in` set to `true`. For example:
+
+    var parser = new Parser({
+      operators: {
+        'in': true
+      }
+    });
+    // Now parser supports 'x in array' expressions
 
 #### Unary operators
 
@@ -273,9 +285,6 @@ roundTo(x, n)  | Rounds x to n places after the decimal point.
 
 ### Tests ###
 
-To run tests, you need:
-
-1. [Install NodeJS](https://github.com/nodejs/node)
-2. Install Mocha `npm install -g mocha`
-3. Install Chai `npm install chai`
-4. Execute `mocha`
+1. `cd` to the project directory
+2. Install development dependencies: `npm install`
+3. Run the tests: `npm test`

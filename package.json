@@ -18,7 +18,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
-    "rollup": "^0.50.0",
+    "rollup": "^0.52.0",
     "rollup-plugin-uglify": "^2.0.1"
   },
   "scripts": {

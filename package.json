@@ -29,7 +29,8 @@
     "prepublish": "npm run build"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "parser.d.ts"
   ],
   "repository": {
     "type": "git",

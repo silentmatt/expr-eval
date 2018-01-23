@@ -2,8 +2,8 @@ export default {
   input: 'index.js',
   output: {
     file: 'dist/bundle.js',
-    format: 'umd'
+    format: 'umd',
+    name: 'exprEval'
   },
-  name: 'exprEval',
   plugins: []
 };

@@ -4,6 +4,15 @@
 
 var assert = require('assert');
 var Parser = require('../dist/bundle').Parser;
+var spy = require('./lib/spy');
+
+function returnTrue() {
+  return true;
+}
+
+function returnFalse() {
+  return false;
+}
 
 function assertCloseTo(expected, actual, delta) {
   return Math.abs(expected - actual) <= delta;
@@ -154,25 +163,17 @@ describe('Operators', function () {
     });
 
     it('skips rhs when lhs is false', function () {
-      var wasCalled = false;
-      function notCalled() {
-        wasCalled = true;
-        return false;
-      }
+      var notCalled = spy(returnFalse);
 
       assert.strictEqual(Parser.evaluate('false and notCalled()', { notCalled: notCalled }), false);
-      assert.strictEqual(wasCalled, false);
+      assert.strictEqual(notCalled.called, false);
     });
 
     it('evaluates rhs when lhs is true', function () {
-      var wasCalled = false;
-      function called() {
-        wasCalled = true;
-        return false;
-      }
+      var called = spy(returnFalse);
 
       assert.strictEqual(Parser.evaluate('true and called()', { called: called }), false);
-      assert.strictEqual(wasCalled, true);
+      assert.strictEqual(called.called, true);
     });
   });
 
@@ -202,25 +203,17 @@ describe('Operators', function () {
     });
 
     it('skips rhs when lhs is true', function () {
-      var wasCalled = false;
-      function notCalled() {
-        wasCalled = true;
-        return false;
-      }
+      var notCalled = spy(returnFalse);
 
       assert.strictEqual(Parser.evaluate('true or notCalled()', { notCalled: notCalled }), true);
-      assert.strictEqual(wasCalled, false);
+      assert.strictEqual(notCalled.called, false);
     });
 
     it('evaluates rhs when lhs is false', function () {
-      var wasCalled = false;
-      function called() {
-        wasCalled = true;
-        return true;
-      }
+      var called = spy(returnTrue);
 
       assert.strictEqual(Parser.evaluate('false or called()', { called: called }), true);
-      assert.strictEqual(wasCalled, true);
+      assert.strictEqual(called.called, true);
     });
   });
 

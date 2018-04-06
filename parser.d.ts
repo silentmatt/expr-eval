@@ -60,7 +60,7 @@ export class Parser {
 export interface Expression {
     simplify(values?: Value): Expression;
     evaluate(values?: Value): number;
-    substitute(values: Value): Expression;
+    substitute(variable: string, value: Expression | string | number): Expression;
     symbols(options?: { withMembers?: boolean }): string[];
     variables(options?: { withMembers?: boolean }): string[];
     toJSFunction(params: string, values?: Value): (...args: any[]) => number;

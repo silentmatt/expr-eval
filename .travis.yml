@@ -1,5 +1,8 @@
 language: node_js
 node_js:
+  - "10"
+  - "9"
+  - "8"
   - "7"
   - "6"
   - "6.1"
@@ -10,7 +13,6 @@ node_js:
   - "4.2"
   - "4.1"
   - "4.0"
-  - "10"
 
 install:
   - npm install

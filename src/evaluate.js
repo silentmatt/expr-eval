@@ -12,8 +12,14 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IOP2) {
       n2 = nstack.pop();
       n1 = nstack.pop();
-      f = expr.binaryOps[item.value];
-      nstack.push(f(n1, n2));
+      if (item.value === 'and') {
+        nstack.push(n1 ? !!evaluate(n2, expr, values) : false);
+      } else if (item.value === 'or') {
+        nstack.push(n1 ? true : !!evaluate(n2, expr, values));
+      } else {
+        f = expr.binaryOps[item.value];
+        nstack.push(f(n1, n2));
+      }
     } else if (type === IOP3) {
       n3 = nstack.pop();
       n2 = nstack.pop();

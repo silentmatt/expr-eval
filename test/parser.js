@@ -253,10 +253,13 @@ describe('Parser', function () {
         assert.deepEqual(parser.parse('abcdefg/hijklmnop+qrstuvwxyz').variables(), [ 'abcdefg', 'hijklmnop', 'qrstuvwxyz' ]);
         assert.deepEqual(parser.parse('ABCDEFG/HIJKLMNOP+QRSTUVWXYZ').variables(), [ 'ABCDEFG', 'HIJKLMNOP', 'QRSTUVWXYZ' ]);
         assert.deepEqual(parser.parse('abc123+def456*ghi789/jkl0').variables(), [ 'abc123', 'def456', 'ghi789', 'jkl0' ]);
+        assert.deepEqual(parser.parse('_').variables(), [ '_' ]);
+        assert.deepEqual(parser.parse('_x').variables(), [ '_x' ]);
         assert.deepEqual(parser.parse('$x').variables(), [ '$x' ]);
         assert.deepEqual(parser.parse('$xyz').variables(), [ '$xyz' ]);
         assert.deepEqual(parser.parse('$a_sdf').variables(), [ '$a_sdf' ]);
         assert.deepEqual(parser.parse('$xyz_123').variables(), [ '$xyz_123' ]);
+        assert.deepEqual(parser.parse('_xyz_123').variables(), [ '_xyz_123' ]);
       });
 
       it('should not parse invalid variables', function () {
@@ -266,11 +269,6 @@ describe('Parser', function () {
 
       it('should not parse a single $ as a variable', function () {
         assert.throws(function () { parser.parse('$'); }, /parse error/);
-      });
-
-      it('should not allow leading _ in variable names', function () {
-        assert.throws(function () { parser.parse('_'); }, /parse error/);
-        assert.throws(function () { parser.parse('_ab'); }, /parse error/);
       });
 
       it('should not allow leading digits in variable names', function () {

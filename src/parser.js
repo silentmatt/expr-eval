@@ -36,6 +36,10 @@ import {
   condition,
   roundTo
 } from './functions';
+import {
+  now,
+  dateAdd
+} from './date-functions';
 
 export function Parser(options) {
   this.options = options || {};
@@ -104,7 +108,9 @@ export function Parser(options) {
     atan2: Math.atan2,
     'if': condition,
     gamma: gamma,
-    roundTo: roundTo
+    roundTo: roundTo,
+    now: now,
+    dateAdd: dateAdd
   };
 
   this.consts = {

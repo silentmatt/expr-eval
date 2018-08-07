@@ -1,8 +1,8 @@
-import moment, { months } from 'moment';
+import moment from 'moment';
 import contains from './contains';
 
-const DATE_FORMAT_DEFAULT = 'YYYY-MM-DD';
-const SUPORT_DATE_FORMATS = [
+var DATE_FORMAT_DEFAULT = 'YYYY-MM-DD';
+var SUPORT_DATE_FORMATS = [
   'YYYY-MM-DD', 'YYYY/MM/DD', 'YYYYMMDD',
   'YYYY-MM-DD HH', 'YYYY/MM/DD HH', 'YYYYMMDD HH',
   'YYYY-MM-DD HH:mm', 'YYYY/MM/DD HH:mm', 'YYYYMMDD HH:mm',
@@ -11,7 +11,7 @@ const SUPORT_DATE_FORMATS = [
 ];
 
 function parse (date) {
-  let m = moment(date, SUPORT_DATE_FORMATS, true);
+  var m = moment(date, SUPORT_DATE_FORMATS, true);
   if (!m.isValid()) {
     throw Error('传入的不是一个有效的日期');
   }
@@ -29,9 +29,9 @@ export function now (f) {
   }
 }
 
-const UNIT_TYPE_REGX = /^[y|Q|M|w|d|h|m|s|ms]$/;
+var UNIT_TYPE_REGX = /^[y|Q|M|w|d|h|m|s|ms]$/;
 /**
- * 日期增加天数
+ * 日期增加数（默认为num天）
  * @param {Number} date 被加日期
  * @param {Number} num 加数
  * @param {Number} unit 增加数单位 [y: years, Q: quarters, M: months, w: weeks, d: days, 
@@ -48,13 +48,20 @@ export function dateAdd (date, num, unit) {
   } else {
     unit = 'd';
   }
-  let m = parse(date);
+  var m = parse(date);
   if (m) {
     m.add(num, unit);
     return m.format(m._f);
   }
 }
 
+/**
+ * 日期减去数（默认为num天）
+ * @param {Number} date 被减日期
+ * @param {Number} num 减数
+ * @param {Number} unit 减去数单位 [y: years, Q: quarters, M: months, w: weeks, d: days, 
+ * h: hours, m: minutes, s: seconds, ms: milliseconds]
+ */
 export function dateSubtract (date, num, unit) {
   if (arguments.length < 2) {
     throw Error('dateAdd 至少需要传递两个参数');
@@ -66,7 +73,7 @@ export function dateSubtract (date, num, unit) {
   } else {
     unit = 'd';
   }
-  let m = parse(date);
+  var m = parse(date);
   if (m) {
     m.subtract(num, unit);
     return m.format(m._f);
@@ -91,8 +98,8 @@ export function datesDiff (date1, date2, unit) {
   } else {
     unit = 'd';
   }
-  let m1 = parse(date1);
-  let m2 = parse(date2);
+  var m1 = parse(date1);
+  var m2 = parse(date2);
   if (!m1) {
     throw Error('date1 不是有效日期/时间');
   } else if (!m2) {
@@ -115,10 +122,14 @@ export function dateGet (date, unit) {
   if (!unit) {
     throw Error('unit 不能为空');
   }
-  let m = moment(date);
-  if (m) {
+  var m = parse(date);
+  if (!m) {
     throw Error('date 不是有效的日期');
   } else {
-    return m.get(unit);
+    if (unit === 'M') {
+      return m.get(unit) + 1;
+    } else {
+      return m.get(unit);
+    }
   }
 }

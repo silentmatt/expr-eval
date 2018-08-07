@@ -38,7 +38,10 @@ import {
 } from './functions';
 import {
   now,
-  dateAdd
+  dateAdd,
+  dateSubtract,
+  datesDiff,
+  dateGet
 } from './date-functions';
 
 export function Parser(options) {
@@ -110,7 +113,10 @@ export function Parser(options) {
     gamma: gamma,
     roundTo: roundTo,
     now: now,
-    dateAdd: dateAdd
+    dateAdd: dateAdd,
+    dateSubtract: dateSubtract,
+    datesDiff: datesDiff,
+    dateGet: dateGet
   };
 
   this.consts = {

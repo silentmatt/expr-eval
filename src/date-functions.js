@@ -64,7 +64,7 @@ export function dateAdd (date, num, unit) {
  */
 export function dateSubtract (date, num, unit) {
   if (arguments.length < 2) {
-    throw Error('dateAdd 至少需要传递两个参数');
+    throw Error('dateSubtract 至少需要传递两个参数');
   }
   if (unit) {
     if (!UNIT_TYPE_REGX.test(unit)) {
@@ -89,7 +89,7 @@ export function dateSubtract (date, num, unit) {
  */
 export function datesDiff (date1, date2, unit) {
   if (!date1 || !date2) {
-    throw Error('daysBetween 参数date1、date2都不能为空');
+    throw Error('datesDiff 参数date1、date2都不能为空');
   }
   if (unit) {
     if (!UNIT_TYPE_REGX.test(unit)) {

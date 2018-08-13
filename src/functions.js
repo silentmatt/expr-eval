@@ -238,3 +238,31 @@ export function roundTo(value, exp) {
   value = value.toString().split('e');
   return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
 }
+
+/**
+ * 判断对象是否为空（字符串不会剔除空白）
+ * @param {*} val 
+ */
+export function isNull(val) {
+  if (val === undefined || val === null) {
+    return true;
+  }
+  if (typeof val === 'string') {
+    return '' === val;
+  }
+  return false;
+}
+
+/**
+ * 判断对象是否为空（字符串会剔除空白后再判断）
+ * @param {*} val 
+ */
+export function isEmpty(val) {
+  if (val === undefined || val === null) {
+    return true;
+  }
+  if (typeof val === 'string') {
+    return '' === val.trim();
+  }
+  return false;
+}

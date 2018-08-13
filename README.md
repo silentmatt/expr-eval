@@ -1,9 +1,8 @@
 JavaScript Expression Evaluator
 ===============================
 
-[![npm](https://img.shields.io/npm/v/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/expr-eval)
-[![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg?maxAge=3600)](https://cdnjs.com/libraries/expr-eval)
-[![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
+[![npm](https://img.shields.io/npm/v/expr-eval-ex.svg?maxAge=3600)](https://www.npmjs.com/package/expr-eval-ex)
+[![Build Status](https://api.travis-ci.org/tanhaican/expr-eval.svg?branch=master)](https://travis-ci.org/tanhaican/expr-eval)
 
 Description
 -------------------------------------
@@ -19,12 +18,12 @@ directly, or compiled into native JavaScript functions.
 Installation
 -------------------------------------
 
-    npm install expr-eval
+    npm install expr-eval-ex
 
 Basic Usage
 -------------------------------------
 
-    var Parser = require('expr-eval').Parser;
+    var Parser = require('expr-eval-ex').Parser;
 
     var parser = new Parser();
     var expr = parser.parse('2 * x + 1');
@@ -282,6 +281,30 @@ pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
 atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 if(c, a, b)  | Function form of c ? a : b
 roundTo(x, n)  | Rounds x to n places after the decimal point.
+isNull(val)   | 判断对象是否为空（字符串不会剔除空白）
+isEmpty(val)  | 判断对象是否为空（字符串会剔除空白后再判断）
+
+#### Date functions
+
+Here are some processing functions for dates.
+### 支持的日期格式：
+> 'YYYY-MM-DD', 'YYYY/MM/DD', 'YYYYMMDD', <br/>
+'YYYY-MM-DD HH', 'YYYY/MM/DD HH', 'YYYYMMDD HH',<br/>
+'YYYY-MM-DD HH:mm', 'YYYY/MM/DD HH:mm', 'YYYYMMDD HH:mm',<br/>
+'YYYY-MM-DD HH:mm:ss', 'YYYY/MM/DD HH:mm:ss', 'YYYYMMDD HH:mm:ss',<br/>
+'HH', 'HH:mm', 'HH:mm:ss'.
+
+### 计算用时间单位符号
+> y：年 | Q：季 | M：月 | w：周 | d：天 | h：时 | m：分 | s：秒 | ms：毫秒<br/>
+<b>注意大小写</b>
+
+Function                        | Description
+:------------------------------ | :-----------------------------------------------
+now(format)                     | 获取当前时间。format为非必填的，内容可选择“支持的日期格式”
+dateAdd(date, num, unit)        | 日期增加数。unit非必填，不填则默认为'd'(天)（默认为num天），可选值请看“计算用时间单位符号”。例：dateAdd('2018-08-08 13', 2, 'h')
+dateSubtract(date, num, unit)   | 日期减去数。unit非必填，不填则默认为'd'(天)（默认为num天），可选值请看“计算用时间单位符号”。例：dateSubtract('2018-08-08 13', 2, 'h')
+datesDiff (date1, date2, unit)  | 两日期相差数。unit非必填，不填则默认为'd'(天)（默认为num天），可选值请看“计算用时间单位符号”。例：datesDiff('2018-08-08', '2018-08-06', 'h')
+dateGet (date, unit)            | 获取日期中的某个值（年份/月份/时分秒等），unit可选值请看“计算用时间单位符号”，其中<b style="color:red">天需要传D</b>。例：dateGet('2018-08-08', 'D')
 
 ### Tests ###
 

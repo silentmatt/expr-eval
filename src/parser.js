@@ -34,7 +34,9 @@ import {
   stringLength,
   hypot,
   condition,
-  roundTo
+  roundTo,
+  isNull,
+  isEmpty
 } from './functions';
 import {
   now,
@@ -116,7 +118,9 @@ export function Parser(options) {
     dateAdd: dateAdd,
     dateSubtract: dateSubtract,
     datesDiff: datesDiff,
-    dateGet: dateGet
+    dateGet: dateGet,
+    isNull: isNull,
+    isEmpty: isEmpty
   };
 
   this.consts = {

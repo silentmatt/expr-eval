@@ -172,11 +172,11 @@ describe('Expression', function () {
     });
 
     it('x ? (y + 1) : z', function () {
-      assert.strictEqual(Parser.parse('x ? (y + 1) : z').simplify({ y: 2 }).toString(), '(x ? (3) : (z))');
+      assert.strictEqual(Parser.parse('x ? (y + 1) : z').simplify({ y: 2 }).toString(), '(x ? 3 : (z))');
     });
 
     it('x ? y : (z * 4)', function () {
-      assert.strictEqual(Parser.parse('x ? y : (z * 4)').simplify({ z: 3 }).toString(), '(x ? (y) : (12))');
+      assert.strictEqual(Parser.parse('x ? y : (z * 4)').simplify({ z: 3 }).toString(), '(x ? (y) : 12)');
     });
   });
 

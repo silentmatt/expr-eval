@@ -283,6 +283,23 @@ atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in r
 if(c, a, b)  | Function form of c ? a : b
 roundTo(x, n)  | Rounds x to n places after the decimal point.
 
+#### Custom functions
+
+If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
+
+    var parser = new Parser();
+    
+    // Add a new function
+    parser.functions.customAddFunction = function (arg1, arg2) {
+      return arg1 + arg2;
+    };
+    
+    // Remove the factorial function
+    delete parser.functions.fac;
+    
+    parser.evaluate('customAddFunction(2, 4) == 6'); // true
+    //parser.evaluate('fac(3)'); // This will fail
+
 ### Tests ###
 
 1. `cd` to the project directory

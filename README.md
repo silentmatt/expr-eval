@@ -36,6 +36,26 @@ Basic Usage
 Documentation
 -------------------------------------
 
+* [Parser](#parser)
+    - [Parser()](#parser--)
+    - [parse(expression: string)](#parse-expression--string-)
+    - [Parser.parse(expression: string)](#parserparse-expression--string-)
+    - [Parser.evaluate(expression: string, variables?: object)](#parserevaluate-expression--string--variables---object-)
+* [Expression](#expression)
+    - [evaluate(variables?: object)](#evaluate-variables---object-)
+    - [substitute(variable: string, expression: Expression | string | number)](#substitute-variable--string--expression--expression---string---number-)
+    - [simplify(variables: object)](#simplify-variables--object-)
+    - [variables(options?: object)](#variables-options---object-)
+    - [symbols(options?: object)](#symbols-options---object-)
+    - [toString()](#tostring--)
+    - [toJSFunction(parameters: array | string, variables?: object)](#tojsfunction-parameters--array---string--variables---object-)
+* [Expression Syntax](#expression-syntax)
+    - [Operator Precedence](#operator-precedence)
+    - [Unary operators](#unary-operators)
+    - [Pre-defined functions](#pre-defined-functions)
+    - [Custom functions](#custom-functions)
+    - [Constants](#constants)
+
 ### Parser ###
 
 Parser is the main class in the library. It has as single `parse` method, and
@@ -299,6 +319,32 @@ If you need additional functions that aren't supported out of the box, you can e
     
     parser.evaluate('customAddFunction(2, 4) == 6'); // true
     //parser.evaluate('fac(3)'); // This will fail
+
+#### Constants
+
+The parser also includes a number of pre-defined constants that can be used in expressions. These are shown
+in the table below:
+
+Constant     | Description
+:----------- | :----------
+E            | The value of `Math.E` from your JavaScript runtime
+Pi           | The value of `Math.Pi` from your JavaScript runtime
+true         | Logical `true` value
+false        | Logical `false` value
+
+Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customse the
+constants available to your expressions. For example:
+
+    var parser = new Parser();
+    parser.consts.R = 1.234;
+
+    console.log(parser.parse('A+B/R').toString());  // ((A + B) / 1.234)
+
+To disable the pre-defined constants, you can replace or delete `parser.consts`:
+
+    var parser = new Parser();
+    parser.consts = {};
+
 
 ### Tests ###
 

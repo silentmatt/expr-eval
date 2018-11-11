@@ -328,11 +328,11 @@ in the table below:
 Constant     | Description
 :----------- | :----------
 E            | The value of `Math.E` from your JavaScript runtime
-Pi           | The value of `Math.Pi` from your JavaScript runtime
+PI           | The value of `Math.PI` from your JavaScript runtime
 true         | Logical `true` value
 false        | Logical `false` value
 
-Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customse the
+Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customise the
 constants available to your expressions. For example:
 
     var parser = new Parser();

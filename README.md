@@ -178,9 +178,9 @@ expression.
 
     js> expr = Parser.parse("min(x, y, z)");
     (min(x, y, z))
-    js> expr.variables();
+    js> expr.symbols();
     min,x,y,z
-    js> expr.simplify({ y: 4, z: 5 }).variables();
+    js> expr.simplify({ y: 4, z: 5 }).symbols();
     min,x
 
 Like `variables`, `symbols` accepts an option argument `{ withMembers: true }` to include object members.

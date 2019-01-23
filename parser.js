@@ -929,7 +929,7 @@ var Parser = (function (scope) {
 				}
 			}
 			else if (code === 111) { // o
-				if (this.expression.charCodeAt(this.pos + 1) === 114) { // r
+				if (this.expression.charCodeAt(this.pos + 1) === 114 && this.expression.charCodeAt(this.pos + 2) === 32) { // r && space
 					this.pos++;
 					this.tokenprio = 0;
 					this.tokenindex = "or";

@@ -1,5 +1,6 @@
 export var TEOF = 'TEOF';
 export var TOP = 'TOP';
+export var TFUNCOP = 'TFUNCOP';
 export var TNUMBER = 'TNUMBER';
 export var TSTRING = 'TSTRING';
 export var TPAREN = 'TPAREN';

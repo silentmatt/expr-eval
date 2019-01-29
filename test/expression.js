@@ -114,6 +114,14 @@ describe('Expression', function () {
     it('fn.max(conf.limits.lower, conf.limits.upper)', function () {
       assert.strictEqual(Parser.evaluate('fn.max(conf.limits.lower, conf.limits.upper)', { fn: { max: Math.max }, conf: { limits: { lower: 4, upper: 9 } } }), 9);
     });
+
+    it('8 - 4 @custom 6 * 2', function () {
+      var parser = new Parser();
+      parser.functions.custom = function (a, b) {
+        return a * a + b * b;
+      };
+      assert.strictEqual(parser.evaluate('8 - 4 @custom 6 * 2'), -96);
+    });
   });
 
   describe('substitute()', function () {

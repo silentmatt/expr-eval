@@ -1,5 +1,5 @@
-import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
-import { Instruction, INUMBER, IVAR, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { TOP, TFUNCOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
+import { Instruction, INUMBER, IVAR, IFUNCOP, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -173,9 +173,23 @@ ParserState.prototype.parseExponential = function (instr) {
 };
 
 ParserState.prototype.parsePostfixExpression = function (instr) {
-  this.parseFunctionCall(instr);
+  this.parseFunctionOperator(instr);
   while (this.accept(TOP, '!')) {
     instr.push(unaryInstruction('!'));
+  }
+};
+
+ParserState.prototype.parseFunctionOperator = function (instr) {
+  var functions = this.tokens.functions;
+  var op;
+  function isCustomOperator(token) {
+    return token.value in functions;
+  }
+  this.parseFunctionCall(instr);
+  while (this.accept(TFUNCOP, isCustomOperator)) {
+    op = this.current;
+    this.parseFactor(instr);
+    instr.push(new Instruction(IFUNCOP, op.value));
   }
 };
 

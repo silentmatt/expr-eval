@@ -51,7 +51,9 @@ export interface ParserOptions {
 
 export class Parser {
     constructor(options?: ParserOptions);
+    unaryOps: any;
     functions: any;
+    consts: any;
     parse(expression: string): Expression;
     evaluate(expression: string, values?: Value): number;
     static parse(expression: string): Expression;

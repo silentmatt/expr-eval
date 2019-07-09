@@ -220,6 +220,11 @@ describe('Expression', function () {
       assert.deepEqual(expr.variables({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
     });
 
+    it('x + x.y + x.z with { withMembers: true } option', function () {
+      var expr = Parser.parse('x + x.y + x.z');
+      assert.deepEqual(expr.variables({ withMembers: true }), ['x', 'x.y', 'x.z']);
+    });
+
     it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
       assert.deepEqual(expr.variables({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);

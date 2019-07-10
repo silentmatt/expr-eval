@@ -7,14 +7,9 @@ node_js:
   - "8"
   - "7"
   - "6"
-  - "6.1"
   - "6.0"
   - "5"
-  - "5.1"
   - "4"
-  - "4.2"
-  - "4.1"
-  - "4.0"
 
 install:
   - npm install
@@ -22,3 +17,10 @@ install:
 
 script:
   - mocha
+
+before_install:
+  - if [ "$TRAVIS_NODE_VERSION" = "4" ]; then nvm install 6; fi
+  - if [ "$TRAVIS_NODE_VERSION" = "5" ]; then nvm install 6; fi
+
+before_script:
+  - nvm use $TRAVIS_NODE_VERSION

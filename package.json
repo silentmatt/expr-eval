@@ -1,6 +1,6 @@
 {
   "name": "expr-eval",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
   "typings": "parser.d.ts",

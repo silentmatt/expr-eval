@@ -99,6 +99,16 @@ describe('Expression', function () {
       assert.throws(function () { Parser.evaluate('x + 1'); }, Error);
     });
 
+    it('x = 3 * 2 + 1', function () {
+      assert.strictEqual(Parser.evaluate('x = 3 * 2 + 1'), 7);
+    });
+
+    it('x = x * 2 + 1', function () {
+      var obj = {}
+      Parser.evaluate('x = 3 * 2 + 1', obj)
+      assert.strictEqual(Parser.evaluate('x = x * 2 + 1', obj), 15);
+    });
+
     it('should fail trying to call a non-function', function () {
       assert.throws(function () { Parser.evaluate('f()', { f: 2 }); }, Error);
     });
@@ -419,6 +429,10 @@ describe('Expression', function () {
         '((((a < b) or (((c > d) and ((e <= f))))) or (((g >= h) and ((i == j))))) or ((k != l)))');
     });
 
+    it('x = x + 1', function () {
+      assert.strictEqual(parser.parse('x = x + 1').toString(), '(x = ((x + 1)))');
+    });
+
     it('\'as\' || \'df\'', function () {
       assert.strictEqual(parser.parse('\'as\' || \'df\'').toString(), '("as" || "df")');
     });
@@ -452,6 +466,12 @@ describe('Expression', function () {
       var expr = parser.parse('x || y');
       var f = expr.toJSFunction('x, y');
       assert.strictEqual(f(4, 2), '42');
+    });
+
+    it('x = x + 1', function () {
+      var expr = parser.parse('x = x + 1');
+      var f = expr.toJSFunction('x');
+      assert.strictEqual(f(4), 5);
     });
 
     it('(sqrt y) + max(3, 1) * (x ? -y : z)', function () {

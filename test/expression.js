@@ -100,26 +100,30 @@ describe('Expression', function () {
     });
 
     it('x = 3 * 2 + 1', function () {
-      assert.strictEqual(Parser.evaluate('x = 3 * 2 + 1'), 7);
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('x = 3 * 2 + 1'), 7);
     });
 
     it('x = x * 2 + 1', function () {
+      var parser = new Parser({ operators: { assignment: true } });
       var obj = {}
-      Parser.evaluate('x = 3 * 2 + 1', obj);
-      assert.strictEqual(Parser.evaluate('x = x * 2 + 1', obj), 15);
+      parser.evaluate('x = 3 * 2 + 1', obj);
+      assert.strictEqual(parser.evaluate('x = x * 2 + 1', obj), 15);
     });
 
     it('y = x = x * 2 + 1', function () {
+      var parser = new Parser({ operators: { assignment: true } });
       var obj = {}
-      Parser.evaluate('x = 3 * 2 + 1', obj);
-      assert.strictEqual(Parser.evaluate('y = x = x * 2 + 1', obj), 15);
+      parser.evaluate('x = 3 * 2 + 1', obj);
+      assert.strictEqual(parser.evaluate('y = x = x * 2 + 1', obj), 15);
       assert.strictEqual(15, obj.x);
       assert.strictEqual(15, obj.y);
     });
 
     it('y = y = 2*z', function () {
+      var parser = new Parser({ operators: { assignment: true } });
       var obj = { y: 5, z: 3 }
-      assert.strictEqual(Parser.evaluate('x = y = 2*z', obj), 6);
+      assert.strictEqual(parser.evaluate('x = y = 2*z', obj), 6);
       assert.strictEqual(6, obj.x);
       assert.strictEqual(6, obj.y);
       assert.strictEqual(3, obj.z);
@@ -143,7 +147,7 @@ describe('Expression', function () {
   });
 
   describe('substitute()', function () {
-    var parser = new Parser();
+    var parser = new Parser({ operators: { assignment: true } });
 
     var expr = parser.parse('2 * x + 1');
     var expr2 = expr.substitute('x', '4 * x');
@@ -181,6 +185,14 @@ describe('Expression', function () {
       assert.strictEqual(expr7.toString(), '((2 * (4 * x)) + 1)');
       assert.strictEqual(expr7.evaluate({x: 3}), 25);
     });
+
+    var expr8 = parser.parse('x = x + 1').substitute('x', '7');
+    it('should not replace assigned variables', function () {
+      assert.strictEqual(expr8.toString(), '(x = ((7 + 1)))');
+      var vars = { x: 42 };
+      assert.strictEqual(expr8.evaluate(vars), 8);
+      assert.strictEqual(vars.x, 8);
+    });
   });
 
   describe('simplify()', function () {
@@ -203,6 +215,10 @@ describe('Expression', function () {
 
     it('x ? y : (z * 4)', function () {
       assert.strictEqual(Parser.parse('x ? y : (z * 4)').simplify({ z: 3 }).toString(), '(x ? (y) : (12))');
+    });
+
+    it('x = 2*x', function () {
+      assert.strictEqual(new Parser({ operators: { assignment: true }}).parse('x = 2*x').simplify({x: 3}).toString(), '(x = (6))');
     });
   });
 
@@ -290,6 +306,10 @@ describe('Expression', function () {
       var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
       assert.deepEqual(expr.variables({ withMembers: true }), ['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
     });
+
+    it('x = y + z', function () {
+      assert.deepEqual(new Parser({ operators: { assignment: true } }).parse('x = y + z').variables(), ['x', 'y', 'z']);
+    });
   });
 
   describe('symbols()', function () {
@@ -347,10 +367,14 @@ describe('Expression', function () {
       var expr = Parser.parse('x');
       assert.deepEqual(expr.symbols({ withMembers: false }), ['x']);
     });
+
+    it('x = y + z', function () {
+      assert.deepEqual(new Parser({ operators: { assignment: true } }).parse('x = y + z').symbols(), ['x', 'y', 'z']);
+    });
   });
 
   describe('toString()', function () {
-    var parser = new Parser();
+    var parser = new Parser({ operators: { assignment: true } });
 
     it('2 ^ x', function () {
       assert.strictEqual(parser.parse('2 ^ x').toString(), '(2 ^ x)');
@@ -472,7 +496,7 @@ describe('Expression', function () {
   });
 
   describe('toJSFunction()', function () {
-    var parser = new Parser();
+    var parser = new Parser({ operators: { assignment: true } });
 
     it('2 ^ x', function () {
       var expr = parser.parse('2 ^ x');

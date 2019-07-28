@@ -1,5 +1,5 @@
 import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
-import { Instruction, INUMBER, IVAR, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -74,6 +74,21 @@ ParserState.prototype.parseAtom = function (instr) {
 
 ParserState.prototype.parseExpression = function (instr) {
   this.parseConditionalExpression(instr);
+  this.parseVariableAssignmentExpression(instr);
+};
+
+ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
+  while (this.accept(TOP, '=')) {
+    var varName = instr.pop();
+    var varValue = [];
+    if (varName.type !== IVAR) {
+      throw new Error('expected variable for assignment');
+    }
+    this.parseConditionalExpression(varValue);
+    instr.push(new Instruction(IVARNAME, varName.value));
+    instr.push(new Instruction(IEXPR, varValue));
+    instr.push(binaryInstruction('='));
+  }
 };
 
 ParserState.prototype.parseConditionalExpression = function (instr) {

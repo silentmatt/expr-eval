@@ -383,7 +383,7 @@ TokenStream.prototype.isOperator = function () {
       this.current = this.newToken(TOP, '==');
       this.pos++;
     } else {
-      return false;
+      this.current = this.newToken(TOP, c);
     }
   } else if (c === '!') {
     if (this.expression.charAt(this.pos + 1) === '=') {
@@ -424,7 +424,8 @@ var optionNameMap = {
   'or': 'logical',
   'not': 'logical',
   '?': 'conditional',
-  ':': 'conditional'
+  ':': 'conditional',
+  '=': 'set'
 };
 
 function getOptionName(op) {

@@ -1,4 +1,4 @@
-import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IEXPR, IMEMBER } from './instruction';
+import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER } from './instruction';
 
 export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values) {
   var nstack = [];
@@ -8,7 +8,7 @@ export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
-    if (type === INUMBER) {
+    if (type === INUMBER || type === IVARNAME) {
       nstack.push(item);
     } else if (type === IVAR && values.hasOwnProperty(item.value)) {
       item = new Instruction(INUMBER, values[item.value]);

@@ -73,18 +73,20 @@ ParserState.prototype.parseAtom = function (instr) {
 };
 
 ParserState.prototype.parseExpression = function (instr) {
-  this.parseConditionalExpression(instr);
+  //this.parseConditionalExpression(instr);
   this.parseVariableAssignmentExpression(instr);
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
+  this.parseConditionalExpression(instr);
   while (this.accept(TOP, '=')) {
     var varName = instr.pop();
     var varValue = [];
     if (varName.type !== IVAR) {
       throw new Error('expected variable for assignment');
     }
-    this.parseConditionalExpression(varValue);
+    this.parseVariableAssignmentExpression(varValue);
+    //this.parseConditionalExpression(varValue);
     instr.push(new Instruction(IVARNAME, varName.value));
     instr.push(new Instruction(IEXPR, varValue));
     instr.push(binaryInstruction('='));

@@ -105,8 +105,24 @@ describe('Expression', function () {
 
     it('x = x * 2 + 1', function () {
       var obj = {}
-      Parser.evaluate('x = 3 * 2 + 1', obj)
+      Parser.evaluate('x = 3 * 2 + 1', obj);
       assert.strictEqual(Parser.evaluate('x = x * 2 + 1', obj), 15);
+    });
+
+    it('y = x = x * 2 + 1', function () {
+      var obj = {}
+      Parser.evaluate('x = 3 * 2 + 1', obj);
+      assert.strictEqual(Parser.evaluate('y = x = x * 2 + 1', obj), 15);
+      assert.strictEqual(15, obj.x);
+      assert.strictEqual(15, obj.y);
+    });
+
+    it('y = y = 2*z', function () {
+      var obj = { y: 5, z: 3 }
+      assert.strictEqual(Parser.evaluate('x = y = 2*z', obj), 6);
+      assert.strictEqual(6, obj.x);
+      assert.strictEqual(6, obj.y);
+      assert.strictEqual(3, obj.z);
     });
 
     it('should fail trying to call a non-function', function () {
@@ -431,6 +447,10 @@ describe('Expression', function () {
 
     it('x = x + 1', function () {
       assert.strictEqual(parser.parse('x = x + 1').toString(), '(x = ((x + 1)))');
+    });
+
+    it('x = y = x + 1', function () {
+      assert.strictEqual(parser.parse('x = y = x + 1').toString(), '(x = ((y = ((x + 1)))))');
     });
 
     it('\'as\' || \'df\'', function () {

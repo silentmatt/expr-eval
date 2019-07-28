@@ -425,7 +425,7 @@ var optionNameMap = {
   'not': 'logical',
   '?': 'conditional',
   ':': 'conditional',
-  '=': 'set'
+  '=': 'assignment'
 };
 
 function getOptionName(op) {
@@ -436,9 +436,9 @@ TokenStream.prototype.isOperatorEnabled = function (op) {
   var optionName = getOptionName(op);
   var operators = this.options.operators || {};
 
-  // in is a special case for now because it's disabled by default
-  if (optionName === 'in') {
-    return !!operators['in'];
+  // in and = are a special case for now because they're disabled by default
+  if (optionName === 'in' || optionName === 'assignment') {
+    return !!operators[optionName];
   }
 
   return !(optionName in operators) || !!operators[optionName];

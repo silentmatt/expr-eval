@@ -45,7 +45,8 @@ export interface ParserOptions {
     trunc?: boolean,
     exp?: boolean,
     length?: boolean,
-    in?: boolean
+    in?: boolean,
+    assignment?: boolean
   };
 }
 

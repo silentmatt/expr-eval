@@ -86,8 +86,9 @@ For example, the following will create a `Parser` that does not allow comparison
         logical: false,
         comparison: false,
 
-        // The in operator is disabled by default in the current version
-        'in': true
+        // The in and = operators are disabled by default in the current version
+        'in': true,
+        assignment: true
       }
     });
 
@@ -231,16 +232,18 @@ f(), x.y                 | Left          | Function call, property access
 and                      | Left          | Logical AND
 or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
+=                        | Right         | Variable assignment (disabled by default)
 
-The `in` operator is disabled by default in the current version. To use it,
-construct a `Parser` instance with `operators.in` set to `true`. For example:
+The `in` and `=` operators are disabled by default in the current version. To use them,
+construct a `Parser` instance with `operators.in` or `operators.assignment` set to `true`. For example:
 
     var parser = new Parser({
       operators: {
-        'in': true
+        'in': true,
+        'assignment': true
       }
     });
-    // Now parser supports 'x in array' expressions
+    // Now parser supports 'x in array' and 'y = 2*x' expressions
 
 #### Unary operators
 

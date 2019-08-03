@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, IENDSTATEMENT } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
@@ -65,6 +65,8 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IMEMBER) {
       n1 = nstack.pop();
       nstack.push(n1[item.value]);
+    } else if (type === IENDSTATEMENT) {
+      nstack.splice(0);
     } else {
       throw new Error('invalid Expression');
     }

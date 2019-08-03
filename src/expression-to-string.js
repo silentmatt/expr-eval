@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, IENDSTATEMENT } from './instruction';
 
 export default function expressionToString(tokens, toJS) {
   var nstack = [];
@@ -79,12 +79,15 @@ export default function expressionToString(tokens, toJS) {
       nstack.push(n1 + '.' + item.value);
     } else if (type === IEXPR) {
       nstack.push('(' + expressionToString(item.value, toJS) + ')');
+    } else if (type === IENDSTATEMENT) {
+      // eslint-disable no-empty
     } else {
       throw new Error('invalid Expression');
     }
   }
   if (nstack.length > 1) {
-    throw new Error('invalid Expression (parity)');
+    // throw new Error('invalid Expression (parity)');
+    nstack = [ nstack.join(',') ];
   }
   return String(nstack[0]);
 }

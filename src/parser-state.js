@@ -1,5 +1,5 @@
-import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
-import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, IENDSTATEMENT, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -74,7 +74,17 @@ ParserState.prototype.parseAtom = function (instr) {
 
 ParserState.prototype.parseExpression = function (instr) {
   //this.parseConditionalExpression(instr);
+  this.parseEndStatement(instr);
+};
+
+ParserState.prototype.parseEndStatement = function (instr) {
   this.parseVariableAssignmentExpression(instr);
+  while (this.accept(TSEMICOLON)) {
+    // Ignore last semicolon to return value of last expression
+    if (this.accept(TEOF)) break;
+    instr.push(new Instruction(IENDSTATEMENT));
+    this.parseVariableAssignmentExpression(instr);
+  }
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {

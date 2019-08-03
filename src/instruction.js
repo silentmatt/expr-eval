@@ -7,6 +7,7 @@ export var IVARNAME = 'IVARNAME';
 export var IFUNCALL = 'IFUNCALL';
 export var IEXPR = 'IEXPR';
 export var IMEMBER = 'IMEMBER';
+export var IENDSTATEMENT = 'IENDSTATEMENT';
 
 export function Instruction(type, value) {
   this.type = type;
@@ -21,6 +22,7 @@ Instruction.prototype.toString = function () {
     case IOP3:
     case IVAR:
     case IVARNAME:
+    case IENDSTATEMENT:
       return this.value;
     case IFUNCALL:
       return 'CALL ' + this.value;

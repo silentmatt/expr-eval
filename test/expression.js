@@ -147,6 +147,11 @@ describe('Expression', function () {
       assert.strictEqual(parser.evaluate('x=3;y=4;z=x*y;'), 12);
     });
 
+    it('2+(x=3;y=4;z=x*y)+5', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('2+(x=3;y=4;z=x*y)+5'), 19);
+    });
+
     it('should fail trying to call a non-function', function () {
       assert.throws(function () { Parser.evaluate('f()', { f: 2 }); }, Error);
     });

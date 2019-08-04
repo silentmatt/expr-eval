@@ -73,18 +73,33 @@ ParserState.prototype.parseAtom = function (instr) {
 };
 
 ParserState.prototype.parseExpression = function (instr) {
-  //this.parseConditionalExpression(instr);
-  this.parseEndStatement(instr);
+  var exprInstr = []
+  if (this.parseUntilEndStatement(instr, exprInstr)) return;
+  this.parseVariableAssignmentExpression(exprInstr);
+  if (this.parseUntilEndStatement(instr, exprInstr)) return;
+  this.pushExpression(instr, exprInstr);
 };
 
-ParserState.prototype.parseEndStatement = function (instr) {
-  this.parseVariableAssignmentExpression(instr);
-  while (this.accept(TSEMICOLON)) {
-    // Ignore last semicolon to return value of last expression
-    if (this.accept(TEOF)) break;
-    instr.push(new Instruction(IENDSTATEMENT));
-    this.parseVariableAssignmentExpression(instr);
+ParserState.prototype.pushExpression = function (instr, exprInstr) {
+  for (var i=0, len=exprInstr.length; i < len; i++) {
+    instr.push(exprInstr[i]);
   }
+};
+
+ParserState.prototype.parseUntilEndStatement = function (instr, exprInstr) {
+  if (!this.accept(TSEMICOLON)) return false;
+  if (this.nextToken && this.nextToken.type !== TEOF && !(this.nextToken.type === TPAREN && this.nextToken.value === ')')) {
+    exprInstr.push(new Instruction(IENDSTATEMENT));
+  }
+  if (this.nextToken.type !== TEOF) {
+    this.parseExpression(exprInstr);
+  }
+  if (instr[0]) {
+    instr.push(new Instruction(IEXPR, exprInstr));
+  } else {
+    this.pushExpression(instr, exprInstr);
+  }
+  return true;
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {

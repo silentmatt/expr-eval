@@ -4,6 +4,9 @@ export default function evaluate(tokens, expr, values) {
   var nstack = [];
   var n1, n2, n3;
   var f;
+  function evaluateIfExpression(n) {
+    return Array.isArray(n) && n[0].type ? evaluate(n, expr, values) : n;
+  }
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
@@ -21,7 +24,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(f(n1, evaluate(n2, expr, values), values));
       } else {
         f = expr.binaryOps[item.value];
-        nstack.push(f(n1, n2));
+        nstack.push(f(n1, evaluateIfExpression(n2)));
       }
     } else if (type === IOP3) {
       n3 = nstack.pop();
@@ -66,7 +69,7 @@ export default function evaluate(tokens, expr, values) {
       n1 = nstack.pop();
       nstack.push(n1[item.value]);
     } else if (type === IENDSTATEMENT) {
-      nstack.splice(0);
+      nstack.pop();
     } else {
       throw new Error('invalid Expression');
     }
@@ -74,5 +77,5 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0] === -0 ? 0: nstack[0];
+  return nstack[0] === -0 ? 0: evaluateIfExpression(nstack[0]);
 }

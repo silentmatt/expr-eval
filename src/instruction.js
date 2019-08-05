@@ -6,6 +6,7 @@ export var IVAR = 'IVAR';
 export var IVARNAME = 'IVARNAME';
 export var IFUNCALL = 'IFUNCALL';
 export var IEXPR = 'IEXPR';
+export var IEXPREVAL = 'IEXPREVAL';
 export var IMEMBER = 'IMEMBER';
 export var IENDSTATEMENT = 'IENDSTATEMENT';
 

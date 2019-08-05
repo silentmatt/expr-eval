@@ -76,10 +76,6 @@ export default function evaluate(tokens, expr, values) {
       nstack.push(n1[item.value]);
     } else if (type === IENDSTATEMENT) {
       nstack.pop();
-      n1 = tokens[i + 1];
-      if (n1 && n1.type === IEXPR) {
-        tokens[i + 1] = createExpressionEvaluator(n1, expr, values);
-      }
     } else {
       throw new Error('invalid Expression');
     }

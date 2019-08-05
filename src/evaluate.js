@@ -5,7 +5,7 @@ export default function evaluate(tokens, expr, values) {
   var n1, n2, n3;
   var f;
   function evaluateIfExpression(n) {
-    return Array.isArray(n) && n[0].type ? evaluate(n, expr, values) : n;
+    return Array.isArray(n) && n.length && n[0].type ? evaluate(n, expr, values) : n;
   }
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
@@ -24,7 +24,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(f(n1, evaluate(n2, expr, values), values));
       } else {
         f = expr.binaryOps[item.value];
-        nstack.push(f(n1, evaluateIfExpression(n2)));
+        nstack.push(f(evaluateIfExpression(n1), evaluateIfExpression(n2)));
       }
     } else if (type === IOP3) {
       n3 = nstack.pop();

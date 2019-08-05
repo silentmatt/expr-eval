@@ -94,11 +94,7 @@ ParserState.prototype.parseUntilEndStatement = function (instr, exprInstr) {
   if (this.nextToken.type !== TEOF) {
     this.parseExpression(exprInstr);
   }
-  if (instr[0]) {
-    instr.push(new Instruction(IEXPR, exprInstr));
-  } else {
-    this.pushExpression(instr, exprInstr);
-  }
+  instr.push(new Instruction(IEXPR, exprInstr));
   return true;
 };
 

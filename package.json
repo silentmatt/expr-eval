@@ -25,6 +25,7 @@
     "test": "npm run build && mocha",
     "coverage": "npm run build && istanbul cover _mocha",
     "lint": "eslint index.js src test rollup.config.js rollup-min.config.js",
+    "watch": "rollup -c rollup.config.js -w",
     "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js",
     "prepublish": "npm run build"
   },

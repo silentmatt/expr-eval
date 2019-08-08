@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
@@ -60,6 +60,31 @@ export default function evaluate(tokens, expr, values) {
       } else {
         throw new Error(f + ' is not a function');
       }
+    } else if (type === IFUNDEF) {
+      // Create closure to keep references to arguments and expression
+      nstack.push((function () {
+        var n2 = nstack.pop();
+        var args = [];
+        var argCount = item.value;
+        while (argCount-- > 0) {
+          args.unshift(nstack.pop());
+        }
+        var n1 = nstack.pop();
+        var f = function () {
+          var scope = Object.assign({}, values);
+          for (var i = 0, len = args.length; i < len; i++) {
+            scope[args[i]] = arguments[i];
+          }
+          return evaluate(n2, expr, scope);
+        };
+        // f.name = n1
+        Object.defineProperty(f, 'name', {
+          value: n1,
+          writable: false
+        });
+        values[n1] = f;
+        return f;
+      })());
     } else if (type === IEXPR) {
       nstack.push(item.value);
     } else if (type === IMEMBER) {

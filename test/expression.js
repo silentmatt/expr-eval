@@ -106,14 +106,14 @@ describe('Expression', function () {
 
     it('x = x * 2 + 1', function () {
       var parser = new Parser({ operators: { assignment: true } });
-      var obj = {}
+      var obj = {};
       parser.evaluate('x = 3 * 2 + 1', obj);
       assert.strictEqual(parser.evaluate('x = x * 2 + 1', obj), 15);
     });
 
     it('y = x = x * 2 + 1', function () {
       var parser = new Parser({ operators: { assignment: true } });
-      var obj = {}
+      var obj = {};
       parser.evaluate('x = 3 * 2 + 1', obj);
       assert.strictEqual(parser.evaluate('y = x = x * 2 + 1', obj), 15);
       assert.strictEqual(15, obj.x);
@@ -122,11 +122,24 @@ describe('Expression', function () {
 
     it('y = y = 2*z', function () {
       var parser = new Parser({ operators: { assignment: true } });
-      var obj = { y: 5, z: 3 }
+      var obj = { y: 5, z: 3 };
       assert.strictEqual(parser.evaluate('x = y = 2*z', obj), 6);
       assert.strictEqual(6, obj.x);
       assert.strictEqual(6, obj.y);
       assert.strictEqual(3, obj.z);
+    });
+
+    it('f(x) = x * x', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      var obj = { f: null };
+      assert.strictEqual(parser.evaluate('f(x) = x * x', obj) instanceof Function, true);
+      assert.strictEqual(obj.f instanceof Function, true);
+      assert.strictEqual(obj.f(3), 9);
+    });
+
+    it('(f(x) = x * x)(3)', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('(f(x) = x * x)(3)'), 9);
     });
 
     it('should fail trying to call a non-function', function () {
@@ -309,6 +322,11 @@ describe('Expression', function () {
 
     it('x = y + z', function () {
       assert.deepEqual(new Parser({ operators: { assignment: true } }).parse('x = y + z').variables(), ['x', 'y', 'z']);
+    });
+
+    it('f(x, y, z) = x + y + z', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.deepEqual(parser.parse('f(x, y, z) = x + y + z').variables(), ['f', 'x', 'y', 'z']);
     });
   });
 
@@ -701,6 +719,12 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(4), 6);
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(5), 24);
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(6), 120);
+    });
+
+    it('(f(x) = g(y) = x * y)(a)(b)', function () {
+      var f = parser.parse('(f(x) = g(y) = x * y)(a)(b)').toJSFunction('a,b');
+      assert.strictEqual(f(3, 4), 12);
+      assert.strictEqual(f(4, 5), 20);
     });
   });
 });

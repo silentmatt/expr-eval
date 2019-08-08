@@ -5,6 +5,7 @@ export var IOP3 = 'IOP3';
 export var IVAR = 'IVAR';
 export var IVARNAME = 'IVARNAME';
 export var IFUNCALL = 'IFUNCALL';
+export var IFUNDEF = 'IFUNDEF';
 export var IEXPR = 'IEXPR';
 export var IMEMBER = 'IMEMBER';
 
@@ -24,6 +25,8 @@ Instruction.prototype.toString = function () {
       return this.value;
     case IFUNCALL:
       return 'CALL ' + this.value;
+    case IFUNDEF:
+      return 'DEF ' + this.value;
     case IMEMBER:
       return '.' + this.value;
     default:

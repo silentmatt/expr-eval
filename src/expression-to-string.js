@@ -1,9 +1,9 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, IARRAY } from './instruction';
 
 export default function expressionToString(tokens, toJS) {
   var nstack = [];
   var n1, n2, n3;
-  var f;
+  var f, args, argCount;
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
@@ -67,8 +67,8 @@ export default function expressionToString(tokens, toJS) {
         nstack.push('(' + f + ' ' + n1 + ')');
       }
     } else if (type === IFUNCALL) {
-      var argCount = item.value;
-      var args = [];
+      argCount = item.value;
+      args = [];
       while (argCount-- > 0) {
         args.unshift(nstack.pop());
       }
@@ -77,6 +77,13 @@ export default function expressionToString(tokens, toJS) {
     } else if (type === IMEMBER) {
       n1 = nstack.pop();
       nstack.push(n1 + '.' + item.value);
+    } else if (type === IARRAY) {
+      argCount = item.value;
+      args = [];
+      while (argCount-- > 0) {
+        args.unshift(nstack.pop());
+      }
+      nstack.push('[' + args.join(', ') + ']');
     } else if (type === IEXPR) {
       nstack.push('(' + expressionToString(item.value, toJS) + ')');
     } else {

@@ -129,6 +129,18 @@ describe('Expression', function () {
       assert.strictEqual(3, obj.z);
     });
 
+    it('[1, 2, 3]', function () {
+      assert.deepEqual(Parser.evaluate('[1, 2, 3]'), [1, 2, 3]);
+    });
+
+    it('[1, 2, 3, [4, [5, 6]]]', function () {
+      assert.deepEqual(Parser.evaluate('[1, 2, 3, [4, [5, 6]]]'), [1, 2, 3, [4, [5, 6]]]);
+    });
+
+    it('["a", ["b", ["c"]], true, 1 + 2 + 3]', function () {
+      assert.deepEqual(Parser.evaluate('["a", ["b", ["c"]], true, 1 + 2 + 3]'), ['a', ['b', ['c']], true, 6]);
+    });
+
     it('should fail trying to call a non-function', function () {
       assert.throws(function () { Parser.evaluate('f()', { f: 2 }); }, Error);
     });
@@ -477,6 +489,18 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('x = y = x + 1').toString(), '(x = ((y = ((x + 1)))))');
     });
 
+    it('[1, 2, 3]', function () {
+      assert.strictEqual(Parser.parse('[1, 2, 3]').toString(), '[1, 2, 3]');
+    });
+
+    it('[1, 2, 3, [4, [5, 6]]]', function () {
+      assert.strictEqual(Parser.parse('[1, 2, 3, [4, [5, 6]]]').toString(), '[1, 2, 3, [4, [5, 6]]]');
+    });
+
+    it('["a", ["b", ["c"]], true, 1 + 2 + 3]', function () {
+      assert.strictEqual(Parser.parse('["a", ["b", ["c"]], true, 1 + 2 + 3]').toString(), '["a", ["b", ["c"]], true, ((1 + 2) + 3)]');
+    });
+
     it('\'as\' || \'df\'', function () {
       assert.strictEqual(parser.parse('\'as\' || \'df\'').toString(), '("as" || "df")');
     });
@@ -701,6 +725,14 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(4), 6);
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(5), 24);
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(6), 120);
+    });
+
+    it('[x, y, z]', function () {
+      assert.deepEqual(parser.parse('[x, y, z]').toJSFunction('x,y,z')(1, 2, 3), [1, 2, 3]);
+    });
+
+    it('[x, [y, [z]]]', function () {
+      assert.deepEqual(parser.parse('[x, [y, [z]]]').toJSFunction('x,y,z')('abc', true, 3), ['abc', [true, [3]]]);
     });
   });
 });

@@ -3,6 +3,7 @@ export var TOP = 'TOP';
 export var TNUMBER = 'TNUMBER';
 export var TSTRING = 'TSTRING';
 export var TPAREN = 'TPAREN';
+export var TBRACKET = 'TBRACKET';
 export var TCOMMA = 'TCOMMA';
 export var TNAME = 'TNAME';
 

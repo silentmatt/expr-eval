@@ -20,7 +20,7 @@
     "istanbul": "^0.4.5",
     "mocha": "^5.0.0",
     "rollup": "^0.63.0",
-    "rollup-plugin-uglify": "^3.0.0"
+    "rollup-plugin-uglify": "^6.0.3"
   },
   "scripts": {
     "test": "npm run build && mocha",

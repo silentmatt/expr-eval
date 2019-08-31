@@ -31,6 +31,8 @@ Instruction.prototype.toString = function () {
       return 'CALL ' + this.value;
     case IFUNDEF:
       return 'DEF ' + this.value;
+    case IARRAY:
+      return 'ARRAY ' + this.value;
     case IMEMBER:
       return '.' + this.value;
     default:

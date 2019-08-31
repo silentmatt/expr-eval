@@ -10,6 +10,8 @@ export default function expressionToString(tokens, toJS) {
     if (type === INUMBER) {
       if (typeof item.value === 'number' && item.value < 0) {
         nstack.push('(' + item.value + ')');
+      } else if (Array.isArray(item.value)) {
+        nstack.push('[' + item.value.map(escapeValue).join(', ') + ']');
       } else {
         nstack.push(escapeValue(item.value));
       }
@@ -30,11 +32,17 @@ export default function expressionToString(tokens, toJS) {
           nstack.push('(' + n1 + ' === ' + n2 + ')');
         } else if (f === '!=') {
           nstack.push('(' + n1 + ' !== ' + n2 + ')');
+        } else if (f === '[') {
+          nstack.push(n1 + '[(' + n2 + ') | 0]');
         } else {
           nstack.push('(' + n1 + ' ' + f + ' ' + n2 + ')');
         }
       } else {
-        nstack.push('(' + n1 + ' ' + f + ' ' + n2 + ')');
+        if (f === '[') {
+          nstack.push(n1 + '[' + n2 + ']');
+        } else {
+          nstack.push('(' + n1 + ' ' + f + ' ' + n2 + ')');
+        }
       }
     } else if (type === IOP3) {
       n3 = nstack.pop();

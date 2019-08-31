@@ -35,7 +35,8 @@ import {
   hypot,
   condition,
   roundTo,
-  setVar
+  setVar,
+  arrayIndex
 } from './functions';
 
 export function Parser(options) {
@@ -88,7 +89,8 @@ export function Parser(options) {
     and: andOperator,
     or: orOperator,
     'in': inOperator,
-    '=': setVar
+    '=': setVar,
+    '[': arrayIndex
   };
 
   this.ternaryOps = {

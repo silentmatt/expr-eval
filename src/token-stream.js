@@ -84,7 +84,7 @@ TokenStream.prototype.isParen = function () {
 
 TokenStream.prototype.isBracket = function () {
   var c = this.expression.charAt(this.pos);
-  if (c === '[' || c === ']') {
+  if ((c === '[' || c === ']') && this.isOperatorEnabled('[')) {
     this.current = this.newToken(TBRACKET, c);
     this.pos++;
     return true;
@@ -447,7 +447,8 @@ var optionNameMap = {
   'not': 'logical',
   '?': 'conditional',
   ':': 'conditional',
-  '=': 'assignment'
+  '=': 'assignment',
+  '[': 'array'
 };
 
 function getOptionName(op) {

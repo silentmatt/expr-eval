@@ -896,4 +896,30 @@ describe('Operators', function () {
       assert.ok(isNaN(parser.evaluate('(-1/0)!')));
     });
   });
+
+  describe('[] operator', function () {
+    it('a[0]', function () {
+      assert.strictEqual(Parser.evaluate('a[0]', { a: [ 4, 3, 2, 1 ] }), 4);
+    });
+
+    it('a[0.1]', function () {
+      assert.strictEqual(Parser.evaluate('a[0.1]', { a: [ 4, 3, 2, 1 ] }), 4);
+    });
+
+    it('a[3]', function () {
+      assert.strictEqual(Parser.evaluate('a[3]', { a: [ 4, 3, 2, 1 ] }), 1);
+    });
+
+    it('a[3 - 2]', function () {
+      assert.strictEqual(Parser.evaluate('a[3 - 2]', { a: [ 4, 3, 2, 1 ] }), 3);
+    });
+
+    it('a["foo"]', function () {
+      assert.strictEqual(Parser.evaluate('a["foo"]', { a: { foo: 'bar' } }), undefined);
+    });
+
+    it('a[2]^3', function () {
+      assert.strictEqual(Parser.evaluate('a[2]^3', { a: [ 1, 2, 3, 4 ] }), 27);
+    });
+  });
 });

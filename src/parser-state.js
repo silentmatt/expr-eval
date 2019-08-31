@@ -67,6 +67,13 @@ ParserState.prototype.parseAtom = function (instr) {
   } else if (this.accept(TPAREN, '(')) {
     this.parseExpression(instr);
     this.expect(TPAREN, ')');
+  } else if (this.accept(TBRACKET, '[')) {
+    if (this.accept(TBRACKET, ']')) {
+      instr.push(new Instruction(IARRAY, 0));
+    } else {
+      var argCount = this.parseArrayList(instr);
+      instr.push(new Instruction(IARRAY, argCount));
+    }
   } else {
     throw new Error('unexpected ' + this.nextToken);
   }
@@ -74,9 +81,13 @@ ParserState.prototype.parseAtom = function (instr) {
 
 ParserState.prototype.parseExpression = function (instr) {
   var exprInstr = []
-  if (this.parseUntilEndStatement(instr, exprInstr)) return;
-  this.parseArrayExpression(exprInstr);
-  if (this.parseUntilEndStatement(instr, exprInstr)) return;
+  if (this.parseUntilEndStatement(instr, exprInstr)) {
+    return;
+  }
+  this.parseVariableAssignmentExpression(exprInstr);
+  if (this.parseUntilEndStatement(instr, exprInstr)) {
+    return;
+  }
   this.pushExpression(instr, exprInstr);
 };
 
@@ -98,12 +109,9 @@ ParserState.prototype.parseUntilEndStatement = function (instr, exprInstr) {
   return true;
 };
 
-ParserState.prototype.parseArrayExpression = function (instr) {
-  if (!this.accept(TBRACKET, '[')) {
-    this.parseVariableAssignmentExpression(instr);
-    return;
-  }
+ParserState.prototype.parseArrayList = function (instr) {
   var argCount = 0;
+
   while (!this.accept(TBRACKET, ']')) {
     this.parseExpression(instr);
     ++argCount;
@@ -112,7 +120,8 @@ ParserState.prototype.parseArrayExpression = function (instr) {
       ++argCount;
     }
   }
-  instr.push(new Instruction(IARRAY, argCount));
+
+  return argCount;
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
@@ -286,12 +295,26 @@ ParserState.prototype.parseArgumentList = function (instr) {
 
 ParserState.prototype.parseMemberExpression = function (instr) {
   this.parseAtom(instr);
-  while (this.accept(TOP, '.')) {
-    if (!this.allowMemberAccess) {
-      throw new Error('unexpected ".", member access is not permitted');
-    }
+  while (this.accept(TOP, '.') || this.accept(TBRACKET, '[')) {
+    var op = this.current;
 
-    this.expect(TNAME);
-    instr.push(new Instruction(IMEMBER, this.current.value));
+    if (op.value === '.') {
+      if (!this.allowMemberAccess) {
+        throw new Error('unexpected ".", member access is not permitted');
+      }
+
+      this.expect(TNAME);
+      instr.push(new Instruction(IMEMBER, this.current.value));
+    } else if (op.value === '[') {
+      if (!this.tokens.isOperatorEnabled('[')) {
+        throw new Error('unexpected "[]", arrays are disabled');
+      }
+
+      this.parseExpression(instr);
+      this.expect(TBRACKET, ']');
+      instr.push(binaryInstruction('['));
+    } else {
+      throw new Error('unexpected symbol: ' + op.value);
+    }
   }
 };

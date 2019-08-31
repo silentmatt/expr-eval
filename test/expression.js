@@ -233,6 +233,10 @@ describe('Expression', function () {
     it('fn.max(conf.limits.lower, conf.limits.upper)', function () {
       assert.strictEqual(Parser.evaluate('fn.max(conf.limits.lower, conf.limits.upper)', { fn: { max: Math.max }, conf: { limits: { lower: 4, upper: 9 } } }), 9);
     });
+
+    it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
+      assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]')), JSON.stringify([1, 5, 20, 6/7, [8, 9, 10], '11']));
+    });
   });
 
   describe('substitute()', function () {
@@ -312,6 +316,14 @@ describe('Expression', function () {
 
     it('(f(x) = x * y)(3)', function () {
       assert.strictEqual(new Parser().parse('(f(x) = x * y)(3)').simplify({y: 5}).toString(), '(f(x) = ((x * 5)))(3)');
+    });
+
+    it('a[2] + b[3]', function () {
+      assert.strictEqual(Parser.parse('a[2] + b[3]').simplify({ a: [ 0, 0, 5, 0 ], b: [ 0, 0, 0, 4, 0 ] }).toString(), '9');
+      assert.strictEqual(Parser.parse('a[2] + b[3]').simplify({ a: [ 0, 0, 5, 0 ] }).toString(), '(5 + b[3])');
+      assert.strictEqual(Parser.parse('a[2] + b[5 - 2]').simplify({ b: [ 0, 0, 0, 4, 0 ] }).toString(), '(a[2] + 4)');
+      assert.strictEqual(Parser.parse('a[two] + b[3]').simplify({ a: [ 0, 0, 5, 0 ], b: [ 0, 0, 0, 4, 0 ] }).toString(), '([0, 0, 5, 0][two] + 4)');
+      assert.strictEqual(Parser.parse('a[two] + b[3]').simplify({ a: [ 0, 'New\nLine', 5, 0 ], b: [ 0, 0, 0, 4, 0 ] }).toString(), '([0, "New\\nLine", 5, 0][two] + 4)');
     });
   });
 
@@ -621,6 +633,18 @@ describe('Expression', function () {
     it('(x - 1)!', function () {
       assert.strictEqual(parser.parse('(x - 1)!').toString(), '((x - 1)!)');
     });
+
+    it('a[0]', function () {
+      assert.strictEqual(parser.parse('a[0]').toString(), 'a[0]');
+    });
+
+    it('a[2 + 3]', function () {
+      assert.strictEqual(parser.parse('a[2 + 3]').toString(), 'a[(2 + 3)]');
+    });
+
+    it('[1, 2+3, a, "5"]', function () {
+      assert.strictEqual(parser.parse('[1, 2+3, a, "5"]').toString(), '[1, (2 + 3), a, "5"]');
+    });
   });
 
   describe('toJSFunction()', function () {
@@ -849,6 +873,29 @@ describe('Expression', function () {
 
     it('[x, [y, [z]]]', function () {
       assert.deepEqual(parser.parse('[x, [y, [z]]]').toJSFunction('x,y,z')('abc', true, 3), ['abc', [true, [3]]]);
+    });
+
+    it('a[2]', function () {
+      assert.strictEqual(parser.parse('a[2]').toJSFunction('a')([ 1, 2, 3 ]), 3);
+    });
+
+    it('a[2.9]', function () {
+      assert.strictEqual(parser.parse('a[2.9]').toJSFunction('a')([ 1, 2, 3, 4, 5 ]), 3);
+    });
+
+    it('a[n]', function () {
+      assert.strictEqual(parser.parse('a[n]').toJSFunction('a,n')([ 1, 2, 3 ], 0), 1);
+      assert.strictEqual(parser.parse('a[n]').toJSFunction('a,n')([ 1, 2, 3 ], 1), 2);
+      assert.strictEqual(parser.parse('a[n]').toJSFunction('a,n')([ 1, 2, 3 ], 2), 3);
+    });
+
+    it('a["foo"]', function () {
+      assert.strictEqual(parser.parse('a["foo"]').toJSFunction('a')({ foo: 42 }), undefined);
+    });
+
+    it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
+      var exp = parser.parse('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]');
+      assert.strictEqual(JSON.stringify(exp.toJSFunction()()), JSON.stringify([1, 5, 20, 6/7, [8, 9, 10], '11']));
     });
   });
 });

@@ -243,3 +243,7 @@ export function setVar(name, value, variables) {
   if (variables) variables[name] = value;
   return value;
 }
+
+export function arrayIndex(array, index) {
+  return array[index | 0];
+}

@@ -211,6 +211,18 @@ describe('Parser', function () {
         assert.throws(function () { parser.parse('"\\uGGGG"'); }, Error);
       });
 
+      it('should parse arrays correctly', function () {
+        assert.strictEqual(parser.parse('[1, 2, 3+4, 5*6, (7/8)]').toString(), '[1, 2, (3 + 4), (5 * 6), (7 / 8)]');
+      });
+
+      it('should parse empty arrays correctly', function () {
+        assert.strictEqual(parser.parse('[]').toString(), '[]');
+      });
+
+      it('should fail with missing ]', function () {
+        assert.throws(function () { parser.parse('[1, 2, 3+4, 5*6, (7/8)'); }, Error);
+      });
+
       it('should parse operators that look like functions as function calls', function () {
         assert.strictEqual(parser.parse('sin 2^3').toString(), '(sin (2 ^ 3))');
         assert.strictEqual(parser.parse('sin(2)^3').toString(), '((sin 2) ^ 3)');
@@ -507,6 +519,27 @@ describe('Parser', function () {
       assert.strictEqual(parser.evaluate('a = 5', {}), 5);
     });
 
+    it('should allow arrays to be enabled', function () {
+      var parser = new Parser({
+        operators: {
+          array: true
+        }
+      });
+
+      assert.deepEqual(parser.evaluate('[1, 2, 3]'), [1, 2, 3]);
+      assert.strictEqual(parser.evaluate('a[0]', { a: [ 4, 2 ] }), 4);
+    });
+
+    it('should allow arrays to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          array: false
+        }
+      });
+
+      assert.throws(function () { parser.parse('[1, 2, 3]'); }, /\[/);
+      assert.throws(function () { parser.parse('a[0]'); }, /\[/);
+    });
   });
 
   it('should disallow member access', function () {

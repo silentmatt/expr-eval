@@ -501,10 +501,10 @@ describe('Parser', function () {
       assert.throws(function () { parser.parse('a = 5'); }, Error);
     });
 
-    it('should disable assignment operator by default', function () {
+    it('should allow assignment operator by default', function () {
       var parser = new Parser();
 
-      assert.throws(function () { parser.parse('a = 5'); }, Error);
+      assert.strictEqual(parser.evaluate('a = 5', {}), 5);
     });
 
   });

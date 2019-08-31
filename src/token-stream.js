@@ -447,11 +447,6 @@ TokenStream.prototype.isOperatorEnabled = function (op) {
   var optionName = getOptionName(op);
   var operators = this.options.operators || {};
 
-  // in and = are a special case for now because they're disabled by default
-  if (optionName === 'in' || optionName === 'assignment') {
-    return !!operators[optionName];
-  }
-
   return !(optionName in operators) || !!operators[optionName];
 };
 

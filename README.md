@@ -86,9 +86,9 @@ For example, the following will create a `Parser` that does not allow comparison
         logical: false,
         comparison: false,
 
-        // The in and = operators are disabled by default in the current version
-        'in': true,
-        assignment: true
+        // Disable 'in' and = operators
+        'in': false,
+        assignment: false
       }
     });
 
@@ -228,14 +228,11 @@ f(), x.y                 | Left          | Function call, property access
 +, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list)
 \*, /, %                 | Left          | Multiplication, division, remainder
 +, -, \|\|               | Left          | Addition, subtraction, concatenation
-==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?" (disabled by default)
+==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?"
 and                      | Left          | Logical AND
 or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
-=                        | Right         | Variable assignment (disabled by default)
-
-The `in` and `=` operators are disabled by default in the current version. To use them,
-construct a `Parser` instance with `operators.in` or `operators.assignment` set to `true`. For example:
+=                        | Right         | Variable assignment
 
     var parser = new Parser({
       operators: {
@@ -311,15 +308,15 @@ roundTo(x, n)  | Rounds x to n places after the decimal point.
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
 
     var parser = new Parser();
-    
+
     // Add a new function
     parser.functions.customAddFunction = function (arg1, arg2) {
       return arg1 + arg2;
     };
-    
+
     // Remove the factorial function
     delete parser.functions.fac;
-    
+
     parser.evaluate('customAddFunction(2, 4) == 6'); // true
     //parser.evaluate('fac(3)'); // This will fail
 

@@ -218,7 +218,7 @@ describe('Operators', function () {
   });
 
   describe('in operator', function () {
-    var parser = new Parser({ operators: { 'in': true } });
+    var parser = new Parser();
 
     it('"a" in ["a", "b"]', function () {
       assert.strictEqual(parser.evaluate('"a" in toto', {'toto': ['a', 'b']}), true);

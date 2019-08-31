@@ -100,19 +100,19 @@ describe('Expression', function () {
     });
 
     it('x = 3 * 2 + 1', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('x = 3 * 2 + 1'), 7);
     });
 
     it('x = x * 2 + 1', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = {};
       parser.evaluate('x = 3 * 2 + 1', obj);
       assert.strictEqual(parser.evaluate('x = x * 2 + 1', obj), 15);
     });
 
     it('y = x = x * 2 + 1', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = {};
       parser.evaluate('x = 3 * 2 + 1', obj);
       assert.strictEqual(parser.evaluate('y = x = x * 2 + 1', obj), 15);
@@ -121,7 +121,7 @@ describe('Expression', function () {
     });
 
     it('y = y = 2*z', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = { y: 5, z: 3 };
       assert.strictEqual(parser.evaluate('x = y = 2*z', obj), 6);
       assert.strictEqual(6, obj.x);
@@ -130,7 +130,7 @@ describe('Expression', function () {
     });
 
     it('f(x) = x * x', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = { f: null };
       assert.strictEqual(parser.evaluate('f(x) = x * x', obj) instanceof Function, true);
       assert.strictEqual(obj.f instanceof Function, true);
@@ -138,12 +138,12 @@ describe('Expression', function () {
     });
 
     it('(f(x) = x * x)(3)', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('(f(x) = x * x)(3)'), 9);
     });
 
     it('y = 5; f(x) = x * y', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = { f: null };
       assert.strictEqual(parser.evaluate('y = 5; f(x) = x * y', obj) instanceof Function, true);
       assert.strictEqual(obj.f instanceof Function, true);
@@ -151,24 +151,24 @@ describe('Expression', function () {
     });
 
     it('y = 5; (f(x) = x * y)(3)', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('y = 5; (f(x) = x * y)(3)'), 15);
     });
 
     it('(f(x) = x > 1 ? x*f(x-1) : 1)(5)', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('(f(x) = x > 1 ? x*f(x-1) : 1)(5)'), 120);
       assert.strictEqual(parser.evaluate('(f(x) = x > 1 ? x*f(x-1) : 1); f(6)'), 720);
     });
 
     it('f(x) = x > 1 ? x*f(x-1) : 1; f(6); f(5)', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1; f(6)'), 720);
       assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1; f(6); f(5)'), 120);
     });
 
     it('f(x) = x > 1 ? x*f(x-1) : 1', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       var obj = { f: null };
       assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1', obj) instanceof Function, true);
       assert.strictEqual(obj.f instanceof Function, true);
@@ -187,22 +187,22 @@ describe('Expression', function () {
     });
 
     it('x = 3 ; y = 4 ; z = x * y', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('x = 3 ; y = 4 ; z = x * y'), 12);
     });
 
     it('x=3;y=4;z=x*y;', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('x=3;y=4;z=x*y;'), 12);
     });
 
     it('1 + (( 3 ; 4 ) + 5)', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('1 + (( 3 ; 4 ) + 5)'), 10);
     });
 
     it('2+(x=3;y=4;z=x*y)+5', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.evaluate('2+(x=3;y=4;z=x*y)+5'), 19);
     });
 
@@ -224,7 +224,7 @@ describe('Expression', function () {
   });
 
   describe('substitute()', function () {
-    var parser = new Parser({ operators: { assignment: true } });
+    var parser = new Parser();
 
     var expr = parser.parse('2 * x + 1');
     var expr2 = expr.substitute('x', '4 * x');
@@ -295,11 +295,11 @@ describe('Expression', function () {
     });
 
     it('x = 2*x', function () {
-      assert.strictEqual(new Parser({ operators: { assignment: true }}).parse('x = 2*x').simplify({x: 3}).toString(), '(x = (6))');
+      assert.strictEqual(new Parser().parse('x = 2*x').simplify({x: 3}).toString(), '(x = (6))');
     });
 
     it('(f(x) = x * y)(3)', function () {
-      assert.strictEqual(new Parser({ operators: { assignment: true }}).parse('(f(x) = x * y)(3)').simplify({y: 5}).toString(), '(f(x) = ((x * 5)))(3)');
+      assert.strictEqual(new Parser().parse('(f(x) = x * y)(3)').simplify({y: 5}).toString(), '(f(x) = ((x * 5)))(3)');
     });
   });
 
@@ -389,11 +389,11 @@ describe('Expression', function () {
     });
 
     it('x = y + z', function () {
-      assert.deepEqual(new Parser({ operators: { assignment: true } }).parse('x = y + z').variables(), ['x', 'y', 'z']);
+      assert.deepEqual(new Parser().parse('x = y + z').variables(), ['x', 'y', 'z']);
     });
 
     it('f(x, y, z) = x + y + z', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.deepEqual(parser.parse('f(x, y, z) = x + y + z').variables(), ['f', 'x', 'y', 'z']);
     });
   });
@@ -455,12 +455,12 @@ describe('Expression', function () {
     });
 
     it('x = y + z', function () {
-      assert.deepEqual(new Parser({ operators: { assignment: true } }).parse('x = y + z').symbols(), ['x', 'y', 'z']);
+      assert.deepEqual(new Parser().parse('x = y + z').symbols(), ['x', 'y', 'z']);
     });
   });
 
   describe('toString()', function () {
-    var parser = new Parser({ operators: { assignment: true } });
+    var parser = new Parser();
 
     it('2 ^ x', function () {
       assert.strictEqual(parser.parse('2 ^ x').toString(), '(2 ^ x)');
@@ -572,12 +572,12 @@ describe('Expression', function () {
     });
 
     it('x = 3 ; y = 4 ; z = x * y', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.parse('x = 3 ; y = 4 ; z = x * y').toString(), '((x = (3)),((y = (4)),(z = ((x * y)))))');
     });
 
     it('2+(x=3;y=4;z=x*y)+5', function () {
-      var parser = new Parser({ operators: { assignment: true } });
+      var parser = new Parser();
       assert.strictEqual(parser.parse('2+(x=3;y=4;z=x*y)+5').toString(), '((2 + ((x = (3)),((y = (4)),(z = ((x * y)))))) + 5)');
     });
 
@@ -600,7 +600,7 @@ describe('Expression', function () {
   });
 
   describe('toJSFunction()', function () {
-    var parser = new Parser({ operators: { assignment: true } });
+    var parser = new Parser();
 
     it('2 ^ x', function () {
       var expr = parser.parse('2 ^ x');

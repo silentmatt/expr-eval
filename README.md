@@ -1,8 +1,8 @@
 JavaScript Expression Evaluator
 ===============================
 
-[![npm](https://img.shields.io/npm/v/expr-eval.svg)](https://www.npmjs.com/package/expr-eval)
-[![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg)](https://cdnjs.com/libraries/expr-eval)
+[![npm](https://img.shields.io/npm/v/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/expr-eval)
+[![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg?maxAge=3600)](https://cdnjs.com/libraries/expr-eval)
 [![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
 
 Description
@@ -36,6 +36,26 @@ Basic Usage
 Documentation
 -------------------------------------
 
+* [Parser](#parser)
+    - [Parser()](#parser-1)
+    - [parse(expression: string)](#parseexpression-string)
+    - [Parser.parse(expression: string)](#parserparseexpression-string)
+    - [Parser.evaluate(expression: string, variables?: object)](#parserevaluateexpression-string-variables-object)
+* [Expression](#expression)
+    - [evaluate(variables?: object)](#evaluatevariables-object)
+    - [substitute(variable: string, expression: Expression | string | number)](#substitutevariable-string-expression-expression--string--number)
+    - [simplify(variables: object)](#simplifyvariables-object)
+    - [variables(options?: object)](#variablesoptions-object)
+    - [symbols(options?: object)](#symbolsoptions-object)
+    - [toString()](#tostring)
+    - [toJSFunction(parameters: array | string, variables?: object)](#tojsfunctionparameters-array--string-variables-object)
+* [Expression Syntax](#expression-syntax)
+    - [Operator Precedence](#operator-precedence)
+    - [Unary operators](#unary-operators)
+    - [Pre-defined functions](#pre-defined-functions)
+    - [Custom functions](#custom-functions)
+    - [Constants](#constants)
+
 ### Parser ###
 
 Parser is the main class in the library. It has as single `parse` method, and
@@ -66,8 +86,9 @@ For example, the following will create a `Parser` that does not allow comparison
         logical: false,
         comparison: false,
 
-        // The in operator is disabled by default in the current version
-        'in': true
+        // The in and = operators are disabled by default in the current version
+        'in': true,
+        assignment: true
       }
     });
 
@@ -158,9 +179,9 @@ expression.
 
     js> expr = Parser.parse("min(x, y, z)");
     (min(x, y, z))
-    js> expr.variables();
+    js> expr.symbols();
     min,x,y,z
-    js> expr.simplify({ y: 4, z: 5 }).variables();
+    js> expr.simplify({ y: 4, z: 5 }).symbols();
     min,x
 
 Like `variables`, `symbols` accepts an option argument `{ withMembers: true }` to include object members.
@@ -211,16 +232,18 @@ f(), x.y                 | Left          | Function call, property access
 and                      | Left          | Logical AND
 or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
+=                        | Right         | Variable assignment (disabled by default)
 
-The `in` operator is disabled by default in the current version. To use it,
-construct a `Parser` instance with `operators.in` set to `true`. For example:
+The `in` and `=` operators are disabled by default in the current version. To use them,
+construct a `Parser` instance with `operators.in` or `operators.assignment` set to `true`. For example:
 
     var parser = new Parser({
       operators: {
-        'in': true
+        'in': true,
+        'assignment': true
       }
     });
-    // Now parser supports 'x in array' expressions
+    // Now parser supports 'x in array' and 'y = 2*x' expressions
 
 #### Unary operators
 
@@ -282,6 +305,49 @@ pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
 atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 if(c, a, b)  | Function form of c ? a : b
 roundTo(x, n)  | Rounds x to n places after the decimal point.
+
+#### Custom functions
+
+If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
+
+    var parser = new Parser();
+    
+    // Add a new function
+    parser.functions.customAddFunction = function (arg1, arg2) {
+      return arg1 + arg2;
+    };
+    
+    // Remove the factorial function
+    delete parser.functions.fac;
+    
+    parser.evaluate('customAddFunction(2, 4) == 6'); // true
+    //parser.evaluate('fac(3)'); // This will fail
+
+#### Constants
+
+The parser also includes a number of pre-defined constants that can be used in expressions. These are shown
+in the table below:
+
+Constant     | Description
+:----------- | :----------
+E            | The value of `Math.E` from your JavaScript runtime
+PI           | The value of `Math.PI` from your JavaScript runtime
+true         | Logical `true` value
+false        | Logical `false` value
+
+Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customise the
+constants available to your expressions. For example:
+
+    var parser = new Parser();
+    parser.consts.R = 1.234;
+
+    console.log(parser.parse('A+B/R').toString());  // ((A + B) / 1.234)
+
+To disable the pre-defined constants, you can replace or delete `parser.consts`:
+
+    var parser = new Parser();
+    parser.consts = {};
+
 
 ### Tests ###
 

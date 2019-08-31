@@ -10,7 +10,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^5.12.1",
+    "eslint": "^6.3.0",
     "eslint-config-semistandard": "^13.0.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.15.0",

@@ -1,4 +1,4 @@
-import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME, TSEMICOLON } from './token';
+import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON } from './token';
 
 export function TokenStream(parser, expression) {
   this.pos = 0;
@@ -39,6 +39,7 @@ TokenStream.prototype.next = function () {
       this.isOperator() ||
       this.isString() ||
       this.isParen() ||
+      this.isBracket() ||
       this.isComma() ||
       this.isSemicolon() ||
       this.isNamedOp() ||
@@ -75,6 +76,16 @@ TokenStream.prototype.isParen = function () {
   var c = this.expression.charAt(this.pos);
   if (c === '(' || c === ')') {
     this.current = this.newToken(TPAREN, c);
+    this.pos++;
+    return true;
+  }
+  return false;
+};
+
+TokenStream.prototype.isBracket = function () {
+  var c = this.expression.charAt(this.pos);
+  if (c === '[' || c === ']') {
+    this.current = this.newToken(TBRACKET, c);
     this.pos++;
     return true;
   }

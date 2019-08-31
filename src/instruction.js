@@ -10,6 +10,7 @@ export var IEXPR = 'IEXPR';
 export var IEXPREVAL = 'IEXPREVAL';
 export var IMEMBER = 'IMEMBER';
 export var IENDSTATEMENT = 'IENDSTATEMENT';
+export var IARRAY = 'IARRAY';
 
 export function Instruction(type, value) {
   this.type = type;

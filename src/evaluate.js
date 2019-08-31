@@ -1,9 +1,9 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
   var n1, n2, n3;
-  var f;
+  var f, args, argCount;
 
   if (isExpressionEvaluator(tokens)) {
     return resolveExpression(tokens, values);
@@ -56,8 +56,8 @@ export default function evaluate(tokens, expr, values) {
       f = expr.unaryOps[item.value];
       nstack.push(f(resolveExpression(n1, values)));
     } else if (type === IFUNCALL) {
-      var argCount = item.value;
-      var args = [];
+      argCount = item.value;
+      args = [];
       while (argCount-- > 0) {
         args.unshift(resolveExpression(nstack.pop(), values));
       }
@@ -101,6 +101,13 @@ export default function evaluate(tokens, expr, values) {
       nstack.push(n1[item.value]);
     } else if (type === IENDSTATEMENT) {
       nstack.pop();
+    } else if (type === IARRAY) {
+      argCount = item.value;
+      args = [];
+      while (argCount-- > 0) {
+        args.unshift(nstack.pop());
+      }
+      nstack.push(args);
     } else {
       throw new Error('invalid Expression');
     }

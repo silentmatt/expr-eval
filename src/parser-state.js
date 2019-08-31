@@ -1,5 +1,5 @@
-import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
-import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -75,7 +75,7 @@ ParserState.prototype.parseAtom = function (instr) {
 ParserState.prototype.parseExpression = function (instr) {
   var exprInstr = []
   if (this.parseUntilEndStatement(instr, exprInstr)) return;
-  this.parseVariableAssignmentExpression(exprInstr);
+  this.parseArrayExpression(exprInstr);
   if (this.parseUntilEndStatement(instr, exprInstr)) return;
   this.pushExpression(instr, exprInstr);
 };
@@ -96,6 +96,23 @@ ParserState.prototype.parseUntilEndStatement = function (instr, exprInstr) {
   }
   instr.push(new Instruction(IEXPR, exprInstr));
   return true;
+};
+
+ParserState.prototype.parseArrayExpression = function (instr) {
+  if (!this.accept(TBRACKET, '[')) {
+    this.parseVariableAssignmentExpression(instr);
+    return;
+  }
+  var argCount = 0;
+  while (!this.accept(TBRACKET, ']')) {
+    this.parseExpression(instr);
+    ++argCount;
+    while (this.accept(TCOMMA)) {
+      this.parseExpression(instr);
+      ++argCount;
+    }
+  }
+  instr.push(new Instruction(IARRAY, argCount));
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
@@ -120,7 +137,6 @@ ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
       throw new Error('expected variable for assignment');
     }
     this.parseVariableAssignmentExpression(varValue);
-    //this.parseConditionalExpression(varValue);
     instr.push(new Instruction(IVARNAME, varName.value));
     instr.push(new Instruction(IEXPR, varValue));
     instr.push(binaryInstruction('='));

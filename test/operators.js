@@ -341,6 +341,17 @@ describe('Operators', function () {
       assert.strictEqual(parser.evaluate('length -1'), 2);
       assert.strictEqual(parser.evaluate('length -999'), 4);
     });
+
+    it('should return 0 for empty arrays', function () {
+      assert.strictEqual(parser.evaluate('length []'), 0);
+    });
+
+    it('should return the length of an array', function () {
+      assert.strictEqual(parser.evaluate('length [123]'), 1);
+      assert.strictEqual(parser.evaluate('length [123, 456]'), 2);
+      assert.strictEqual(parser.evaluate('length [12, 34, 56]'), 3);
+      assert.strictEqual(parser.evaluate('length [1, 2, 3, 4]'), 4);
+    });
   });
 
   describe('% operator', function () {

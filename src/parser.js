@@ -31,7 +31,7 @@ import {
   random,
   factorial,
   gamma,
-  stringLength,
+  stringOrArrayLength,
   hypot,
   condition,
   roundTo,
@@ -68,7 +68,7 @@ export function Parser(options) {
     '+': Number,
     exp: Math.exp,
     not: not,
-    length: stringLength,
+    length: stringOrArrayLength,
     '!': factorial
   };
 

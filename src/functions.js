@@ -184,7 +184,10 @@ export function gamma(n) {
   return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
 }
 
-export function stringLength(s) {
+export function stringOrArrayLength(s) {
+  if (Array.isArray(s)) {
+    return s.length;
+  }
   return String(s).length;
 }
 

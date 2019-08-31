@@ -237,6 +237,26 @@ describe('Expression', function () {
     it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
       assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]')), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
     });
+
+    it('1 ? 1 : 0', function () {
+      assert.strictEqual(Parser.evaluate('1 ? 1 : 0'), 1);
+    });
+
+    it('0 ? 1 : 0', function () {
+      assert.strictEqual(Parser.evaluate('0 ? 1 : 0'), 0);
+    });
+
+    it('1==1 or 2==1 ? 39 : 0', function () {
+      assert.strictEqual(Parser.evaluate('1==1 or 2==1 ? 39 : 0'), 39);
+    });
+
+    it('1==1 or 1==2 ? -4 + 8 : 0', function () {
+      assert.strictEqual(Parser.evaluate('1==1 or 1==2 ? -4 + 8 : 0'), 4);
+    });
+
+    it('3 and 6 ? 45 > 5 * 11 ? 3 * 3 : 2.4 : 0', function () {
+      assert.strictEqual(Parser.evaluate('3 and 6 ? 45 > 5 * 11 ? 3 * 3 : 2.4 : 0'), 2.4);
+    });
   });
 
   describe('substitute()', function () {

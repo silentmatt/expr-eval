@@ -1,5 +1,5 @@
 import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
-import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER, IENDSTATEMENT, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -103,7 +103,20 @@ ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
   while (this.accept(TOP, '=')) {
     var varName = instr.pop();
     var varValue = [];
-    if (varName.type !== IVAR) {
+    var lastInstrIndex = instr.length - 1;
+    if (varName.type === IFUNCALL) {
+      for (var i = 0, len = varName.value + 1; i < len; i++) {
+        var index = lastInstrIndex - i;
+        if (instr[index].type === IVAR) {
+          instr[index] = new Instruction(IVARNAME, instr[index].value);
+        }
+      }
+      this.parseVariableAssignmentExpression(varValue);
+      instr.push(new Instruction(IEXPR, varValue));
+      instr.push(new Instruction(IFUNDEF, varName.value));
+      continue;
+    }
+    if (varName.type !== IVAR && varName.type !== IMEMBER) {
       throw new Error('expected variable for assignment');
     }
     this.parseVariableAssignmentExpression(varValue);

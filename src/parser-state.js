@@ -80,7 +80,7 @@ ParserState.prototype.parseAtom = function (instr) {
 };
 
 ParserState.prototype.parseExpression = function (instr) {
-  var exprInstr = []
+  var exprInstr = [];
   if (this.parseUntilEndStatement(instr, exprInstr)) {
     return;
   }
@@ -92,7 +92,7 @@ ParserState.prototype.parseExpression = function (instr) {
 };
 
 ParserState.prototype.pushExpression = function (instr, exprInstr) {
-  for (var i=0, len=exprInstr.length; i < len; i++) {
+  for (var i = 0, len = exprInstr.length; i < len; i++) {
     instr.push(exprInstr[i]);
   }
 };

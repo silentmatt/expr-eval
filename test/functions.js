@@ -80,7 +80,7 @@ describe('Functions', function () {
         distinct[x] = true;
       }
       // Technically, these could fail but that should be extremely rare
-      assert.equal(Object.keys(distinct).length, 1000);
+      assert.strictEqual(Object.keys(distinct).length, 1000);
       assert.ok((sum / 1000 >= 0.4) && (sum / 1000 <= 0.6));
     });
   });

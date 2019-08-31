@@ -49,7 +49,7 @@ export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values
     } else if (type === IMEMBER && nstack.length > 0) {
       n1 = nstack.pop();
       nstack.push(new Instruction(INUMBER, n1.value[item.value]));
-    } /*else if (type === IARRAY && nstack.length >= item.value) {
+    } /* else if (type === IARRAY && nstack.length >= item.value) {
       var length = item.value;
       while (length-- > 0) {
         newexpression.push(nstack.pop());

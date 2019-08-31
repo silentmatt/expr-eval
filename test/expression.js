@@ -8,43 +8,43 @@ var Parser = require('../dist/bundle').Parser;
 describe('Expression', function () {
   describe('evaluate()', function () {
     it('2 ^ x', function () {
-      assert.strictEqual(Parser.evaluate('2 ^ x', {x: 3}), 8);
+      assert.strictEqual(Parser.evaluate('2 ^ x', { x: 3 }), 8);
     });
 
     it('2 * x + 1', function () {
-      assert.strictEqual(Parser.evaluate('2 * x + 1', {x: 3}), 7);
+      assert.strictEqual(Parser.evaluate('2 * x + 1', { x: 3 }), 7);
     });
 
     it('2 + 3 * x', function () {
-      assert.strictEqual(Parser.evaluate('2 + 3 * x', {x: 4}), 14);
+      assert.strictEqual(Parser.evaluate('2 + 3 * x', { x: 4 }), 14);
     });
 
     it('(2 + 3) * x', function () {
-      assert.strictEqual(Parser.evaluate('(2 + 3) * x', {x: 4}), 20);
+      assert.strictEqual(Parser.evaluate('(2 + 3) * x', { x: 4 }), 20);
     });
 
     it('2-3^x', function () {
-      assert.strictEqual(Parser.evaluate('2-3^x', {x: 4}), -79);
+      assert.strictEqual(Parser.evaluate('2-3^x', { x: 4 }), -79);
     });
 
     it('-2-3^x', function () {
-      assert.strictEqual(Parser.evaluate('-2-3^x', {x: 4}), -83);
+      assert.strictEqual(Parser.evaluate('-2-3^x', { x: 4 }), -83);
     });
 
     it('-3^x', function () {
-      assert.strictEqual(Parser.evaluate('-3^x', {x: 4}), -81);
+      assert.strictEqual(Parser.evaluate('-3^x', { x: 4 }), -81);
     });
 
     it('(-3)^x', function () {
-      assert.strictEqual(Parser.evaluate('(-3)^x', {x: 4}), 81);
+      assert.strictEqual(Parser.evaluate('(-3)^x', { x: 4 }), 81);
     });
 
     it('2 ^ x.y', function () {
-      assert.strictEqual(Parser.evaluate('2^x.y', {x: {y: 3}}), 8);
+      assert.strictEqual(Parser.evaluate('2^x.y', { x: { y: 3 } }), 8);
     });
 
     it('2 + 3 * foo.bar.baz', function () {
-      assert.strictEqual(Parser.evaluate('2 + 3 * foo.bar.baz', {foo: {bar: {baz: 4}}}), 14);
+      assert.strictEqual(Parser.evaluate('2 + 3 * foo.bar.baz', { foo: { bar: { baz: 4 } } }), 14);
     });
 
     it('10/-1', function () {
@@ -56,7 +56,7 @@ describe('Expression', function () {
     });
 
     it('10*-x', function () {
-      assert.strictEqual(Parser.evaluate('10*-x', {x: 1}), -10);
+      assert.strictEqual(Parser.evaluate('10*-x', { x: 1 }), -10);
     });
 
     it('10+-1', function () {
@@ -72,7 +72,7 @@ describe('Expression', function () {
     });
 
     it('10*+x', function () {
-      assert.strictEqual(Parser.evaluate('10*+x', {x: 1}), 10);
+      assert.strictEqual(Parser.evaluate('10*+x', { x: 1 }), 10);
     });
 
     it('10+ +1', function () {
@@ -207,15 +207,15 @@ describe('Expression', function () {
     });
 
     it('[1, 2, 3]', function () {
-      assert.deepEqual(Parser.evaluate('[1, 2, 3]'), [1, 2, 3]);
+      assert.deepStrictEqual(Parser.evaluate('[1, 2, 3]'), [1, 2, 3]);
     });
 
     it('[1, 2, 3, [4, [5, 6]]]', function () {
-      assert.deepEqual(Parser.evaluate('[1, 2, 3, [4, [5, 6]]]'), [1, 2, 3, [4, [5, 6]]]);
+      assert.deepStrictEqual(Parser.evaluate('[1, 2, 3, [4, [5, 6]]]'), [1, 2, 3, [4, [5, 6]]]);
     });
 
     it('["a", ["b", ["c"]], true, 1 + 2 + 3]', function () {
-      assert.deepEqual(Parser.evaluate('["a", ["b", ["c"]], true, 1 + 2 + 3]'), ['a', ['b', ['c']], true, 6]);
+      assert.deepStrictEqual(Parser.evaluate('["a", ["b", ["c"]], true, 1 + 2 + 3]'), ['a', ['b', ['c']], true, 6]);
     });
 
     it('should fail trying to call a non-function', function () {
@@ -235,7 +235,7 @@ describe('Expression', function () {
     });
 
     it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
-      assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]')), JSON.stringify([1, 5, 20, 6/7, [8, 9, 10], '11']));
+      assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]')), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
     });
   });
 
@@ -245,7 +245,7 @@ describe('Expression', function () {
     var expr = parser.parse('2 * x + 1');
     var expr2 = expr.substitute('x', '4 * x');
     it('((2*(4*x))+1)', function () {
-      assert.strictEqual(expr2.evaluate({x: 3}), 25);
+      assert.strictEqual(expr2.evaluate({ x: 3 }), 25);
     });
 
     var expr3 = expr.substitute('x', '4 * x.y.z');
@@ -276,7 +276,7 @@ describe('Expression', function () {
     var expr7 = expr.substitute('x', parser.parse('4 * x'));
     it('should substitute expressions', function () {
       assert.strictEqual(expr7.toString(), '((2 * (4 * x)) + 1)');
-      assert.strictEqual(expr7.evaluate({x: 3}), 25);
+      assert.strictEqual(expr7.evaluate({ x: 3 }), 25);
     });
 
     var expr8 = parser.parse('x = x + 1').substitute('x', '7');
@@ -311,11 +311,11 @@ describe('Expression', function () {
     });
 
     it('x = 2*x', function () {
-      assert.strictEqual(new Parser().parse('x = 2*x').simplify({x: 3}).toString(), '(x = (6))');
+      assert.strictEqual(new Parser().parse('x = 2*x').simplify({ x: 3 }).toString(), '(x = (6))');
     });
 
     it('(f(x) = x * y)(3)', function () {
-      assert.strictEqual(new Parser().parse('(f(x) = x * y)(3)').simplify({y: 5}).toString(), '(f(x) = ((x * 5)))(3)');
+      assert.strictEqual(new Parser().parse('(f(x) = x * y)(3)').simplify({ y: 5 }).toString(), '(f(x) = ((x * 5)))(3)');
     });
 
     it('a[2] + b[3]', function () {
@@ -330,156 +330,156 @@ describe('Expression', function () {
   describe('variables()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function () {
-      assert.deepEqual(expr.variables(), ['x', 'y', 'z']);
+      assert.deepStrictEqual(expr.variables(), ['x', 'y', 'z']);
     });
 
     it('["x", "z.y.x"]', function () {
-      assert.deepEqual(expr.simplify({y: 4}).variables(), ['x', 'z']);
+      assert.deepStrictEqual(expr.simplify({ y: 4 }).variables(), ['x', 'z']);
     });
 
     it('["x"]', function () {
-      assert.deepEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables(), ['x']);
+      assert.deepStrictEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).variables(), ['x']);
     });
 
     it('a or b ? c + d : e * f', function () {
-      assert.deepEqual(Parser.parse('a or b ? c + d : e * f').variables(), ['a', 'b', 'c', 'd', 'e', 'f']);
+      assert.deepStrictEqual(Parser.parse('a or b ? c + d : e * f').variables(), ['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
     it('$x * $y_+$a1*$z - $b2', function () {
-      assert.deepEqual(Parser.parse('$x * $y_+$a1*$z - $b2').variables(), ['$x', '$y_', '$a1', '$z', '$b2']);
+      assert.deepStrictEqual(Parser.parse('$x * $y_+$a1*$z - $b2').variables(), ['$x', '$y_', '$a1', '$z', '$b2']);
     });
 
     it('user.age + 2', function () {
-      assert.deepEqual(Parser.parse('user.age + 2').variables(), ['user']);
+      assert.deepStrictEqual(Parser.parse('user.age + 2').variables(), ['user']);
     });
 
     it('user.age + 2 with { withMembers: false } option', function () {
-      assert.deepEqual(Parser.parse('user.age + 2').variables({ withMembers: false }), ['user']);
+      assert.deepStrictEqual(Parser.parse('user.age + 2').variables({ withMembers: false }), ['user']);
     });
 
     it('user.age + 2 with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age + 2');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['user.age']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['user.age']);
     });
 
     it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y ? x.y.z : default.z');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
     });
 
     it('x + x.y + x.z with { withMembers: true } option', function () {
       var expr = Parser.parse('x + x.y + x.z');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['x', 'x.y', 'x.z']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x', 'x.y', 'x.z']);
     });
 
     it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
     });
 
     it('user.age with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['user.age']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['user.age']);
     });
 
     it('x with { withMembers: true } option', function () {
       var expr = Parser.parse('x');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['x']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['x']);
     });
 
     it('x with { withMembers: false } option', function () {
       var expr = Parser.parse('x');
-      assert.deepEqual(expr.variables({ withMembers: false }), ['x']);
+      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['x']);
     });
 
     it('max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
       var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
-      assert.deepEqual(expr.variables({ withMembers: false }), ['conf']);
+      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['conf']);
     });
 
     it('max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
       var expr = Parser.parse('max(conf.limits.lower, conf.limits.upper)');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['conf.limits.lower', 'conf.limits.upper']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['conf.limits.lower', 'conf.limits.upper']);
     });
 
     it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: false } option', function () {
       var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
-      assert.deepEqual(expr.variables({ withMembers: false }), ['fn', 'conf']);
+      assert.deepStrictEqual(expr.variables({ withMembers: false }), ['fn', 'conf']);
     });
 
     it('fn.max(conf.limits.lower, conf.limits.upper) with { withMembers: true } option', function () {
       var expr = Parser.parse('fn.max(conf.limits.lower, conf.limits.upper)');
-      assert.deepEqual(expr.variables({ withMembers: true }), ['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
+      assert.deepStrictEqual(expr.variables({ withMembers: true }), ['fn.max', 'conf.limits.lower', 'conf.limits.upper']);
     });
 
     it('x = y + z', function () {
-      assert.deepEqual(new Parser().parse('x = y + z').variables(), ['x', 'y', 'z']);
+      assert.deepStrictEqual(new Parser().parse('x = y + z').variables(), ['x', 'y', 'z']);
     });
 
     it('f(x, y, z) = x + y + z', function () {
       var parser = new Parser();
-      assert.deepEqual(parser.parse('f(x, y, z) = x + y + z').variables(), ['f', 'x', 'y', 'z']);
+      assert.deepStrictEqual(parser.parse('f(x, y, z) = x + y + z').variables(), ['f', 'x', 'y', 'z']);
     });
   });
 
   describe('symbols()', function () {
     var expr = Parser.parse('x * (y * atan2(1, 2)) + z.y.x');
     it('["x", "y", "z.y.x"]', function () {
-      assert.deepEqual(expr.symbols(), ['x', 'y', 'atan2', 'z']);
+      assert.deepStrictEqual(expr.symbols(), ['x', 'y', 'atan2', 'z']);
     });
 
     it('["x", "z.y.x"]', function () {
-      assert.deepEqual(expr.simplify({y: 4}).symbols(), ['x', 'atan2', 'z']);
+      assert.deepStrictEqual(expr.simplify({ y: 4 }).symbols(), ['x', 'atan2', 'z']);
     });
 
     it('["x"]', function () {
-      assert.deepEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols(), ['x', 'atan2']);
+      assert.deepStrictEqual(expr.simplify({ y: 4, z: { y: { x: 5 } } }).symbols(), ['x', 'atan2']);
     });
 
     it('a or b ? c + d : e * f', function () {
-      assert.deepEqual(Parser.parse('a or b ? c + d : e * f').symbols(), ['a', 'b', 'c', 'd', 'e', 'f']);
+      assert.deepStrictEqual(Parser.parse('a or b ? c + d : e * f').symbols(), ['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
     it('user.age + 2', function () {
-      assert.deepEqual(Parser.parse('user.age + 2').symbols(), ['user']);
+      assert.deepStrictEqual(Parser.parse('user.age + 2').symbols(), ['user']);
     });
 
     it('user.age + 2 with { withMembers: false } option', function () {
-      assert.deepEqual(Parser.parse('user.age + 2').symbols({ withMembers: false }), ['user']);
+      assert.deepStrictEqual(Parser.parse('user.age + 2').symbols({ withMembers: false }), ['user']);
     });
 
     it('user.age + 2 with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age + 2');
-      assert.deepEqual(expr.symbols({ withMembers: true }), ['user.age']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['user.age']);
     });
 
     it('x.y ? x.y.z : default.z with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y ? x.y.z : default.z');
-      assert.deepEqual(expr.symbols({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x.y.z', 'default.z', 'x.y']);
     });
 
     it('x.y < 3 ? 2 * x.y.z : default.z + 1 with { withMembers: true } option', function () {
       var expr = Parser.parse('x.y < 3 ? 2 * x.y.z : default.z + 1');
-      assert.deepEqual(expr.symbols({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x.y', 'x.y.z', 'default.z']);
     });
 
     it('user.age with { withMembers: true } option', function () {
       var expr = Parser.parse('user.age');
-      assert.deepEqual(expr.symbols({ withMembers: true }), ['user.age']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['user.age']);
     });
 
     it('x with { withMembers: true } option', function () {
       var expr = Parser.parse('x');
-      assert.deepEqual(expr.symbols({ withMembers: true }), ['x']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: true }), ['x']);
     });
 
     it('x with { withMembers: false } option', function () {
       var expr = Parser.parse('x');
-      assert.deepEqual(expr.symbols({ withMembers: false }), ['x']);
+      assert.deepStrictEqual(expr.symbols({ withMembers: false }), ['x']);
     });
 
     it('x = y + z', function () {
-      assert.deepEqual(new Parser().parse('x = y + z').symbols(), ['x', 'y', 'z']);
+      assert.deepStrictEqual(new Parser().parse('x = y + z').symbols(), ['x', 'y', 'z']);
     });
   });
 
@@ -786,7 +786,7 @@ describe('Expression', function () {
         for (i = 0; i < 10; i++) {
           assert.ok(counts[i] >= 85 && counts[i] <= 115);
         }
-        assert.deepEqual(Object.keys(counts).sort(), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        assert.deepStrictEqual(Object.keys(counts).sort(), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
       });
     });
 
@@ -868,11 +868,11 @@ describe('Expression', function () {
     });
 
     it('[x, y, z]', function () {
-      assert.deepEqual(parser.parse('[x, y, z]').toJSFunction('x,y,z')(1, 2, 3), [1, 2, 3]);
+      assert.deepStrictEqual(parser.parse('[x, y, z]').toJSFunction('x,y,z')(1, 2, 3), [1, 2, 3]);
     });
 
     it('[x, [y, [z]]]', function () {
-      assert.deepEqual(parser.parse('[x, [y, [z]]]').toJSFunction('x,y,z')('abc', true, 3), ['abc', [true, [3]]]);
+      assert.deepStrictEqual(parser.parse('[x, [y, [z]]]').toJSFunction('x,y,z')('abc', true, 3), ['abc', [true, [3]]]);
     });
 
     it('a[2]', function () {
@@ -895,7 +895,7 @@ describe('Expression', function () {
 
     it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
       var exp = parser.parse('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]');
-      assert.strictEqual(JSON.stringify(exp.toJSFunction()()), JSON.stringify([1, 5, 20, 6/7, [8, 9, 10], '11']));
+      assert.strictEqual(JSON.stringify(exp.toJSFunction()()), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
     });
   });
 });

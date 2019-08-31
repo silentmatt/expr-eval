@@ -115,7 +115,8 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0] === -0 ? 0: resolveExpression(nstack[0], values);
+  // Explicitly return zero to avoid test issues caused by -0
+  return nstack[0] === 0 ? 0 : resolveExpression(nstack[0], values);
 }
 
 function createExpressionEvaluator(token, expr, values) {

@@ -52,8 +52,9 @@ Documentation
 * [Expression Syntax](#expression-syntax)
     - [Operator Precedence](#operator-precedence)
     - [Unary operators](#unary-operators)
+    - [Array literals](#array-literals)
     - [Pre-defined functions](#pre-defined-functions)
-    - [Custom functions](#custom-functions)
+    - [Custom JavaScript functions](#custom-javascript-functions)
     - [Constants](#constants)
 
 ### Parser ###
@@ -222,7 +223,7 @@ exponentiation, not xor.
 Operator                 | Associativity | Description
 :----------------------- | :------------ | :----------
 (...)                    | None          | Grouping
-f(), x.y                 | Left          | Function call, property access
+f(), x.y, a[i]           | Left          | Function call, property access, array indexing
 !                        | Left          | Factorial
 ^                        | Right         | Exponentiation
 +, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list)
@@ -233,6 +234,7 @@ and                      | Left          | Logical AND
 or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
 =                        | Right         | Variable assignment
+;                        | Left          | Expression separator
 
     var parser = new Parser({
       operators: {
@@ -302,7 +304,23 @@ pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
 atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
 roundTo(x, n)  | Rounds x to n places after the decimal point.
 
-#### Custom functions
+#### Array literals
+
+Arrays can be created by including the elements inside square `[]` brackets, separated by commas. For example:
+
+    [ 1, 2, 3, 2+2, 10/2, 3! ]
+
+#### Function definitions
+
+You can define functions using the syntax `name(params) = expression`. When it's evaluated, the name will be added to the passed in scope as a function. You can call it later in the expression, or make it available to other expressions by re-using the same scope object. Functions can support multiple parameters, separated by commas.
+
+Examples:
+
+    square(x) = x*x
+    add(a, b) = a + b
+    factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
+
+#### Custom JavaScript functions
 
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
 

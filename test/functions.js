@@ -106,11 +106,13 @@ describe('Functions', function () {
     it('should return the smallest value', function () {
       var parser = new Parser();
       assert.strictEqual(parser.evaluate('min()'), Infinity);
+      assert.strictEqual(parser.evaluate('min([])'), Infinity);
       assert.strictEqual(parser.evaluate('min(1)'), 1);
       assert.strictEqual(parser.evaluate('min(1,2)'), 1);
       assert.strictEqual(parser.evaluate('min(2,1)'), 1);
       assert.strictEqual(parser.evaluate('min(2,1,0)'), 0);
       assert.strictEqual(parser.evaluate('min(4,3,2,1,0,1,2,3,4,-5,6)'), -5);
+      assert.strictEqual(parser.evaluate('min([1,0,2,-4,8,-16,3.2])'), -16);
     });
   });
 
@@ -118,11 +120,13 @@ describe('Functions', function () {
     it('should return the largest value', function () {
       var parser = new Parser();
       assert.strictEqual(parser.evaluate('max()'), -Infinity);
+      assert.strictEqual(parser.evaluate('max([])'), -Infinity);
       assert.strictEqual(parser.evaluate('max(1)'), 1);
       assert.strictEqual(parser.evaluate('max(1,2)'), 2);
       assert.strictEqual(parser.evaluate('max(2,1)'), 2);
       assert.strictEqual(parser.evaluate('max(2,1,0)'), 2);
       assert.strictEqual(parser.evaluate('max(4,3,2,1,0,1,2,3,4,-5,6)'), 6);
+      assert.strictEqual(parser.evaluate('max([1,0,2,-4,8,-16,3.2])'), 8);
     });
   });
 

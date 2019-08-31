@@ -250,3 +250,19 @@ export function setVar(name, value, variables) {
 export function arrayIndex(array, index) {
   return array[index | 0];
 }
+
+export function max(array) {
+  if (arguments.length === 1 && Array.isArray(array)) {
+    return Math.max.apply(Math, array);
+  } else {
+    return Math.max.apply(Math, arguments);
+  }
+}
+
+export function min(array) {
+  if (arguments.length === 1 && Array.isArray(array)) {
+    return Math.min.apply(Math, array);
+  } else {
+    return Math.min.apply(Math, arguments);
+  }
+}

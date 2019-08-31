@@ -36,7 +36,9 @@ import {
   condition,
   roundTo,
   setVar,
-  arrayIndex
+  arrayIndex,
+  max,
+  min
 } from './functions';
 
 export function Parser(options) {
@@ -100,8 +102,8 @@ export function Parser(options) {
   this.functions = {
     random: random,
     fac: factorial,
-    min: Math.min,
-    max: Math.max,
+    min: min,
+    max: max,
     hypot: Math.hypot || hypot,
     pyt: Math.hypot || hypot, // backward compat
     pow: Math.pow,

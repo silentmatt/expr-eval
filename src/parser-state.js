@@ -1,5 +1,5 @@
-import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME } from './token';
-import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { TOP, TNUMBER, TSTRING, TPAREN, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
 import contains from './contains';
 
 export function ParserState(parser, tokenStream, options) {
@@ -73,8 +73,29 @@ ParserState.prototype.parseAtom = function (instr) {
 };
 
 ParserState.prototype.parseExpression = function (instr) {
-  //this.parseConditionalExpression(instr);
-  this.parseVariableAssignmentExpression(instr);
+  var exprInstr = []
+  if (this.parseUntilEndStatement(instr, exprInstr)) return;
+  this.parseVariableAssignmentExpression(exprInstr);
+  if (this.parseUntilEndStatement(instr, exprInstr)) return;
+  this.pushExpression(instr, exprInstr);
+};
+
+ParserState.prototype.pushExpression = function (instr, exprInstr) {
+  for (var i=0, len=exprInstr.length; i < len; i++) {
+    instr.push(exprInstr[i]);
+  }
+};
+
+ParserState.prototype.parseUntilEndStatement = function (instr, exprInstr) {
+  if (!this.accept(TSEMICOLON)) return false;
+  if (this.nextToken && this.nextToken.type !== TEOF && !(this.nextToken.type === TPAREN && this.nextToken.value === ')')) {
+    exprInstr.push(new Instruction(IENDSTATEMENT));
+  }
+  if (this.nextToken.type !== TEOF) {
+    this.parseExpression(exprInstr);
+  }
+  instr.push(new Instruction(IEXPR, exprInstr));
+  return true;
 };
 
 ParserState.prototype.parseVariableAssignmentExpression = function (instr) {

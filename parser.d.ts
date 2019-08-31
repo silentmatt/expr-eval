@@ -46,6 +46,9 @@ export interface ParserOptions {
     exp?: boolean,
     length?: boolean,
     in?: boolean,
+    random?: boolean,
+    min?: boolean,
+    max?: boolean,
     assignment?: boolean
   };
 }

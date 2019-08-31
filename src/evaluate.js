@@ -1,10 +1,17 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
   var n1, n2, n3;
   var f;
-  for (var i = 0; i < tokens.length; i++) {
+
+  if (isExpressionEvaluator(tokens)) {
+    return resolveExpression(tokens);
+  }
+
+  var numTokens = tokens.length;
+
+  for (var i = 0; i < numTokens; i++) {
     var item = tokens[i];
     var type = item.type;
     if (type === INUMBER || type === IVARNAME) {
@@ -21,7 +28,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(f(n1, evaluate(n2, expr, values), values));
       } else {
         f = expr.binaryOps[item.value];
-        nstack.push(f(n1, n2));
+        nstack.push(f(resolveExpression(n1), resolveExpression(n2)));
       }
     } else if (type === IOP3) {
       n3 = nstack.pop();
@@ -31,7 +38,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(evaluate(n1 ? n2 : n3, expr, values));
       } else {
         f = expr.ternaryOps[item.value];
-        nstack.push(f(n1, n2, n3));
+        nstack.push(f(resolveExpression(n1), resolveExpression(n2), resolveExpression(n3)));
       }
     } else if (type === IVAR) {
       if (item.value in expr.functions) {
@@ -47,12 +54,12 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IOP1) {
       n1 = nstack.pop();
       f = expr.unaryOps[item.value];
-      nstack.push(f(n1));
+      nstack.push(f(resolveExpression(n1)));
     } else if (type === IFUNCALL) {
       var argCount = item.value;
       var args = [];
       while (argCount-- > 0) {
-        args.unshift(nstack.pop());
+        args.unshift(resolveExpression(nstack.pop()));
       }
       f = nstack.pop();
       if (f.apply && f.call) {
@@ -61,10 +68,14 @@ export default function evaluate(tokens, expr, values) {
         throw new Error(f + ' is not a function');
       }
     } else if (type === IEXPR) {
-      nstack.push(item.value);
+      nstack.push(createExpressionEvaluator(item, expr, values));
+    } else if (type === IEXPREVAL) {
+      nstack.push(item);
     } else if (type === IMEMBER) {
       n1 = nstack.pop();
       nstack.push(n1[item.value]);
+    } else if (type === IENDSTATEMENT) {
+      nstack.pop();
     } else {
       throw new Error('invalid Expression');
     }
@@ -72,5 +83,23 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0] === -0 ? 0: nstack[0];
+  return nstack[0] === -0 ? 0: resolveExpression(nstack[0]);
+}
+
+function createExpressionEvaluator(token, expr, values) {
+  if (isExpressionEvaluator(token)) return token;
+  return {
+    type: IEXPREVAL,
+    value: function () {
+      return evaluate(token.value, expr, values);
+    }
+  };
+}
+
+function isExpressionEvaluator(n) {
+  return n && n.type === IEXPREVAL;
+}
+
+function resolveExpression(n) {
+  return isExpressionEvaluator(n) ? n.value() : n;
 }

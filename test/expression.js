@@ -129,6 +129,34 @@ describe('Expression', function () {
       assert.strictEqual(3, obj.z);
     });
 
+    it('3 ; 2 ; 1', function () {
+      assert.strictEqual(Parser.evaluate('3 ; 2 ; 1'), 1);
+    });
+
+    it('3 ; 2 ; 1 ;', function () {
+      assert.strictEqual(Parser.evaluate('3 ; 2 ; 1 ;'), 1);
+    });
+
+    it('x = 3 ; y = 4 ; z = x * y', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('x = 3 ; y = 4 ; z = x * y'), 12);
+    });
+
+    it('x=3;y=4;z=x*y;', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('x=3;y=4;z=x*y;'), 12);
+    });
+
+    it('1 + (( 3 ; 4 ) + 5)', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('1 + (( 3 ; 4 ) + 5)'), 10);
+    });
+
+    it('2+(x=3;y=4;z=x*y)+5', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('2+(x=3;y=4;z=x*y)+5'), 19);
+    });
+
     it('should fail trying to call a non-function', function () {
       assert.throws(function () { Parser.evaluate('f()', { f: 2 }); }, Error);
     });
@@ -477,6 +505,24 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('x = y = x + 1').toString(), '(x = ((y = ((x + 1)))))');
     });
 
+    it('3 ; 2 ; 1', function () {
+      assert.strictEqual(parser.parse('3 ; 2 ; 1').toString(), '(3,(2,1))');
+    });
+
+    it('3 ; 2 ; 1 ;', function () {
+      assert.strictEqual(parser.parse('3 ; 2 ; 1 ;').toString(), '(3,(2,(1)))');
+    });
+
+    it('x = 3 ; y = 4 ; z = x * y', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.parse('x = 3 ; y = 4 ; z = x * y').toString(), '((x = (3)),((y = (4)),(z = ((x * y)))))');
+    });
+
+    it('2+(x=3;y=4;z=x*y)+5', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.parse('2+(x=3;y=4;z=x*y)+5').toString(), '((2 + ((x = (3)),((y = (4)),(z = ((x * y)))))) + 5)');
+    });
+
     it('\'as\' || \'df\'', function () {
       assert.strictEqual(parser.parse('\'as\' || \'df\'').toString(), '("as" || "df")');
     });
@@ -516,6 +562,12 @@ describe('Expression', function () {
       var expr = parser.parse('x = x + 1');
       var f = expr.toJSFunction('x');
       assert.strictEqual(f(4), 5);
+    });
+
+    it('y = 4 ; z = x < 5 ? x * y : x / y', function () {
+      var expr = parser.parse('y = 4 ; z = x < 5 ? x * y : x / y');
+      var f = expr.toJSFunction('x');
+      assert.strictEqual(f(3), 12);
     });
 
     it('(sqrt y) + max(3, 1) * (x ? -y : z)', function () {
@@ -702,5 +754,6 @@ describe('Expression', function () {
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(5), 24);
       assert.strictEqual(parser.parse('(x - 1)!').toJSFunction('x')(6), 120);
     });
+
   });
 });

@@ -142,6 +142,42 @@ describe('Expression', function () {
       assert.strictEqual(parser.evaluate('(f(x) = x * x)(3)'), 9);
     });
 
+    it('y = 5; f(x) = x * y', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      var obj = { f: null };
+      assert.strictEqual(parser.evaluate('y = 5; f(x) = x * y', obj) instanceof Function, true);
+      assert.strictEqual(obj.f instanceof Function, true);
+      assert.strictEqual(obj.f(3), 15);
+    });
+
+    it('y = 5; (f(x) = x * y)(3)', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('y = 5; (f(x) = x * y)(3)'), 15);
+    });
+
+    it('(f(x) = x > 1 ? x*f(x-1) : 1)(5)', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('(f(x) = x > 1 ? x*f(x-1) : 1)(5)'), 120);
+      assert.strictEqual(parser.evaluate('(f(x) = x > 1 ? x*f(x-1) : 1); f(6)'), 720);
+    });
+
+    it('f(x) = x > 1 ? x*f(x-1) : 1; f(6); f(5)', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1; f(6)'), 720);
+      assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1; f(6); f(5)'), 120);
+    });
+
+    it('f(x) = x > 1 ? x*f(x-1) : 1', function () {
+      var parser = new Parser({ operators: { assignment: true } });
+      var obj = { f: null };
+      assert.strictEqual(parser.evaluate('f(x) = x > 1 ? x*f(x-1) : 1', obj) instanceof Function, true);
+      assert.strictEqual(obj.f instanceof Function, true);
+      assert.strictEqual(obj.f(6), 720);
+      assert.strictEqual(obj.f(5), 120);
+      assert.strictEqual(obj.f(4), 24);
+      assert.strictEqual(obj.f(3), 6);
+    });
+
     it('3 ; 2 ; 1', function () {
       assert.strictEqual(Parser.evaluate('3 ; 2 ; 1'), 1);
     });
@@ -260,6 +296,10 @@ describe('Expression', function () {
 
     it('x = 2*x', function () {
       assert.strictEqual(new Parser({ operators: { assignment: true }}).parse('x = 2*x').simplify({x: 3}).toString(), '(x = (6))');
+    });
+
+    it('(f(x) = x * y)(3)', function () {
+      assert.strictEqual(new Parser({ operators: { assignment: true }}).parse('(f(x) = x * y)(3)').simplify({y: 5}).toString(), '(f(x) = ((x * 5)))(3)');
     });
   });
 

@@ -6,7 +6,7 @@ export default function evaluate(tokens, expr, values) {
   var f;
 
   if (isExpressionEvaluator(tokens)) {
-    return resolveExpression(tokens);
+    return resolveExpression(tokens, values);
   }
 
   var numTokens = tokens.length;
@@ -28,7 +28,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(f(n1, evaluate(n2, expr, values), values));
       } else {
         f = expr.binaryOps[item.value];
-        nstack.push(f(resolveExpression(n1), resolveExpression(n2)));
+        nstack.push(f(resolveExpression(n1, values), resolveExpression(n2, values)));
       }
     } else if (type === IOP3) {
       n3 = nstack.pop();
@@ -38,7 +38,7 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(evaluate(n1 ? n2 : n3, expr, values));
       } else {
         f = expr.ternaryOps[item.value];
-        nstack.push(f(resolveExpression(n1), resolveExpression(n2), resolveExpression(n3)));
+        nstack.push(f(resolveExpression(n1, values), resolveExpression(n2, values), resolveExpression(n3, values)));
       }
     } else if (type === IVAR) {
       if (item.value in expr.functions) {
@@ -54,12 +54,12 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IOP1) {
       n1 = nstack.pop();
       f = expr.unaryOps[item.value];
-      nstack.push(f(resolveExpression(n1)));
+      nstack.push(f(resolveExpression(n1, values)));
     } else if (type === IFUNCALL) {
       var argCount = item.value;
       var args = [];
       while (argCount-- > 0) {
-        args.unshift(resolveExpression(nstack.pop()));
+        args.unshift(resolveExpression(nstack.pop(), values));
       }
       f = nstack.pop();
       if (f.apply && f.call) {
@@ -108,15 +108,15 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0] === -0 ? 0: resolveExpression(nstack[0]);
+  return nstack[0] === -0 ? 0: resolveExpression(nstack[0], values);
 }
 
 function createExpressionEvaluator(token, expr, values) {
   if (isExpressionEvaluator(token)) return token;
   return {
     type: IEXPREVAL,
-    value: function () {
-      return evaluate(token.value, expr, values);
+    value: function (scope) {
+      return evaluate(token.value, expr, scope);
     }
   };
 }
@@ -125,6 +125,6 @@ function isExpressionEvaluator(n) {
   return n && n.type === IEXPREVAL;
 }
 
-function resolveExpression(n) {
-  return isExpressionEvaluator(n) ? n.value() : n;
+function resolveExpression(n, values) {
+  return isExpressionEvaluator(n) ? n.value(values) : n;
 }

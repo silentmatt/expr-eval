@@ -83,9 +83,9 @@ export default function expressionToString(tokens, toJS) {
       }
       n1 = nstack.pop();
       if (toJS) {
-        nstack.push(n1 + ' = function(' + args.join(', ') + ') { return ' + n2 + ' }');
+        nstack.push('(' + n1 + ' = function(' + args.join(', ') + ') { return ' + n2 + ' })');
       } else {
-        nstack.push(n1 + '(' + args.join(', ') + ') => ' + n2);
+        nstack.push('(' + n1 + '(' + args.join(', ') + ') = ' + n2 + ')');
       }
     } else if (type === IMEMBER) {
       n1 = nstack.pop();

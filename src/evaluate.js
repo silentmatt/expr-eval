@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCALL, IEXPR, IMEMBER } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IEXPR, IMEMBER } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
@@ -7,7 +7,7 @@ export default function evaluate(tokens, expr, values) {
   for (var i = 0; i < tokens.length; i++) {
     var item = tokens[i];
     var type = item.type;
-    if (type === INUMBER) {
+    if (type === INUMBER || type === IVARNAME) {
       nstack.push(item.value);
     } else if (type === IOP2) {
       n2 = nstack.pop();
@@ -16,6 +16,9 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(n1 ? !!evaluate(n2, expr, values) : false);
       } else if (item.value === 'or') {
         nstack.push(n1 ? true : !!evaluate(n2, expr, values));
+      } else if (item.value === '=') {
+        f = expr.binaryOps[item.value];
+        nstack.push(f(n1, evaluate(n2, expr, values), values));
       } else {
         f = expr.binaryOps[item.value];
         nstack.push(f(n1, n2));
@@ -69,5 +72,5 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0];
+  return nstack[0] === -0 ? 0: nstack[0];
 }

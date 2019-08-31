@@ -48,12 +48,14 @@ export interface ParserOptions {
     in?: boolean,
     random?: boolean,
     min?: boolean,
-    max?: boolean
+    max?: boolean,
+    assignment?: boolean
   };
 }
 
 export class Parser {
     constructor(options?: ParserOptions);
+    functions: any;
     parse(expression: string): Expression;
     evaluate(expression: string, values?: Value): number;
     static parse(expression: string): Expression;
@@ -62,7 +64,7 @@ export class Parser {
 
 export interface Expression {
     simplify(values?: Value): Expression;
-    evaluate(values?: Value): number;
+    evaluate(values?: Value): any;
     substitute(variable: string, value: Expression | string | number): Expression;
     symbols(options?: { withMembers?: boolean }): string[];
     variables(options?: { withMembers?: boolean }): string[];

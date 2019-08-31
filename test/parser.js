@@ -327,13 +327,15 @@ describe('Parser', function () {
             add: true,
             sqrt: true,
             divide: true,
-            'in': true
+            'in': true,
+            assignment: true
           }
         });
         assert.strictEqual(parser.evaluate('+(-1)'), -1);
         assert.strictEqual(parser.evaluate('sqrt(16)'), 4);
         assert.strictEqual(parser.evaluate('4 / 6'), 2 / 3);
         assert.strictEqual(parser.evaluate('3 in array', { array: [ 1, 2, 3 ] }), true);
+        assert.strictEqual(parser.evaluate('x = 4', { x: 2 }), 4);
       });
     });
 
@@ -477,6 +479,34 @@ describe('Parser', function () {
 
       assert.throws(function () { parser.parse('5 - 3'); }, /-/);
     });
+
+    it('should allow assignment operator to be enabled', function () {
+      var parser = new Parser({
+        operators: {
+          'assignment': true
+        }
+      });
+
+      assert.throws(function () { parser.parse('a ='); }, Error);
+      assert.strictEqual(parser.evaluate('a = 5', {}), 5);
+    });
+
+    it('should allow assignment operator to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          'assignment': false
+        }
+      });
+
+      assert.throws(function () { parser.parse('a = 5'); }, Error);
+    });
+
+    it('should disable assignment operator by default', function () {
+      var parser = new Parser();
+
+      assert.throws(function () { parser.parse('a = 5'); }, Error);
+    });
+
   });
 
   it('should disallow member access', function () {

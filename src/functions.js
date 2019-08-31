@@ -238,3 +238,8 @@ export function roundTo(value, exp) {
   value = value.toString().split('e');
   return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
 }
+
+export function setVar(name, value, variables) {
+  if (variables) variables[name] = value;
+  return value;
+}

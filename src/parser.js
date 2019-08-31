@@ -34,7 +34,8 @@ import {
   stringLength,
   hypot,
   condition,
-  roundTo
+  roundTo,
+  setVar
 } from './functions';
 
 export function Parser(options) {
@@ -86,7 +87,8 @@ export function Parser(options) {
     '<=': lessThanEqual,
     and: andOperator,
     or: orOperator,
-    'in': inOperator
+    'in': inOperator,
+    '=': setVar
   };
 
   this.ternaryOps = {

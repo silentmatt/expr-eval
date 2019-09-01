@@ -17,14 +17,14 @@
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "istanbul": "^0.4.5",
     "mocha": "^6.2.0",
+    "nyc": "^14.1.1",
     "rollup": "^1.20.3",
     "rollup-plugin-uglify": "^6.0.3"
   },
   "scripts": {
     "test": "npm run build && mocha",
-    "coverage": "npm run build && istanbul cover _mocha",
+    "coverage": "npm run build && nyc --reporter=lcov --reporter=text-summary mocha",
     "lint": "eslint index.js src test rollup.config.js rollup-min.config.js",
     "watch": "rollup -c rollup.config.js -w",
     "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js",

@@ -39,7 +39,8 @@ import {
   arrayIndex,
   max,
   min,
-  arrayMap
+  arrayMap,
+  arrayFold
 } from './functions';
 
 export function Parser(options) {
@@ -111,7 +112,8 @@ export function Parser(options) {
     atan2: Math.atan2,
     gamma: gamma,
     roundTo: roundTo,
-    map: arrayMap
+    map: arrayMap,
+    fold: arrayFold
   };
 
   this.consts = {

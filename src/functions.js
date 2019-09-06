@@ -278,3 +278,15 @@ export function arrayMap(f, a) {
     return f(x, i);
   });
 }
+
+export function arrayFold(f, init, a) {
+  if (typeof f !== 'function') {
+    throw new Error('First argument to map is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to map is not an array');
+  }
+  return a.reduce(function (acc, x, i) {
+    return f(acc, x, i);
+  }, init);
+}

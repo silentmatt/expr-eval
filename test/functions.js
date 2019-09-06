@@ -261,4 +261,45 @@ describe('Functions', function () {
       assert.deepStrictEqual(parser.evaluate('f(a, i) = i; map(f, [1,3,5,7,9])'), [ 0, 1, 2, 3, 4 ]);
     });
   });
+
+  describe('fold(f, init, array)', function () {
+    it('should return the initial value on an empty array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('fold(atan2, 15, [])'), 15);
+    });
+
+    it('should fail if first argument is not a function', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('fold(4, 0, [])'); }, /not a function/);
+    });
+
+    it('should fail if third argument is not an array', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('fold(random, 0, 5)'); }, /not an array/);
+    });
+
+    it('should call built-in functions', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('fold(max, -1, [1, 3, 5, 4, 2, 0])'), 5);
+      assert.strictEqual(parser.evaluate('fold(min, 10, [1, 3, 5, 4, 2, 0, -2, -1])'), -2);
+    });
+
+    it('should call self-defined functions', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 1, [1, 2, 3, 4, 5])'), 120);
+    });
+
+    it('should call self-defined functions with index', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('f(a, b, i) = a*i + b; fold(f, 100, [1,3,5,7,9])'), 193);
+    });
+
+    it('should start with the accumulator', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 0, [1, 2, 3, 4, 5])'), 0);
+      assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 1, [1, 2, 3, 4, 5])'), 120);
+      assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 2, [1, 2, 3, 4, 5])'), 240);
+      assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 3, [1, 2, 3, 4, 5])'), 360);
+    });
+  });
 });

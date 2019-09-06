@@ -11,6 +11,7 @@ export function TokenStream(parser, expression) {
   this.savedPosition = 0;
   this.savedCurrent = null;
   this.options = parser.options;
+  this.parser = parser;
 }
 
 TokenStream.prototype.newToken = function (type, value, pos) {
@@ -427,40 +428,8 @@ TokenStream.prototype.isOperator = function () {
   }
 };
 
-var optionNameMap = {
-  '+': 'add',
-  '-': 'subtract',
-  '*': 'multiply',
-  '/': 'divide',
-  '%': 'remainder',
-  '^': 'power',
-  '!': 'factorial',
-  '<': 'comparison',
-  '>': 'comparison',
-  '<=': 'comparison',
-  '>=': 'comparison',
-  '==': 'comparison',
-  '!=': 'comparison',
-  '||': 'concatenate',
-  'and': 'logical',
-  'or': 'logical',
-  'not': 'logical',
-  '?': 'conditional',
-  ':': 'conditional',
-  '=': 'assignment',
-  '[': 'array',
-  '()=': 'fndef'
-};
-
-function getOptionName(op) {
-  return optionNameMap.hasOwnProperty(op) ? optionNameMap[op] : op;
-}
-
 TokenStream.prototype.isOperatorEnabled = function (op) {
-  var optionName = getOptionName(op);
-  var operators = this.options.operators || {};
-
-  return !(optionName in operators) || !!operators[optionName];
+  return this.parser.isOperatorEnabled(op);
 };
 
 TokenStream.prototype.getCoordinates = function () {

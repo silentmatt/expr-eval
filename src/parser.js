@@ -147,3 +147,39 @@ Parser.parse = function (expr) {
 Parser.evaluate = function (expr, variables) {
   return sharedParser.parse(expr).evaluate(variables);
 };
+
+var optionNameMap = {
+  '+': 'add',
+  '-': 'subtract',
+  '*': 'multiply',
+  '/': 'divide',
+  '%': 'remainder',
+  '^': 'power',
+  '!': 'factorial',
+  '<': 'comparison',
+  '>': 'comparison',
+  '<=': 'comparison',
+  '>=': 'comparison',
+  '==': 'comparison',
+  '!=': 'comparison',
+  '||': 'concatenate',
+  'and': 'logical',
+  'or': 'logical',
+  'not': 'logical',
+  '?': 'conditional',
+  ':': 'conditional',
+  '=': 'assignment',
+  '[': 'array',
+  '()=': 'fndef'
+};
+
+function getOptionName(op) {
+  return optionNameMap.hasOwnProperty(op) ? optionNameMap[op] : op;
+}
+
+Parser.prototype.isOperatorEnabled = function (op) {
+  var optionName = getOptionName(op);
+  var operators = this.options.operators || {};
+
+  return !(optionName in operators) || !!operators[optionName];
+};

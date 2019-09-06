@@ -131,6 +131,9 @@ ParserState.prototype.parseVariableAssignmentExpression = function (instr) {
     var varValue = [];
     var lastInstrIndex = instr.length - 1;
     if (varName.type === IFUNCALL) {
+      if (!this.tokens.isOperatorEnabled('()=')) {
+        throw new Error('function definition is not permitted');
+      }
       for (var i = 0, len = varName.value + 1; i < len; i++) {
         var index = lastInstrIndex - i;
         if (instr[index].type === IVAR) {

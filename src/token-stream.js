@@ -448,7 +448,8 @@ var optionNameMap = {
   '?': 'conditional',
   ':': 'conditional',
   '=': 'assignment',
-  '[': 'array'
+  '[': 'array',
+  '()=': 'fndef'
 };
 
 function getOptionName(op) {

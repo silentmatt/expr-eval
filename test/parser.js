@@ -540,6 +540,42 @@ describe('Parser', function () {
       assert.throws(function () { parser.parse('[1, 2, 3]'); }, /\[/);
       assert.throws(function () { parser.parse('a[0]'); }, /\[/);
     });
+
+    it('Should allow functions to be disabled', function () {
+      var parser = new Parser({
+        operators: {
+          fndef: false
+        }
+      });
+      var obj = {};
+      assert.throws(function () { parser.parse('f(x) = x * x'); }, /function definition is not permitted/);
+      assert.strictEqual('f' in obj, false);
+      assert.strictEqual('x' in obj, false);
+    });
+
+    it('Should allow functions to be enabled', function () {
+      var parser = new Parser({
+        operators: {
+          fndef: true
+        }
+      });
+      var obj = {};
+      assert.strictEqual(parser.evaluate('f(x) = x * x', obj) instanceof Function, true);
+      assert.strictEqual(obj.f instanceof Function, true);
+      assert.strictEqual(obj.f(3), 9);
+    });
+
+    it('Disabling assignment should disable function definition', function () {
+      var parser = new Parser({
+        operators: {
+          assignment: false
+        }
+      });
+      var obj = {};
+      assert.throws(function () { parser.parse('f(x) = x * x'); }, Error);
+      assert.strictEqual('f' in obj, false);
+      assert.strictEqual('x' in obj, false);
+    });
   });
 
   it('should disallow member access', function () {

@@ -49,7 +49,8 @@ export interface ParserOptions {
     random?: boolean,
     min?: boolean,
     max?: boolean,
-    assignment?: boolean
+    assignment?: boolean,
+    fndef?: boolean
   };
 }
 

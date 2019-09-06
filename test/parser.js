@@ -230,6 +230,18 @@ describe('Parser', function () {
         assert.strictEqual(parser.parse('sin(2)^3').evaluate(), Math.pow(Math.sin(2), 3));
       });
 
+      it('should parse named prefix operators as function names at the end of expressions', function () {
+        assert.strictEqual(parser.parse('sin;').toString(), '(sin)');
+        assert.strictEqual(parser.parse('(sin)').toString(), 'sin');
+        assert.strictEqual(parser.parse('sin; (2)^3').toString(), '(sin;(2 ^ 3))');
+        assert.deepStrictEqual(parser.parse('f(sin, sqrt)').evaluate({ f: function (a, b) { return [ a, b ]; }}), [ Math.sin, Math.sqrt ]);
+        assert.strictEqual(parser.parse('sin').evaluate(), Math.sin);
+        assert.strictEqual(parser.parse('cos;').evaluate(), Math.cos);
+        assert.strictEqual(parser.parse('cos;tan').evaluate(), Math.tan);
+        assert.strictEqual(parser.parse('(floor)').evaluate(), Math.floor);
+        assert.strictEqual(parser.parse('4; ceil').evaluate(), Math.ceil);
+      });
+
       it('unary + and - should not be parsed as function calls', function () {
         assert.strictEqual(parser.parse('-2^3').toString(), '(-(2 ^ 3))');
         assert.strictEqual(parser.parse('-(2)^3').toString(), '(-(2 ^ 3))');

@@ -58,7 +58,12 @@ ParserState.prototype.expect = function (type, value) {
 };
 
 ParserState.prototype.parseAtom = function (instr) {
-  if (this.accept(TNAME)) {
+  var unaryOps = this.tokens.unaryOps;
+  function isPrefixOperator(token) {
+    return token.value in unaryOps;
+  }
+
+  if (this.accept(TNAME) || this.accept(TOP, isPrefixOperator)) {
     instr.push(new Instruction(IVAR, this.current.value));
   } else if (this.accept(TNUMBER)) {
     instr.push(new Instruction(INUMBER, this.current.value));
@@ -230,14 +235,21 @@ ParserState.prototype.parseFactor = function (instr) {
 
   this.save();
   if (this.accept(TOP, isPrefixOperator)) {
-    if ((this.current.value !== '-' && this.current.value !== '+' && this.nextToken.type === TPAREN && this.nextToken.value === '(')) {
-      this.restore();
-      this.parseExponential(instr);
-    } else {
-      var op = this.current;
-      this.parseFactor(instr);
-      instr.push(unaryInstruction(op.value));
+    if (this.current.value !== '-' && this.current.value !== '+') {
+      if (this.nextToken.type === TPAREN && this.nextToken.value === '(') {
+        this.restore();
+        this.parseExponential(instr);
+        return;
+      } else if (this.nextToken.type === TSEMICOLON || this.nextToken.type === TCOMMA || this.nextToken.type === TEOF || (this.nextToken.type === TPAREN && this.nextToken.value === ')')) {
+        this.restore();
+        this.parseAtom(instr);
+        return;
+      }
     }
+
+    var op = this.current;
+    this.parseFactor(instr);
+    instr.push(unaryInstruction(op.value));
   } else {
     this.parseExponential(instr);
   }

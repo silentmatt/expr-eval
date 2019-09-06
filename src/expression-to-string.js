@@ -114,8 +114,11 @@ export default function expressionToString(tokens, toJS) {
     }
   }
   if (nstack.length > 1) {
-    // throw new Error('invalid Expression (parity)');
-    nstack = [ nstack.join(',') ];
+    if (toJS) {
+      nstack = [ nstack.join(',') ];
+    } else {
+      nstack = [ nstack.join(';') ];
+    }
   }
   return String(nstack[0]);
 }

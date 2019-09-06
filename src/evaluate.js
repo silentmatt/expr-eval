@@ -43,6 +43,8 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IVAR) {
       if (item.value in expr.functions) {
         nstack.push(expr.functions[item.value]);
+      } else if (item.value in expr.unaryOps && expr.parser.isOperatorEnabled(item.value)) {
+        nstack.push(expr.unaryOps[item.value]);
       } else {
         var v = values[item.value];
         if (v !== undefined) {

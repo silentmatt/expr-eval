@@ -226,4 +226,39 @@ describe('Functions', function () {
       assert.ok(isNaN(parser.evaluate('gamma(-1/0)')));
     });
   });
+
+  describe('map(f, a)', function () {
+    it('should work on empty arrays', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('map(random, [])'), []);
+    });
+
+    it('should fail if first argument is not a function', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('map(4, [])'); }, /not a function/);
+    });
+
+    it('should fail if second argument is not an array', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('map(random, 0)'); }, /not an array/);
+    });
+
+    it('should call built-in functions', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('map(sqrt, [0, 1, 16, 81])'), [ 0, 1, 4, 9 ]);
+      assert.deepStrictEqual(parser.evaluate('map(max, [2, 2, 2, 2, 2, 2])'), [ 2, 2, 2, 3, 4, 5 ]);
+    });
+
+    it('should call self-defined functions', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('f(a) = a*a; map(f, [0, 1, 2, 3, 4])'), [ 0, 1, 4, 9, 16 ]);
+    });
+
+    it('should call self-defined functions with index', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('f(a, i) = a+i; map(f, [1,3,5,7,9])'), [ 1, 4, 7, 10, 13 ]);
+      assert.deepStrictEqual(parser.evaluate('map(anon(a, i) = a+i, [1,3,5,7,9])'), [ 1, 4, 7, 10, 13 ]);
+      assert.deepStrictEqual(parser.evaluate('f(a, i) = i; map(f, [1,3,5,7,9])'), [ 0, 1, 2, 3, 4 ]);
+    });
+  });
 });

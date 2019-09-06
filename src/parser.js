@@ -38,7 +38,8 @@ import {
   setVar,
   arrayIndex,
   max,
-  min
+  min,
+  arrayMap
 } from './functions';
 
 export function Parser(options) {
@@ -109,7 +110,8 @@ export function Parser(options) {
     pow: Math.pow,
     atan2: Math.atan2,
     gamma: gamma,
-    roundTo: roundTo
+    roundTo: roundTo,
+    map: arrayMap
   };
 
   this.consts = {

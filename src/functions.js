@@ -266,3 +266,15 @@ export function min(array) {
     return Math.min.apply(Math, arguments);
   }
 }
+
+export function arrayMap(f, a) {
+  if (typeof f !== 'function') {
+    throw new Error('First argument to map is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to map is not an array');
+  }
+  return a.map(function (x, i) {
+    return f(x, i);
+  });
+}

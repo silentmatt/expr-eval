@@ -290,3 +290,15 @@ export function arrayFold(f, init, a) {
     return f(acc, x, i);
   }, init);
 }
+
+export function arrayFilter(f, a) {
+  if (typeof f !== 'function') {
+    throw new Error('First argument to map is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to map is not an array');
+  }
+  return a.filter(function (x, i) {
+    return f(x, i);
+  });
+}

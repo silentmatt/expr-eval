@@ -40,7 +40,8 @@ import {
   max,
   min,
   arrayMap,
-  arrayFold
+  arrayFold,
+  arrayFilter
 } from './functions';
 
 export function Parser(options) {
@@ -113,7 +114,8 @@ export function Parser(options) {
     gamma: gamma,
     roundTo: roundTo,
     map: arrayMap,
-    fold: arrayFold
+    fold: arrayFold,
+    filter: arrayFilter
   };
 
   this.consts = {

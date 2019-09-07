@@ -302,4 +302,38 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('f(a, b) = a*b; fold(f, 3, [1, 2, 3, 4, 5])'), 360);
     });
   });
+
+  describe('filter(f, array)', function () {
+    it('should work on an empty array', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('filter(random, [])'), []);
+    });
+
+    it('should fail if first argument is not a function', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('filter(4, [])'); }, /not a function/);
+    });
+
+    it('should fail if third argument is not an array', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('filter(random, 5)'); }, /not an array/);
+    });
+
+    it('should call built-in functions', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('filter(not, [1, 0, false, true, 2, ""])'), [ 0, false, '' ]);
+    });
+
+    it('should call self-defined functions', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('f(x) = x > 2; filter(f, [1, 2, 0, 3, -1, 4])'), [ 3, 4 ]);
+      assert.deepStrictEqual(parser.evaluate('f(x) = x > 2; filter(f, [1, 2, 0, 1.9, -1, -4])'), []);
+    });
+
+    it('should call self-defined functions with index', function () {
+      var parser = new Parser();
+      assert.deepStrictEqual(parser.evaluate('f(a, i) = a <= i; filter(f, [1,0,5,3,2])'), [ 0, 3, 2 ]);
+      assert.deepStrictEqual(parser.evaluate('f(a, i) = i > 3; filter(f, [9,0,5,6,1,2,3,4])'), [ 1, 2, 3, 4 ]);
+    });
+  });
 });

@@ -44,7 +44,10 @@ import {
   arrayFilter,
   stringOrArrayIndexOf,
   arrayJoin,
-  sign
+  sign,
+  cbrt,
+  expm1,
+  log1p
 } from './functions';
 
 export function Parser(options) {
@@ -63,10 +66,13 @@ export function Parser(options) {
     acosh: Math.acosh || acosh,
     atanh: Math.atanh || atanh,
     sqrt: Math.sqrt,
+    cbrt: Math.cbrt || cbrt,
     log: Math.log,
     ln: Math.log,
     lg: Math.log10 || log10,
     log10: Math.log10 || log10,
+    expm1: Math.expm1 || expm1,
+    log1p: Math.log1p || log1p,
     abs: Math.abs,
     ceil: Math.ceil,
     floor: Math.floor,

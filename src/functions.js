@@ -325,3 +325,16 @@ export function arrayJoin(sep, a) {
 export function sign(x) {
   return ((x > 0) - (x < 0)) || +x;
 }
+
+var ONE_THIRD = 1/3;
+export function cbrt(x) {
+  return x < 0 ? -Math.pow(-x, ONE_THIRD) : Math.pow(x, ONE_THIRD);
+}
+
+export function expm1(x) {
+  return Math.exp(x) - 1;
+}
+
+export function log1p(x) {
+  return Math.log(1 + x);
+}

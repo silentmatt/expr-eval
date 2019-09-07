@@ -951,4 +951,60 @@ describe('Operators', function () {
       assert.strictEqual(parser.parse('sign x').toJSFunction('x')(-2), -1);
     });
   });
+
+  describe('cbrt(x)', function () {
+    it('returns the cube root of x', function () {
+      var delta = 1e-15;
+
+      assert.strictEqual(parser.evaluate('cbrt(0/0)'), NaN);
+      assert.strictEqual(parser.evaluate('cbrt -1'), -1);
+      assert.strictEqual(parser.evaluate('cbrt 0'), 0);
+      assert.strictEqual(parser.evaluate('cbrt(-1/0)'), -1/0);
+      assert.strictEqual(parser.evaluate('cbrt 1'), 1);
+      assert.strictEqual(parser.evaluate('cbrt(1/0)'), 1/0);
+      assertCloseTo(parser.evaluate('cbrt 2'), 1.2599210498948732, delta);
+      assertCloseTo(parser.evaluate('cbrt -2'), -1.2599210498948732, delta);
+      assert.strictEqual(parser.evaluate('cbrt 8'), 2);
+      assert.strictEqual(parser.evaluate('cbrt 27'), 3);
+      assert.strictEqual(parser.evaluate('cbrt -8'), -2);
+      assert.strictEqual(parser.evaluate('cbrt -27'), -3);
+
+      assert.strictEqual(parser.parse('cbrt 8').simplify().toString(), '2');
+
+      assert.strictEqual(parser.parse('cbrt x').toJSFunction('x')(27), 3);
+    });
+  });
+
+  describe('expm1(x)', function () {
+    it('returns e^x - 1', function () {
+      var delta = 1e-15;
+
+      assert.strictEqual(parser.evaluate('expm1(0/0)'), NaN);
+      assertCloseTo(parser.evaluate('expm1 -1'), -0.6321205588285577, delta);
+      assert.strictEqual(parser.evaluate('expm1 0'), 0);
+      assertCloseTo(parser.evaluate('expm1 1'), 1.718281828459045, delta);
+      assertCloseTo(parser.evaluate('expm1 2'), 6.38905609893065, delta);
+
+      assert.ok(/^1.718281828459\d*$/.test(parser.parse('expm1 1').simplify().toString()));
+
+      assertCloseTo(parser.parse('expm1 x').toJSFunction('x')(1), 1.718281828459045, delta);
+      assertCloseTo(parser.parse('expm1 x').toJSFunction('x')(2), 6.38905609893065, delta);
+    });
+  });
+
+  describe('log1p(x)', function () {
+    it('returns e^x - 1', function () {
+      var delta = 1e-15;
+
+      assert.strictEqual(parser.evaluate('log1p(0/0)'), NaN);
+      assert.strictEqual(parser.evaluate('log1p -1'), -1/0);
+      assert.strictEqual(parser.evaluate('log1p 0'), 0);
+      assertCloseTo(parser.evaluate('log1p 1'), 0.6931471805599453, delta);
+      assert.strictEqual(parser.evaluate('log1p -2'), 0/0);
+      assertCloseTo(Parser.evaluate('log1p 9'), 2.302585092994046, delta);
+
+      assertCloseTo(parser.parse('log1p x').toJSFunction('x')(1), 0.6931471805599453, delta);
+      assertCloseTo(parser.parse('log1p x').toJSFunction('x')(9), 2.302585092994046, delta);
+    });
+  });
 });

@@ -50,7 +50,11 @@ export interface ParserOptions {
     min?: boolean,
     max?: boolean,
     assignment?: boolean,
-    fndef?: boolean
+    fndef?: boolean,
+    cbrt?: boolean,
+    expm1?: boolean,
+    log1p?: boolean,
+    sign?: boolean,
   };
 }
 

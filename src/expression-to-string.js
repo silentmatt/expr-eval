@@ -27,7 +27,7 @@ export default function expressionToString(tokens, toJS) {
         } else if (f === 'or') {
           nstack.push('(!!' + n1 + ' || !!' + n2 + ')');
         } else if (f === '||') {
-          nstack.push('(String(' + n1 + ') + String(' + n2 + '))');
+          nstack.push('(function(a,b){ return Array.isArray(a) && Array.isArray(b) ? a.concat(b) : String(a) + String(b); }((' + n1 + '),(' + n2 + ')))');
         } else if (f === '==') {
           nstack.push('(' + n1 + ' === ' + n2 + ')');
         } else if (f === '!=') {

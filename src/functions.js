@@ -21,6 +21,9 @@ export function mod(a, b) {
 }
 
 export function concat(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.concat(b);
+  }
   return '' + a + b;
 }
 

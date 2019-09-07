@@ -95,6 +95,10 @@ describe('Expression', function () {
       assert.strictEqual(Parser.evaluate('\'as\' || \'df\''), 'asdf');
     });
 
+    it('[1, 2] || [3, 4] || [5, 6]', function () {
+      assert.deepStrictEqual(Parser.evaluate('[1, 2] || [3, 4] || [5, 6]'), [ 1, 2, 3, 4, 5, 6 ]);
+    });
+
     it('should fail with undefined variables', function () {
       assert.throws(function () { Parser.evaluate('x + 1'); }, Error);
     });
@@ -682,6 +686,12 @@ describe('Expression', function () {
       var expr = parser.parse('x || y');
       var f = expr.toJSFunction('x, y');
       assert.strictEqual(f(4, 2), '42');
+    });
+
+    it('[4, 3] || [1, 2]', function () {
+      var expr = parser.parse('x || y');
+      var f = expr.toJSFunction('x, y');
+      assert.deepStrictEqual(f([ 4, 3 ], [ 1, 2 ]), [ 4, 3, 1, 2 ]);
     });
 
     it('x = x + 1', function () {

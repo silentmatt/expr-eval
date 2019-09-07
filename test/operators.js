@@ -933,4 +933,22 @@ describe('Operators', function () {
       assert.strictEqual(Parser.evaluate('a[2]^3', { a: [ 1, 2, 3, 4 ] }), 27);
     });
   });
+
+  describe('sign(x)', function () {
+    it('returns the sign of x', function () {
+      assert.strictEqual(parser.evaluate('sign 0'), 0);
+      assert.strictEqual(parser.evaluate('sign 1'), 1);
+      assert.strictEqual(parser.evaluate('sign -1'), -1);
+      assert.strictEqual(parser.evaluate('sign 2'), 1);
+      assert.strictEqual(parser.evaluate('sign -2'), -1);
+      assert.strictEqual(parser.evaluate('sign 0.001'), 1);
+      assert.strictEqual(parser.evaluate('sign -0.001'), -1);
+
+      assert.strictEqual(parser.parse('sign -0.001').simplify().toString(), '(-1)');
+
+      assert.strictEqual(parser.parse('sign x').toJSFunction('x')(0), 0);
+      assert.strictEqual(parser.parse('sign x').toJSFunction('x')(2), 1);
+      assert.strictEqual(parser.parse('sign x').toJSFunction('x')(-2), -1);
+    });
+  });
 });

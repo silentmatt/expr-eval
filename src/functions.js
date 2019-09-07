@@ -321,3 +321,7 @@ export function arrayJoin(sep, a) {
 
   return a.join(sep);
 }
+
+export function sign(x) {
+  return ((x > 0) - (x < 0)) || +x;
+}

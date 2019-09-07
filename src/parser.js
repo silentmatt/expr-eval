@@ -43,7 +43,8 @@ import {
   arrayFold,
   arrayFilter,
   stringOrArrayIndexOf,
-  arrayJoin
+  arrayJoin,
+  sign
 } from './functions';
 
 export function Parser(options) {
@@ -76,7 +77,8 @@ export function Parser(options) {
     exp: Math.exp,
     not: not,
     length: stringOrArrayLength,
-    '!': factorial
+    '!': factorial,
+    sign: Math.sign || sign
   };
 
   this.binaryOps = {

@@ -956,7 +956,7 @@ describe('Operators', function () {
     it('returns the cube root of x', function () {
       var delta = 1e-15;
 
-      assert.strictEqual(parser.evaluate('cbrt(0/0)'), NaN);
+      assert.ok(isNaN(parser.evaluate('cbrt(0/0)')));
       assert.strictEqual(parser.evaluate('cbrt -1'), -1);
       assert.strictEqual(parser.evaluate('cbrt 0'), 0);
       assert.strictEqual(parser.evaluate('cbrt(-1/0)'), -1/0);
@@ -979,7 +979,7 @@ describe('Operators', function () {
     it('returns e^x - 1', function () {
       var delta = 1e-15;
 
-      assert.strictEqual(parser.evaluate('expm1(0/0)'), NaN);
+      assert.ok(isNaN(parser.evaluate('expm1(0/0)')));
       assertCloseTo(parser.evaluate('expm1 -1'), -0.6321205588285577, delta);
       assert.strictEqual(parser.evaluate('expm1 0'), 0);
       assertCloseTo(parser.evaluate('expm1 1'), 1.718281828459045, delta);
@@ -996,7 +996,7 @@ describe('Operators', function () {
     it('returns e^x - 1', function () {
       var delta = 1e-15;
 
-      assert.strictEqual(parser.evaluate('log1p(0/0)'), NaN);
+      assert.ok(isNaN(parser.evaluate('log1p(0/0)')));
       assert.strictEqual(parser.evaluate('log1p -1'), -1/0);
       assert.strictEqual(parser.evaluate('log1p 0'), 0);
       assertCloseTo(parser.evaluate('log1p 1'), 0.6931471805599453, delta);

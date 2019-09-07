@@ -302,3 +302,11 @@ export function arrayFilter(f, a) {
     return f(x, i);
   });
 }
+
+export function stringOrArrayIndexOf(target, s) {
+  if (!(Array.isArray(s) || typeof s === 'string')) {
+    throw new Error('Second argument to indexOf is not a string or array');
+  }
+
+  return s.indexOf(target);
+}

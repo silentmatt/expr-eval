@@ -41,7 +41,8 @@ import {
   min,
   arrayMap,
   arrayFold,
-  arrayFilter
+  arrayFilter,
+  stringOrArrayIndexOf
 } from './functions';
 
 export function Parser(options) {
@@ -115,7 +116,8 @@ export function Parser(options) {
     roundTo: roundTo,
     map: arrayMap,
     fold: arrayFold,
-    filter: arrayFilter
+    filter: arrayFilter,
+    indexOf: stringOrArrayIndexOf
   };
 
   this.consts = {

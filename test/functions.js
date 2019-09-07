@@ -314,7 +314,7 @@ describe('Functions', function () {
       assert.throws(function () { parser.evaluate('filter(4, [])'); }, /not a function/);
     });
 
-    it('should fail if third argument is not an array', function () {
+    it('should fail if second argument is not an array', function () {
       var parser = new Parser();
       assert.throws(function () { parser.evaluate('filter(random, 5)'); }, /not an array/);
     });
@@ -334,6 +334,86 @@ describe('Functions', function () {
       var parser = new Parser();
       assert.deepStrictEqual(parser.evaluate('f(a, i) = a <= i; filter(f, [1,0,5,3,2])'), [ 0, 3, 2 ]);
       assert.deepStrictEqual(parser.evaluate('f(a, i) = i > 3; filter(f, [9,0,5,6,1,2,3,4])'), [ 1, 2, 3, 4 ]);
+    });
+  });
+
+  describe('indexOf(target, array)', function () {
+    it('should return -1 an empty array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf(1, [])'), -1);
+    });
+
+    it('should fail if second argument is not an array or string', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('indexOf(5, 5)'); }, /not a string or array/);
+    });
+
+    it('should find values in the array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf(1, [1,0,5,3,2])'), 0);
+      assert.strictEqual(parser.evaluate('indexOf(0, [1,0,5,3,2])'), 1);
+      assert.strictEqual(parser.evaluate('indexOf(5, [1,0,5,3,2])'), 2);
+      assert.strictEqual(parser.evaluate('indexOf(3, [1,0,5,3,2])'), 3);
+      assert.strictEqual(parser.evaluate('indexOf(2, [1,0,5,3,2])'), 4);
+    });
+
+    it('should find the first matching value in the array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf(5, [5,0,5,3,2])'), 0);
+    });
+
+    it('should return -1 for no match', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf(2.5, [1,0,5,3,2])'), -1);
+      assert.strictEqual(parser.evaluate('indexOf("5", [1,0,5,3,2])'), -1);
+    });
+  });
+
+  describe('indexOf(target, string)', function () {
+    it('return -1 for indexOf("x", "")', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("a", "")'), -1);
+    });
+
+    it('return 0 for indexOf("", *)', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("", "")'), 0);
+      assert.strictEqual(parser.evaluate('indexOf("", "a")'), 0);
+      assert.strictEqual(parser.evaluate('indexOf("", "foobar")'), 0);
+    });
+
+    it('should find substrings in the string', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("b", "bafdc")'), 0);
+      assert.strictEqual(parser.evaluate('indexOf("a", "bafdc")'), 1);
+      assert.strictEqual(parser.evaluate('indexOf("f", "bafdc")'), 2);
+      assert.strictEqual(parser.evaluate('indexOf("d", "bafdc")'), 3);
+      assert.strictEqual(parser.evaluate('indexOf("c", "bafdc")'), 4);
+
+      assert.strictEqual(parser.evaluate('indexOf("ba", "bafdc")'), 0);
+      assert.strictEqual(parser.evaluate('indexOf("afd", "bafdc")'), 1);
+      assert.strictEqual(parser.evaluate('indexOf("fdc", "bafdc")'), 2);
+      assert.strictEqual(parser.evaluate('indexOf("dc", "bafdc")'), 3);
+      assert.strictEqual(parser.evaluate('indexOf("c", "bafdc")'), 4);
+
+      assert.strictEqual(parser.evaluate('indexOf("dc", "dbafdc")'), 4);
+    });
+
+    it('should find the first matching substring in the string', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("c", "abcabcabc")'), 2);
+      assert.strictEqual(parser.evaluate('indexOf("ca", "abcabcabc")'), 2);
+    });
+
+    it('should find the entire string', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("abcabcabc", "abcabcabc")'), 0);
+    });
+
+    it('should return -1 for no match', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('indexOf("x", "abcdefg")'), -1);
+      assert.strictEqual(parser.evaluate('indexOf("abd", "abcdefg")'), -1);
     });
   });
 });

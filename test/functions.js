@@ -416,4 +416,29 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('indexOf("abd", "abcdefg")'), -1);
     });
   });
+
+  describe('join(sep, array)', function () {
+    it('should fail if second argument is not an array', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('join("x", "y")'); }, /not an array/);
+    });
+
+    it('should return an empty string on an empty array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('join("x", [])'), '');
+    });
+
+    it('should work on a single-element array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('join("x", ["a"])'), 'a');
+      assert.strictEqual(parser.evaluate('join("x", [5])'), '5');
+    });
+
+    it('should work on a multi-element arrays', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('join("x", ["a", "b", "c", 4])'), 'axbxcx4');
+      assert.strictEqual(parser.evaluate('join(", ", [1, 2])'), '1, 2');
+      assert.strictEqual(parser.evaluate('join("", [1, 2, 3])'), '123');
+    });
+  });
 });

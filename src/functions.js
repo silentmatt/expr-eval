@@ -313,3 +313,11 @@ export function stringOrArrayIndexOf(target, s) {
 
   return s.indexOf(target);
 }
+
+export function arrayJoin(sep, a) {
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to join is not an array');
+  }
+
+  return a.join(sep);
+}

@@ -1000,7 +1000,7 @@ describe('Operators', function () {
       assert.strictEqual(parser.evaluate('log1p -1'), -1/0);
       assert.strictEqual(parser.evaluate('log1p 0'), 0);
       assertCloseTo(parser.evaluate('log1p 1'), 0.6931471805599453, delta);
-      assert.strictEqual(parser.evaluate('log1p -2'), 0/0);
+      assert.ok(isNaN(parser.evaluate('log1p -2')));
       assertCloseTo(Parser.evaluate('log1p 9'), 2.302585092994046, delta);
 
       assertCloseTo(parser.parse('log1p x').toJSFunction('x')(1), 0.6931471805599453, delta);

@@ -228,7 +228,7 @@ f(), x.y, a[i]           | Left          | Function call, property access, array
 ^                        | Right         | Exponentiation
 +, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list)
 \*, /, %                 | Left          | Multiplication, division, remainder
-+, -, \|\|               | Left          | Addition, subtraction, concatenation
++, -, \|\|               | Left          | Addition, subtraction, array/list concatenation
 ==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?"
 and                      | Left          | Logical AND
 or                       | Left          | Logical OR
@@ -261,7 +261,7 @@ Operator | Description
 -x       | Negation
 +x       | Unary plus. This converts it's operand to a number, but has no other effect.
 x!       | Factorial (x * (x-1) * (x-2) * … * 2 * 1). gamma(x + 1) for non-integers.
-abs x    | Absolute value (magnatude) of x
+abs x    | Absolute value (magnitude) of x
 acos x   | Arc cosine of x (in radians)
 acosh x  | Hyperbolic arc cosine of x (in radians)
 asin x   | Arc sine of x (in radians)
@@ -278,7 +278,8 @@ ln x     | Natural logarithm of x
 log x    | Natural logarithm of x (synonym for ln, not base-10)
 log10 x  | Base-10 logarithm of x
 not x    | Logical NOT operator
-round x  | X, rounded to the nearest integer, using "gradeschool rounding"
+round x  | X, rounded to the nearest integer, using "grade-school rounding"
+sign x   | Sign of x (-1, 0, or 1 for negative, zero, or positive respectively)
 sin x    | Sine of x (x is in radians)
 sinh x   | Hyperbolic sine of x (x is in radians)
 sqrt x   | Square root of x. Result is NaN (Not a Number) if x is negative.
@@ -292,17 +293,22 @@ Besides the "operator" functions, there are several pre-defined functions. You
 can provide your own, by binding variables to normal JavaScript functions.
 These are not evaluated by simplify.
 
-Function     | Description
-:----------- | :----------
-random(n)    | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
-fac(n)       | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
-min(a,b,…)   | Get the smallest (minimum) number in the list
-max(a,b,…)   | Get the largest (maximum) number in the list
-hypot(a,b)   | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
-pyt(a, b)    | Alias for hypot
-pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
-atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
-roundTo(x, n)  | Rounds x to n places after the decimal point.
+Function      | Description
+:------------ | :----------
+random(n)     | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
+fac(n)        | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
+min(a,b,…)    | Get the smallest (minimum) number in the list.
+max(a,b,…)    | Get the largest (maximum) number in the list.
+hypot(a,b)    | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
+pyt(a, b)     | Alias for hypot.
+pow(x, y)     | Equivalent to x^y. For consistency with JavaScript's Math object.
+atan2(y, x)   | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+roundTo(x, n) | Rounds x to n places after the decimal point.
+map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results.
+fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array.
+filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`.
+indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found.
+join(sep, a)  | Concatenate the elements of `a`, separated by `sep`.
 
 #### Array literals
 

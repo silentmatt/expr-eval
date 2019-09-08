@@ -52,8 +52,9 @@ Documentation
 * [Expression Syntax](#expression-syntax)
     - [Operator Precedence](#operator-precedence)
     - [Unary operators](#unary-operators)
+    - [Array literals](#array-literals)
     - [Pre-defined functions](#pre-defined-functions)
-    - [Custom functions](#custom-functions)
+    - [Custom JavaScript functions](#custom-javascript-functions)
     - [Constants](#constants)
 
 ### Parser ###
@@ -86,8 +87,9 @@ For example, the following will create a `Parser` that does not allow comparison
         logical: false,
         comparison: false,
 
-        // The in operator is disabled by default in the current version
-        'in': true
+        // Disable 'in' and = operators
+        'in': false,
+        assignment: false
       }
     });
 
@@ -221,26 +223,26 @@ exponentiation, not xor.
 Operator                 | Associativity | Description
 :----------------------- | :------------ | :----------
 (...)                    | None          | Grouping
-f(), x.y                 | Left          | Function call, property access
+f(), x.y, a[i]           | Left          | Function call, property access, array indexing
 !                        | Left          | Factorial
 ^                        | Right         | Exponentiation
 +, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list)
 \*, /, %                 | Left          | Multiplication, division, remainder
-+, -, \|\|               | Left          | Addition, subtraction, concatenation
-==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?" (disabled by default)
++, -, \|\|               | Left          | Addition, subtraction, array/list concatenation
+==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?"
 and                      | Left          | Logical AND
 or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
-
-The `in` operator is disabled by default in the current version. To use it,
-construct a `Parser` instance with `operators.in` set to `true`. For example:
+=                        | Right         | Variable assignment
+;                        | Left          | Expression separator
 
     var parser = new Parser({
       operators: {
-        'in': true
+        'in': true,
+        'assignment': true
       }
     });
-    // Now parser supports 'x in array' expressions
+    // Now parser supports 'x in array' and 'y = 2*x' expressions
 
 #### Unary operators
 
@@ -259,24 +261,29 @@ Operator | Description
 -x       | Negation
 +x       | Unary plus. This converts it's operand to a number, but has no other effect.
 x!       | Factorial (x * (x-1) * (x-2) * … * 2 * 1). gamma(x + 1) for non-integers.
-abs x    | Absolute value (magnatude) of x
+abs x    | Absolute value (magnitude) of x
 acos x   | Arc cosine of x (in radians)
 acosh x  | Hyperbolic arc cosine of x (in radians)
 asin x   | Arc sine of x (in radians)
 asinh x  | Hyperbolic arc sine of x (in radians)
 atan x   | Arc tangent of x (in radians)
 atanh x  | Hyperbolic arc tangent of x (in radians)
+cbrt x   | Cube root of x
 ceil x   | Ceiling of x — the smallest integer that’s >= x
 cos x    | Cosine of x (x is in radians)
 cosh x   | Hyperbolic cosine of x (x is in radians)
 exp x    | e^x (exponential/antilogarithm function with base e)
+expm1 x  | e^x - 1
 floor x  | Floor of x — the largest integer that’s <= x
 length x | String length of x
 ln x     | Natural logarithm of x
 log x    | Natural logarithm of x (synonym for ln, not base-10)
 log10 x  | Base-10 logarithm of x
+log2 x   | Base-2 logarithm of x
+log1p x  | Natural logarithm of (1 + x)
 not x    | Logical NOT operator
-round x  | X, rounded to the nearest integer, using "gradeschool rounding"
+round x  | X, rounded to the nearest integer, using "grade-school rounding"
+sign x   | Sign of x (-1, 0, or 1 for negative, zero, or positive respectively)
 sin x    | Sine of x (x is in radians)
 sinh x   | Hyperbolic sine of x (x is in radians)
 sqrt x   | Square root of x. Result is NaN (Not a Number) if x is negative.
@@ -290,33 +297,53 @@ Besides the "operator" functions, there are several pre-defined functions. You
 can provide your own, by binding variables to normal JavaScript functions.
 These are not evaluated by simplify.
 
-Function     | Description
-:----------- | :----------
-random(n)    | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
-fac(n)       | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
-min(a,b,…)   | Get the smallest (minimum) number in the list
-max(a,b,…)   | Get the largest (maximum) number in the list
-hypot(a,b)   | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
-pyt(a, b)    | Alias for hypot
-pow(x, y)    | Equivalent to x^y. For consistency with JavaScript's Math object.
-atan2(y, x)  | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
-if(c, a, b)  | Function form of c ? a : b
-roundTo(x, n)  | Rounds x to n places after the decimal point.
+Function      | Description
+:------------ | :----------
+random(n)     | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
+fac(n)        | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
+min(a,b,…)    | Get the smallest (minimum) number in the list.
+max(a,b,…)    | Get the largest (maximum) number in the list.
+hypot(a,b)    | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
+pyt(a, b)     | Alias for hypot.
+pow(x, y)     | Equivalent to x^y. For consistency with JavaScript's Math object.
+atan2(y, x)   | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+roundTo(x, n) | Rounds x to n places after the decimal point.
+map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results.
+fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array.
+filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`.
+indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found.
+join(sep, a)  | Concatenate the elements of `a`, separated by `sep`.
 
-#### Custom functions
+#### Array literals
+
+Arrays can be created by including the elements inside square `[]` brackets, separated by commas. For example:
+
+    [ 1, 2, 3, 2+2, 10/2, 3! ]
+
+#### Function definitions
+
+You can define functions using the syntax `name(params) = expression`. When it's evaluated, the name will be added to the passed in scope as a function. You can call it later in the expression, or make it available to other expressions by re-using the same scope object. Functions can support multiple parameters, separated by commas.
+
+Examples:
+
+    square(x) = x*x
+    add(a, b) = a + b
+    factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
+
+#### Custom JavaScript functions
 
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
 
     var parser = new Parser();
-    
+
     // Add a new function
     parser.functions.customAddFunction = function (arg1, arg2) {
       return arg1 + arg2;
     };
-    
+
     // Remove the factorial function
     delete parser.functions.fac;
-    
+
     parser.evaluate('customAddFunction(2, 4) == 6'); // true
     //parser.evaluate('fac(3)'); // This will fail
 

@@ -45,13 +45,25 @@ export interface ParserOptions {
     trunc?: boolean,
     exp?: boolean,
     length?: boolean,
-    in?: boolean
+    in?: boolean,
+    random?: boolean,
+    min?: boolean,
+    max?: boolean,
+    assignment?: boolean,
+    fndef?: boolean,
+    cbrt?: boolean,
+    expm1?: boolean,
+    log1p?: boolean,
+    sign?: boolean,
+    log2?: boolean
   };
 }
 
 export class Parser {
     constructor(options?: ParserOptions);
+    unaryOps: any;
     functions: any;
+    consts: any;
     parse(expression: string): Expression;
     evaluate(expression: string, values?: Value): number;
     static parse(expression: string): Expression;

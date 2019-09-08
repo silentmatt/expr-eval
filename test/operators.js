@@ -15,7 +15,7 @@ function returnFalse() {
 }
 
 function assertCloseTo(expected, actual, delta) {
-  return Math.abs(expected - actual) <= delta;
+  return assert.ok(Math.abs(expected - actual) <= delta);
 }
 
 describe('Operators', function () {
@@ -1005,6 +1005,25 @@ describe('Operators', function () {
 
       assertCloseTo(parser.parse('log1p x').toJSFunction('x')(1), 0.6931471805599453, delta);
       assertCloseTo(parser.parse('log1p x').toJSFunction('x')(9), 2.302585092994046, delta);
+    });
+  });
+
+  describe('log2(x)', function () {
+    it('returns the base 2 log of x', function () {
+      var delta = 1e-15;
+
+      assert.ok(isNaN(parser.evaluate('log2(0/0)')));
+      assert.ok(isNaN(parser.evaluate('log2 -1')));
+      assert.strictEqual(parser.evaluate('log2 0'), -1/0);
+      assert.strictEqual(Parser.evaluate('log2 1'), 0);
+      assert.strictEqual(Parser.evaluate('log2 2'), 1);
+      assert.strictEqual(Parser.evaluate('log2 3'), 1.584962500721156);
+      assert.strictEqual(Parser.evaluate('log2 4'), 2);
+      assert.strictEqual(Parser.evaluate('log2 8'), 3);
+      assert.strictEqual(Parser.evaluate('log2 1024'), 10);
+
+      assert.strictEqual(parser.parse('log2 x').toJSFunction('x')(4), 2);
+      assertCloseTo(parser.parse('log2 x').toJSFunction('x')(3), 1.584962500721156, delta);
     });
   });
 });

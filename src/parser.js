@@ -47,7 +47,8 @@ import {
   sign,
   cbrt,
   expm1,
-  log1p
+  log1p,
+  log2
 } from './functions';
 
 export function Parser(options) {
@@ -68,6 +69,7 @@ export function Parser(options) {
     sqrt: Math.sqrt,
     cbrt: Math.cbrt || cbrt,
     log: Math.log,
+    log2: Math.log2 || log2,
     ln: Math.log,
     lg: Math.log10 || log10,
     log10: Math.log10 || log10,

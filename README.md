@@ -279,6 +279,7 @@ length x | String length of x
 ln x     | Natural logarithm of x
 log x    | Natural logarithm of x (synonym for ln, not base-10)
 log10 x  | Base-10 logarithm of x
+log2 x   | Base-2 logarithm of x
 log1p x  | Natural logarithm of (1 + x)
 not x    | Logical NOT operator
 round x  | X, rounded to the nearest integer, using "grade-school rounding"

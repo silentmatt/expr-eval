@@ -338,3 +338,7 @@ export function expm1(x) {
 export function log1p(x) {
   return Math.log(1 + x);
 }
+
+export function log2(x) {
+  return Math.log(x) / Math.LN2;
+}

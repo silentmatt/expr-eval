@@ -55,6 +55,7 @@ export interface ParserOptions {
     expm1?: boolean,
     log1p?: boolean,
     sign?: boolean,
+    log2?: boolean
   };
 }
 

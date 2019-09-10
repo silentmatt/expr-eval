@@ -174,6 +174,28 @@ describe('Functions', function () {
     });
   });
 
+  describe('if(p, t, f)', function () {
+    it('if(1, 1, 0)', function () {
+      assert.strictEqual(Parser.evaluate('if(1, 1, 0)'), 1);
+    });
+
+    it('if(0, 1, 0)', function () {
+      assert.strictEqual(Parser.evaluate('if(0, 1, 0)'), 0);
+    });
+
+    it('if(1==1 or 2==1, 39, 0)', function () {
+      assert.strictEqual(Parser.evaluate('if(1==1 or 2==1, 39, 0)'), 39);
+    });
+
+    it('if(1==1 or 1==2, -4 + 8, 0)', function () {
+      assert.strictEqual(Parser.evaluate('if(1==1 or 1==2, -4 + 8, 0)'), 4);
+    });
+
+    it('if(3 && 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)', function () {
+      assert.strictEqual(Parser.evaluate('if(3 and 6, if(45 > 5 * 11, 3 * 3, 2.4), 0)'), 2.4);
+    });
+  });
+
   describe('gamma(x)', function () {
     var parser = new Parser();
 

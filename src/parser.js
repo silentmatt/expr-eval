@@ -123,6 +123,7 @@ export function Parser(options) {
     pyt: Math.hypot || hypot, // backward compat
     pow: Math.pow,
     atan2: Math.atan2,
+    'if': condition,
     gamma: gamma,
     roundTo: roundTo,
     map: arrayMap,

@@ -313,6 +313,7 @@ fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by se
 filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`.
 indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found.
 join(sep, a)  | Concatenate the elements of `a`, separated by `sep`.
+if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive.
 
 #### Array literals
 

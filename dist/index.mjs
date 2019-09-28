@@ -1829,9 +1829,11 @@ Parser.prototype.isOperatorEnabled = function (op) {
  but don't feel like you have to let me know or ask permission.
 */
 
+// Backwards compatibility
 var index = {
   Parser: Parser,
   Expression: Expression
 };
 
 export default index;
+export { Expression, Parser };

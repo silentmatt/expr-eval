@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.exprEval = factory());
-}(this, function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = global || self, factory(global.exprEval = {}));
+}(this, function (exports) { 'use strict';
 
   var INUMBER = 'INUMBER';
   var IOP1 = 'IOP1';
@@ -1835,11 +1835,16 @@
    but don't feel like you have to let me know or ask permission.
   */
 
+  // Backwards compatibility
   var index = {
     Parser: Parser,
     Expression: Expression
   };
 
-  return index;
+  exports.Expression = Expression;
+  exports.Parser = Parser;
+  exports.default = index;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

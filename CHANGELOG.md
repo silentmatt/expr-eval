@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.0.2] - 2019-09-28
+
+### Added
+
+- Added non-default exports when using the ES module format. This allows `import { Parser } from 'expr-eval'` to work in TypeScript. The default export is still available for backward compatibility.
+
+
+## [2.0.1] - 2019-09-10
+
+### Added
+
+- Added the `if(condition, trueValue, falseValue)` function back. The ternary operator is still recommended if you need to only evaluate one branch, but we're keep this as an option at least for now.
+
+
 ## [2.0.0] - 2019-09-07
 
 ### Added

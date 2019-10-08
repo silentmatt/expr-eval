@@ -76,5 +76,5 @@ export interface Expression {
     substitute(variable: string, value: Expression | string | number): Expression;
     symbols(options?: { withMembers?: boolean }): string[];
     variables(options?: { withMembers?: boolean }): string[];
-    toJSFunction(params: string, values?: Value): (...args: any[]) => number;
+    toJSFunction(params: string | string[], values?: Value): (...args: any[]) => number;
 }

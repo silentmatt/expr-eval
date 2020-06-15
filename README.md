@@ -275,7 +275,7 @@ cosh x   | Hyperbolic cosine of x (x is in radians)
 exp x    | e^x (exponential/antilogarithm function with base e)
 expm1 x  | e^x - 1
 floor x  | Floor of x — the largest integer that’s <= x
-length x | String length of x
+length x | String or array length of x
 ln x     | Natural logarithm of x
 log x    | Natural logarithm of x (synonym for ln, not base-10)
 log10 x  | Base-10 logarithm of x

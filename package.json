@@ -1,5 +1,5 @@
 {
-  "name": "expr-eval",
+  "name": "@datawrapper/expr-eval",
   "version": "2.0.2",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
@@ -36,7 +36,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/silentmatt/expr-eval.git"
+    "url": "git+https://github.com/datawrapper/expr-eval.git"
   },
   "keywords": [
     "expression",
@@ -45,11 +45,5 @@
     "eval",
     "function",
     "parser"
-  ],
-  "author": "Matthew Crumley",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/silentmatt/expr-eval/issues"
-  },
-  "homepage": "https://github.com/silentmatt/expr-eval#readme"
+  ]
 }

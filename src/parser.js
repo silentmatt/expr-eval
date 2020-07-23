@@ -48,7 +48,8 @@ import {
   cbrt,
   expm1,
   log1p,
-  log2
+  log2,
+  sum
 } from './functions';
 
 export function Parser(options) {
@@ -130,7 +131,8 @@ export function Parser(options) {
     fold: arrayFold,
     filter: arrayFilter,
     indexOf: stringOrArrayIndexOf,
-    join: arrayJoin
+    join: arrayJoin,
+    sum: sum
   };
 
   this.consts = {

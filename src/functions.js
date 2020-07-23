@@ -342,3 +342,13 @@ export function log1p(x) {
 export function log2(x) {
   return Math.log(x) / Math.LN2;
 }
+
+export function sum(array) {
+  if (!Array.isArray(array)) {
+    throw new Error('Sum argument is not an array');
+  }
+
+  return array.reduce(function (total, value) {
+    return total + Number(value);
+  }, 0);
+}

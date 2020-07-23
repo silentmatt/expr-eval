@@ -463,4 +463,26 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('join("", [1, 2, 3])'), '123');
     });
   });
+
+  describe('sum(array)', function () {
+    it('should fail if the argument is not an array', function () {
+      var parser = new Parser();
+      assert.throws(function () { parser.evaluate('sum(1)'); }, /not an array/);
+    });
+
+    it('should return zero with an empty array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('sum([])'), 0);
+    });
+
+    it('should work on a single-element array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('sum([1])'), 1);
+    });
+
+    it('should work on a multi-element array', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('sum([1, 2])'), 3);
+    });
+  });
 });

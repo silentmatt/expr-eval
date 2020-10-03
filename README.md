@@ -23,16 +23,16 @@ Installation
 
 Basic Usage
 -------------------------------------
+```js
+    const Parser = require('expr-eval').Parser;
 
-    var Parser = require('expr-eval').Parser;
-
-    var parser = new Parser();
-    var expr = parser.parse('2 * x + 1');
+    const parser = new Parser();
+    let expr = parser.parse('2 * x + 1');
     console.log(expr.evaluate({ x: 3 })); // 7
 
     // or
     Parser.evaluate('6 * x', { x: 7 }) // 42
-
+```
 Documentation
 -------------------------------------
 
@@ -69,8 +69,8 @@ Constructs a new `Parser` instance.
 The constructor takes an optional `options` parameter that allows you to enable or disable operators.
 
 For example, the following will create a `Parser` that does not allow comparison or logical operators, but does allow `in`:
-
-    var parser = new Parser({
+```js
+    const parser = new Parser({
       operators: {
         // These default to true, but are included to be explicit
         add: true,
@@ -92,7 +92,7 @@ For example, the following will create a `Parser` that does not allow comparison
         assignment: false
       }
     });
-
+```
 #### parse(expression: string)
 
 Convert a mathematical expression into an `Expression` object.
@@ -122,25 +122,25 @@ Evaluate the expression, with variables bound to the values in {variables}. Each
 variable in the expression is bound to the corresponding member of the
 `variables` object. If there are unbound variables, `evaluate` will throw an
 exception.
-
+```js
     js> expr = Parser.parse("2 ^ x");
     (2^x)
     js> expr.evaluate({ x: 3 });
     8
-
+```
 #### substitute(variable: string, expression: Expression | string | number)
 
 Create a new `Expression` with the specified variable replaced with another
 expression. This is similar to function composition. If `expression` is a string
 or number, it will be parsed into an `Expression`.
-
+```js
     js> expr = Parser.parse("2 * x + 1");
     ((2*x)+1)
     js> expr.substitute("x", "4 * x");
     ((2*(4*x))+1)
     js> expr2.evaluate({ x: 3 });
     25
-
+```
 #### simplify(variables: object)
 
 Simplify constant sub-expressions and replace variable references with literal
@@ -154,37 +154,37 @@ multiplication are associative, so `((2*(4*x))+1)` from the previous example
 cannot be simplified unless you provide a value for x. `2*4*x+1` can however,
 because it’s parsed as `(((2*4)*x)+1)`, so the `(2*4)` sub-expression will be
 replaced with "8", resulting in `((8*x)+1)`.
-
+```js
     js> expr = Parser.parse("x * (y * atan(1))").simplify({ y: 4 });
     (x*3.141592653589793)
     js> expr.evaluate({ x: 2 });
     6.283185307179586
-
+```
 #### variables(options?: object)
 
 Get an array of the unbound variables in the expression.
-
+```js
     js> expr = Parser.parse("x * (y * atan(1))");
     (x*(y*atan(1)))
     js> expr.variables();
     x,y
     js> expr.simplify({ y: 4 }).variables();
     x
-
+```
 By default, `variables` will return "top-level" objects, so for example, `Parser.parse(x.y.z).variables()` returns `['x']`. If you want to get the whole chain of object members, you can call it with `{ withMembers: true }`. So `Parser.parse(x.y.z).variables({ withMembers: true })` would return `['x.y.z']`.
 
 #### symbols(options?: object)
 
 Get an array of variables, including any built-in functions used in the
 expression.
-
+```js
     js> expr = Parser.parse("min(x, y, z)");
     (min(x, y, z))
     js> expr.symbols();
     min,x,y,z
     js> expr.simplify({ y: 4, z: 5 }).symbols();
     min,x
-
+```
 Like `variables`, `symbols` accepts an option argument `{ withMembers: true }` to include object members.
 
 #### toString()
@@ -200,7 +200,7 @@ is an array of parameter names, or a string, with the names separated by commas.
 
 If the optional `variables` argument is provided, the expression will be
 simplified with variables bound to the supplied values.
-
+```js
     js> expr = Parser.parse("x + y + z");
     ((x + y) + z)
     js> f = expr.toJSFunction("x,y,z");
@@ -211,7 +211,7 @@ simplified with variables bound to the supplied values.
     [Function] // function (y, z) { return 100 + y + z; };
     js> f(2, 3)
     105
-
+```
 ### Expression Syntax ###
 
 The parser accepts a pretty basic grammar. It's similar to normal JavaScript
@@ -235,15 +235,15 @@ or                       | Left          | Logical OR
 x ? y : z                | Right         | Ternary conditional (if x then y else z)
 =                        | Right         | Variable assignment
 ;                        | Left          | Expression separator
-
-    var parser = new Parser({
+```js
+    const parser = new Parser({
       operators: {
         'in': true,
         'assignment': true
       }
     });
     // Now parser supports 'x in array' and 'y = 2*x' expressions
-
+```
 #### Unary operators
 
 The parser has several built-in "functions" that are actually unary operators.
@@ -326,16 +326,16 @@ Arrays can be created by including the elements inside square `[]` brackets, sep
 You can define functions using the syntax `name(params) = expression`. When it's evaluated, the name will be added to the passed in scope as a function. You can call it later in the expression, or make it available to other expressions by re-using the same scope object. Functions can support multiple parameters, separated by commas.
 
 Examples:
-
+```js
     square(x) = x*x
     add(a, b) = a + b
     factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
-
+```
 #### Custom JavaScript functions
 
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
-
-    var parser = new Parser();
+```js
+    const parser = new Parser();
 
     // Add a new function
     parser.functions.customAddFunction = function (arg1, arg2) {
@@ -347,7 +347,7 @@ If you need additional functions that aren't supported out of the box, you can e
 
     parser.evaluate('customAddFunction(2, 4) == 6'); // true
     //parser.evaluate('fac(3)'); // This will fail
-
+```
 #### Constants
 
 The parser also includes a number of pre-defined constants that can be used in expressions. These are shown
@@ -362,17 +362,17 @@ false        | Logical `false` value
 
 Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customise the
 constants available to your expressions. For example:
-
-    var parser = new Parser();
+```js
+    const parser = new Parser();
     parser.consts.R = 1.234;
 
     console.log(parser.parse('A+B/R').toString());  // ((A + B) / 1.234)
-
+```
 To disable the pre-defined constants, you can replace or delete `parser.consts`:
-
-    var parser = new Parser();
+```js
+    const parser = new Parser();
     parser.consts = {};
-
+```
 
 ### Tests ###
 

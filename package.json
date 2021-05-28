@@ -5,6 +5,7 @@
   "main": "dist/bundle.js",
   "module": "dist/index.mjs",
   "typings": "parser.d.ts",
+  "type": "module",
   "directories": {
     "test": "test"
   },

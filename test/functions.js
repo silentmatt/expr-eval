@@ -1,9 +1,7 @@
 /* global describe, it */
 
-'use strict';
-
-var assert = require('assert');
-var Parser = require('../dist/bundle').Parser;
+import assert from 'assert';
+import { Parser } from '../dist/index.mjs';
 
 describe('Functions', function () {
   describe('roundTo()', function () {

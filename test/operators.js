@@ -1,10 +1,8 @@
 /* global describe, it */
 
-'use strict';
-
-var assert = require('assert');
-var Parser = require('../dist/bundle').Parser;
-var spy = require('./lib/spy');
+import assert from 'assert';
+import { Parser } from '../dist/index.mjs';
+import spy from './lib/spy.cjs';
 
 function returnTrue() {
   return true;

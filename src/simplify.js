@@ -1,4 +1,4 @@
-import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from './instruction';
+import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from './instruction.js';
 
 export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values) {
   var nstack = [];
@@ -10,9 +10,20 @@ export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values
     var type = item.type;
     if (type === INUMBER || type === IVARNAME) {
       if (Array.isArray(item.value)) {
-        nstack.push.apply(nstack, simplify(item.value.map(function (x) {
-          return new Instruction(INUMBER, x);
-        }).concat(new Instruction(IARRAY, item.value.length)), unaryOps, binaryOps, ternaryOps, values));
+        nstack.push.apply(
+          nstack,
+          simplify(
+            item.value
+              .map(function (x) {
+                return new Instruction(INUMBER, x);
+              })
+              .concat(new Instruction(IARRAY, item.value.length)),
+            unaryOps,
+            binaryOps,
+            ternaryOps,
+            values
+          )
+        );
       } else {
         nstack.push(item);
       }

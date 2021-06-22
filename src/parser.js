@@ -1,7 +1,7 @@
-import { TEOF } from './token';
-import { TokenStream } from './token-stream';
-import { ParserState } from './parser-state';
-import { Expression } from './expression';
+import { TEOF } from './token.js';
+import { TokenStream } from './token-stream.js';
+import { ParserState } from './parser-state.js';
+import { Expression } from './expression.js';
 import {
   add,
   sub,
@@ -50,7 +50,7 @@ import {
   log1p,
   log2,
   sum
-} from './functions';
+} from './functions.js';
 
 export function Parser(options) {
   this.options = options || {};
@@ -106,7 +106,7 @@ export function Parser(options) {
     '<=': lessThanEqual,
     and: andOperator,
     or: orOperator,
-    'in': inOperator,
+    in: inOperator,
     '=': setVar,
     '[': arrayIndex
   };
@@ -124,7 +124,7 @@ export function Parser(options) {
     pyt: Math.hypot || hypot, // backward compat
     pow: Math.pow,
     atan2: Math.atan2,
-    'if': condition,
+    if: condition,
     gamma: gamma,
     roundTo: roundTo,
     map: arrayMap,
@@ -138,18 +138,16 @@ export function Parser(options) {
   this.consts = {
     E: Math.E,
     PI: Math.PI,
-    'true': true,
-    'false': false
+    true: true,
+    false: false
   };
 }
 
 Parser.prototype.parse = function (expr) {
   var instr = [];
-  var parserState = new ParserState(
-    this,
-    new TokenStream(this, expr),
-    { allowMemberAccess: this.options.allowMemberAccess }
-  );
+  var parserState = new ParserState(this, new TokenStream(this, expr), {
+    allowMemberAccess: this.options.allowMemberAccess
+  });
 
   parserState.parseExpression(instr);
   parserState.expect(TEOF, 'EOF');
@@ -186,9 +184,9 @@ var optionNameMap = {
   '==': 'comparison',
   '!=': 'comparison',
   '||': 'concatenate',
-  'and': 'logical',
-  'or': 'logical',
-  'not': 'logical',
+  and: 'logical',
+  or: 'logical',
+  not: 'logical',
   '?': 'conditional',
   ':': 'conditional',
   '=': 'assignment',

@@ -1,5 +1,5 @@
-import { IVAR, IMEMBER, IEXPR, IVARNAME } from './instruction';
-import contains from './contains';
+import { IVAR, IMEMBER, IEXPR, IVARNAME } from './instruction.js';
+import contains from './contains.js';
 
 export default function getSymbols(tokens, symbols, options) {
   options = options || {};

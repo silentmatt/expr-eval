@@ -1,6 +1,6 @@
-import { TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token';
-import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
-import contains from './contains';
+import { TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF } from './token.js';
+import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction.js';
+import contains from './contains.js';
 
 export function ParserState(parser, tokenStream, options) {
   this.parser = parser;

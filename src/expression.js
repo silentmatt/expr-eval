@@ -1,8 +1,8 @@
-import simplify from './simplify';
-import substitute from './substitute';
-import evaluate from './evaluate';
-import expressionToString from './expression-to-string';
-import getSymbols from './get-symbols';
+import simplify from './simplify.js';
+import substitute from './substitute.js';
+import evaluate from './evaluate.js';
+import expressionToString from './expression-to-string.js';
+import getSymbols from './get-symbols.js';
 
 export function Expression(tokens, parser) {
   this.tokens = tokens;

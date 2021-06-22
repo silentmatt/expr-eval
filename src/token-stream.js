@@ -1,4 +1,4 @@
-import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON } from './token';
+import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON } from './token.js';
 
 export function TokenStream(parser, expression) {
   this.pos = 0;
@@ -35,17 +35,19 @@ TokenStream.prototype.next = function () {
 
   if (this.isWhitespace() || this.isComment()) {
     return this.next();
-  } else if (this.isRadixInteger() ||
-      this.isNumber() ||
-      this.isOperator() ||
-      this.isString() ||
-      this.isParen() ||
-      this.isBracket() ||
-      this.isComma() ||
-      this.isSemicolon() ||
-      this.isNamedOp() ||
-      this.isConst() ||
-      this.isName()) {
+  } else if (
+    this.isRadixInteger() ||
+    this.isNumber() ||
+    this.isOperator() ||
+    this.isString() ||
+    this.isParen() ||
+    this.isBracket() ||
+    this.isComma() ||
+    this.isSemicolon() ||
+    this.isNamedOp() ||
+    this.isConst() ||
+    this.isName()
+  ) {
     return this.current;
   } else {
     this.parseError('Unknown character "' + this.expression.charAt(this.pos) + '"');
@@ -57,7 +59,7 @@ TokenStream.prototype.isString = function () {
   var startPos = this.pos;
   var quote = this.expression.charAt(startPos);
 
-  if (quote === '\'' || quote === '"') {
+  if (quote === "'" || quote === '"') {
     var index = this.expression.indexOf(quote, startPos + 1);
     while (index >= 0 && this.pos < this.expression.length) {
       this.pos = index + 1;
@@ -211,8 +213,8 @@ TokenStream.prototype.unescape = function (v) {
   while (index >= 0) {
     var c = v.charAt(++index);
     switch (c) {
-      case '\'':
-        buffer += '\'';
+      case "'":
+        buffer += "'";
         break;
       case '"':
         buffer += '"';

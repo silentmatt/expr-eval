@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY } from './instruction.js';
 
 export default function expressionToString(tokens, toJS) {
   var nstack = [];
@@ -115,9 +115,9 @@ export default function expressionToString(tokens, toJS) {
   }
   if (nstack.length > 1) {
     if (toJS) {
-      nstack = [ nstack.join(',') ];
+      nstack = [nstack.join(',')];
     } else {
-      nstack = [ nstack.join(';') ];
+      nstack = [nstack.join(';')];
     }
   }
   return String(nstack[0]);
@@ -125,7 +125,9 @@ export default function expressionToString(tokens, toJS) {
 
 function escapeValue(v) {
   if (typeof v === 'string') {
-    return JSON.stringify(v).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    return JSON.stringify(v)
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
   }
   return v;
 }

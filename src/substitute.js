@@ -1,4 +1,4 @@
-import { Instruction, IOP1, IOP2, IOP3, IVAR, IEXPR, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import { Instruction, IOP1, IOP2, IOP3, IVAR, IEXPR, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction.js';
 
 export default function substitute(tokens, variable, expr) {
   var newexpression = [];

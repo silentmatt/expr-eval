@@ -37,6 +37,7 @@ import {
   roundTo,
   setVar,
   arrayIndex,
+  member,
   max,
   min,
   arrayMap,
@@ -108,8 +109,13 @@ export function Parser(options) {
     or: orOperator,
     'in': inOperator,
     '=': setVar,
-    '[': arrayIndex
+    '[': arrayIndex,
+    '.': member
   };
+
+  if(this.options.overrideMember) {
+    this.binaryOps['.'] = this.options.overrideMember
+  }
 
   this.ternaryOps = {
     '?': condition

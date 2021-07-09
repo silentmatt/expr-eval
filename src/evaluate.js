@@ -100,7 +100,12 @@ export default function evaluate(tokens, expr, values) {
       nstack.push(item);
     } else if (type === IMEMBER) {
       n1 = nstack.pop();
-      nstack.push(n1[item.value]);
+      f = expr.binaryOps['.']
+      if(f.apply && f.call) {
+        nstack.push(f.apply(undefined, [n1, item.value]));
+      } else {
+        throw new Error(f + ' is not a function');
+      }
     } else if (type === IENDSTATEMENT) {
       nstack.pop();
     } else if (type === IARRAY) {

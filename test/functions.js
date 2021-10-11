@@ -485,4 +485,17 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('sum([1, 2])'), 3);
     });
   });
+  
+  describe('member(value,name)', function () {
+    it('basic', function () {
+      var parser = new Parser();
+      assert.strictEqual(parser.evaluate('a.something', {a : {something: 123}}), 123);
+    });
+    
+    it('able to override', function () {
+      var parser = new Parser({overrideMember:function(v,n) { return 456; }});
+      assert.strictEqual(parser.evaluate('a.anything', {a : {}}), 456);
+    });
+  });    
+
 });

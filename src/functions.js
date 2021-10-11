@@ -254,6 +254,10 @@ export function arrayIndex(array, index) {
   return array[index | 0];
 }
 
+export function member(object, name) {
+  return object[name];
+}
+
 export function max(array) {
   if (arguments.length === 1 && Array.isArray(array)) {
     return Math.max.apply(Math, array);

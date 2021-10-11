@@ -1,4 +1,5 @@
 import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from './instruction';
+import { member } from './functions';
 
 export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values) {
   var nstack = [];
@@ -46,7 +47,7 @@ export default function simplify(tokens, unaryOps, binaryOps, ternaryOps, values
         newexpression.push(nstack.shift());
       }
       newexpression.push(new Instruction(IEXPR, simplify(item.value, unaryOps, binaryOps, ternaryOps, values)));
-    } else if (type === IMEMBER && nstack.length > 0) {
+    } else if (type === IMEMBER && nstack.length > 0 && member === binaryOps['.']) { //check if member overridden
       n1 = nstack.pop();
       nstack.push(new Instruction(INUMBER, n1.value[item.value]));
     } /* else if (type === IARRAY && nstack.length >= item.value) {

@@ -321,6 +321,11 @@ Arrays can be created by including the elements inside square `[]` brackets, sep
 
     [ 1, 2, 3, 2+2, 10/2, 3! ]
 
+You can disable arrays by disabling the `array` operator: 
+```js
+    const parser = new Parser({operators: {array: false}});
+```
+
 #### Function definitions
 
 You can define functions using the syntax `name(params) = expression`. When it's evaluated, the name will be added to the passed in scope as a function. You can call it later in the expression, or make it available to other expressions by re-using the same scope object. Functions can support multiple parameters, separated by commas.
@@ -331,6 +336,12 @@ Examples:
     add(a, b) = a + b
     factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
 ```
+
+You can disable function defintions by disabling the `fndef` operator: 
+```js
+    const parser = new Parser({operators: {fndef: false}});
+```
+
 #### Custom JavaScript functions
 
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:

@@ -1,11 +1,15 @@
 export type Value = number
     | string
-    | ((...args: Value[]) => Value)
+    | boolean
+    | ValueFunction
+    | Value[]
     | { [propertyName: string]: Value };
 
 export interface Values {
     [propertyName: string]: Value;
 }
+
+export type ValueFunction = ((...args: any[]) => Value)
 
 export interface ParserOptions {
   allowMemberAccess?: boolean;
@@ -51,6 +55,7 @@ export interface ParserOptions {
     max?: boolean,
     assignment?: boolean,
     fndef?: boolean,
+    array?: boolean
     cbrt?: boolean,
     expm1?: boolean,
     log1p?: boolean,
@@ -61,20 +66,20 @@ export interface ParserOptions {
 
 export class Parser {
     constructor(options?: ParserOptions);
-    unaryOps: any;
-    functions: any;
-    consts: any;
+    unaryOps: {[name: string]: ((arg: any) => Value)};
+    functions: {[name: string]: ValueFunction};
+    consts: Values;
     parse(expression: string): Expression;
-    evaluate(expression: string, values?: Value): number;
+    evaluate(expression: string, values?: Values): Value;
     static parse(expression: string): Expression;
-    static evaluate(expression: string, values?: Value): number;
+    static evaluate(expression: string, values?: Values): Value;
 }
 
 export interface Expression {
-    simplify(values?: Value): Expression;
-    evaluate(values?: Value): any;
+    simplify(values?: Values): Expression;
+    evaluate(values?: Values): Value;
     substitute(variable: string, value: Expression | string | number): Expression;
     symbols(options?: { withMembers?: boolean }): string[];
     variables(options?: { withMembers?: boolean }): string[];
-    toJSFunction(params: string | string[], values?: Value): (...args: any[]) => number;
+    toJSFunction(params: string | string[], values?: Values): ValueFunction;
 }

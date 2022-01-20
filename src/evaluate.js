@@ -41,6 +41,9 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(f(resolveExpression(n1, values), resolveExpression(n2, values), resolveExpression(n3, values)));
       }
     } else if (type === IVAR) {
+      if (/^__proto__|prototype|constructor$/.test(item.value)) {
+        throw new Error('prototype access detected');
+      }
       if (item.value in expr.functions) {
         nstack.push(expr.functions[item.value]);
       } else if (item.value in expr.unaryOps && expr.parser.isOperatorEnabled(item.value)) {

@@ -250,8 +250,11 @@ export function setVar(name, value, variables) {
   return value;
 }
 
-export function arrayIndex(array, index) {
-  return array[index | 0];
+function arrayIndex(array, index) {
+  if (Array.isArray(array)) {
+    return array[index | 0];
+  }
+  return array[index];
 }
 
 export function max(array) {

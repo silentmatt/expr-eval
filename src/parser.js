@@ -146,7 +146,8 @@ export function Parser(options) {
 Parser.prototype.parse = function (expr) {
   var instr = [];
   var parserState = new ParserState(this, new TokenStream(this, expr), {
-    allowMemberAccess: this.options.allowMemberAccess
+    allowMemberAccess: this.options.allowMemberAccess,
+    restrictMemberAccess: this.options.restrictMemberAccess
   });
 
   parserState.parseExpression(instr);

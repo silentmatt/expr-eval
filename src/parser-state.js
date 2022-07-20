@@ -11,6 +11,7 @@ export function ParserState(parser, tokenStream, options) {
   this.savedCurrent = null;
   this.savedNextToken = null;
   this.allowMemberAccess = options.allowMemberAccess !== false;
+  this.preventMemberAccess = new Set(options.preventMemberAccess || []);
 }
 
 ParserState.prototype.next = function () {
@@ -316,6 +317,9 @@ ParserState.prototype.parseMemberExpression = function (instr) {
     if (op.value === '.') {
       if (!this.allowMemberAccess) {
         throw new Error('unexpected ".", member access is not permitted');
+      }
+      if (this.restrictMemberAccess.has(this.nextToken.value)) {
+        throw new Error('access to member "'+this.nextToken.value+'" is not permitted');
       }
 
       this.expect(TNAME);

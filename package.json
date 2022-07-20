@@ -1,6 +1,6 @@
 {
   "name": "@datawrapper/expr-eval",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
   "module": "dist/index.mjs",

@@ -595,4 +595,12 @@ describe('Parser', function () {
     assert.throws(function () { parser.evaluate('32 + min.bind'); }, /member access is not permitted/);
     assert.throws(function () { parser.evaluate('a.b', { a: { b: 2 } }); }, /member access is not permitted/);
   });
+  
+  it('should restrict certain member access', function () {
+    var parser = new Parser({ allowMemberAccess: true, restrictMemberAccess: ['b', 'constructor', '__proto__'] });
+    assert.throws(function () { parser.evaluate('a.b', { a: { b: 2, c: 3 } }); }, /access to member "b" is not permitted/);
+    assert.throws(function () { parser.evaluate('min.__proto__'); }, /access to member "__proto__" is not permitted/);
+    assert.throws(function () { parser.evaluate('min.constructor'); }, /access to member "constructor" is not permitted/);
+    assert.doesNotThrow(function () { parser.evaluate('a.c', { a: { b: 2, c: 3 } }); });
+  });
 });

@@ -138,6 +138,17 @@ export function Parser(options) {
   this.consts = {
     E: Math.E,
     PI: Math.PI,
+    PHI: (1 + Math.sqrt(5)) / 2,
+    LN2: Math.LN2,
+    LN10: Math.LN10,
+    LOG10E: Math.LOG10E,
+    LOG2E: Math.LOG2E,
+    SQRT1_2: Math.SQRT1_2,
+    SQRT2: Math.SQRT2,
+    PLANCKS: 6.62607015e-34,
+    AVOGADROS: 6.0221515e23,
+    G: 6.67300e-11,
+    C: 299792458, //speed of light m/s
     'true': true,
     'false': false
   };

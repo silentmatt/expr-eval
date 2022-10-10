@@ -1,6 +1,6 @@
 {
-  "name": "expr-eval",
-  "version": "1.2.3",
+  "name": "@oat-sa/expr-eval",
+  "version": "1.3.1",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
   "typings": "parser.d.ts",
@@ -34,7 +34,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/silentmatt/expr-eval.git"
+    "url": "git+https://github.com/oat-sa/expr-eval.git"
   },
   "keywords": [
     "expression",
@@ -47,7 +47,7 @@
   "author": "Matthew Crumley",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/silentmatt/expr-eval/issues"
+    "url": "https://github.com/oat-sa/expr-eval/issues"
   },
-  "homepage": "https://github.com/silentmatt/expr-eval#readme"
+  "homepage": "https://github.com/oat-sa/expr-eval#readme"
 }

@@ -78,5 +78,5 @@ export default function evaluate(tokens, expr, values) {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
-  return nstack[0];
+  return nstack[0] === -0 ? 0: nstack[0];
 }

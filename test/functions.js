@@ -141,9 +141,9 @@ describe('Functions', function () {
     });
 
     it('should avoid overflowing', function () {
-      assert.strictEqual(parser.evaluate('hypot(10^200, 10^200)'), 1.4142135623730959e+200);
-      assert.strictEqual(parser.evaluate('hypot(10^-200, 10^-200)'), 1.4142135623730944e-200);
-      assert.strictEqual(parser.evaluate('hypot(10^100, 11^100, 12^100, 13^100)'), 2.4793352492856554e+111);
+      assert.ok(Math.abs(parser.evaluate('hypot(10^200, 10^200)') - 1.4142135623730959e+200) <= 1e186);
+      assert.ok(Math.abs(parser.evaluate('hypot(10^-200, 10^-200)') - 1.4142135623730944e-200) <= 1e186);
+      assert.ok(Math.abs(parser.evaluate('hypot(10^100, 11^100, 12^100, 13^100)') - 2.4793352492856554e+111) <= 1e97);
       assert.strictEqual(parser.evaluate('hypot(x)', { x: Number.MAX_VALUE }), Number.MAX_VALUE);
       assert.strictEqual(parser.evaluate('hypot(x, 0)', { x: Number.MAX_VALUE }), Number.MAX_VALUE);
     });

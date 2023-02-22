@@ -1,4 +1,4 @@
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY } from './instruction';
+import { INUMBER, IOP1, IOP2, IOP3, IVAR, IFUNCOP, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY } from './instruction';
 
 export default function evaluate(tokens, expr, values) {
   var nstack = [];
@@ -60,6 +60,15 @@ export default function evaluate(tokens, expr, values) {
       n1 = nstack.pop();
       f = expr.unaryOps[item.value];
       nstack.push(f(resolveExpression(n1, values)));
+    } else if (type === IFUNCOP) {
+      n2 = nstack.pop();
+      n1 = nstack.pop();
+      f = expr.functions[item.value];
+      if (f.apply && f.call) {
+        nstack.push(f.apply(undefined, [n1, n2]));
+      } else {
+        throw new Error(f + ' is not a function');
+      }
     } else if (type === IFUNCALL) {
       argCount = item.value;
       args = [];

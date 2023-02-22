@@ -1,4 +1,4 @@
-import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON } from './token';
+import { Token, TEOF, TOP, TFUNCOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON } from './token';
 
 export function TokenStream(parser, expression) {
   this.pos = 0;
@@ -6,6 +6,7 @@ export function TokenStream(parser, expression) {
   this.unaryOps = parser.unaryOps;
   this.binaryOps = parser.binaryOps;
   this.ternaryOps = parser.ternaryOps;
+  this.functions = parser.functions;
   this.consts = parser.consts;
   this.expression = expression;
   this.savedPosition = 0;
@@ -44,6 +45,7 @@ TokenStream.prototype.next = function () {
       this.isComma() ||
       this.isSemicolon() ||
       this.isNamedOp() ||
+      this.isFuncOp() ||
       this.isConst() ||
       this.isName()) {
     return this.current;
@@ -152,6 +154,32 @@ TokenStream.prototype.isNamedOp = function () {
       this.current = this.newToken(TOP, str);
       this.pos += str.length;
       return true;
+    }
+  }
+  return false;
+};
+
+TokenStream.prototype.isFuncOp = function () {
+  var c = this.expression.charAt(this.pos);
+  var startPos = this.pos + 1;
+  var i = startPos;
+  var str;
+  if (c === '@') {
+    for (; i < this.expression.length; i++) {
+      c = this.expression.charAt(i);
+      if (c.toUpperCase() === c.toLowerCase()) {
+        if (i === startPos || (c !== '_' && (c < '0' || c > '9'))) {
+          break;
+        }
+      }
+    }
+    if (i > startPos) {
+      str = this.expression.substring(startPos, i);
+      if (str in this.functions) {
+        this.current = this.newToken(TFUNCOP, str);
+        this.pos = startPos + str.length;
+        return true;
+      }
     }
   }
   return false;

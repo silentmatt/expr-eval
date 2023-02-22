@@ -485,4 +485,42 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('sum([1, 2])'), 3);
     });
   });
+
+  describe('custom', function () {
+    describe('custom(x)', function () {
+      it('should return x*x + x*x', function () {
+        var parser = new Parser();
+        parser.functions.custom = function (a) {
+          return a * a + a * a;
+        };
+        assert.strictEqual(parser.evaluate('custom(0)'), 0);
+        assert.strictEqual(parser.evaluate('custom(2)'), 8);
+        assert.strictEqual(parser.evaluate('custom(-5)'), 50);
+      });
+    });
+
+    describe('custom(x, y)', function () {
+      it('should return x*x + y*y', function () {
+        var parser = new Parser();
+        parser.functions.custom = function (a, b) {
+          return a * a + b * b;
+        };
+        assert.strictEqual(parser.evaluate('custom(0, 0)'), 0);
+        assert.strictEqual(parser.evaluate('custom(2, 3)'), 13);
+        assert.strictEqual(parser.evaluate('custom(-5, 8)'), 89);
+      });
+    });
+
+    describe('x @custom y', function () {
+      it('should return x*x + y*y', function () {
+        var parser = new Parser();
+        parser.functions.custom = function (a, b) {
+          return a * a + b * b;
+        };
+        assert.strictEqual(parser.evaluate('0 @custom 0'), 0);
+        assert.strictEqual(parser.evaluate('2 @custom 3'), 13);
+        assert.strictEqual(parser.evaluate('-5 @custom 8'), -89);
+      });
+    });
+  });
 });

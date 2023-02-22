@@ -261,6 +261,14 @@ describe('Expression', function () {
     it('3 and 6 ? 45 > 5 * 11 ? 3 * 3 : 2.4 : 0', function () {
       assert.strictEqual(Parser.evaluate('3 and 6 ? 45 > 5 * 11 ? 3 * 3 : 2.4 : 0'), 2.4);
     });
+
+    it('8 - 4 @custom 6 * 2', function () {
+      var parser = new Parser();
+      parser.functions.custom = function (a, b) {
+        return a * a + b * b;
+      };
+      assert.strictEqual(parser.evaluate('8 - 4 @custom 6 * 2'), -96);
+    });
   });
 
   describe('substitute()', function () {

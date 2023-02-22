@@ -1,6 +1,6 @@
 {
   "name": "@oat-sa/expr-eval",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Mathematical expression evaluator",
   "main": "dist/bundle.js",
   "typings": "parser.d.ts",

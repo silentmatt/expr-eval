@@ -49,7 +49,8 @@ import {
   expm1,
   log1p,
   log2,
-  sum
+  sum,
+  clamp
 } from './functions';
 
 export function Parser(options) {
@@ -132,7 +133,8 @@ export function Parser(options) {
     filter: arrayFilter,
     indexOf: stringOrArrayIndexOf,
     join: arrayJoin,
-    sum: sum
+    sum: sum,
+    clamp: clamp
   };
 
   this.consts = {

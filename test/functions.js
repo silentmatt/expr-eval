@@ -485,4 +485,30 @@ describe('Functions', function () {
       assert.strictEqual(parser.evaluate('sum([1, 2])'), 3);
     });
   });
+
+  describe('clamp(min,val,max)', function() {
+    it('should clamp values below the minimum to the minimum', function () {
+      assert.strictEqual(Parser.evaluate('clamp(0, -5, 10)'), 0);
+    });
+
+    it('should clamp values above the maximum to the maximum', function () {
+      assert.strictEqual(Parser.evaluate('clamp(0, 15, 10)'), 10);
+    });
+
+    it('should not clamp values within the range', function () {
+      assert.strictEqual(Parser.evaluate('clamp(0, 5, 10)'), 5);
+    });
+
+    it('should handle minimum and maximum values being the same', function () {
+      assert.strictEqual(Parser.evaluate('clamp(5, 10, 5)'), 5);
+    });
+
+    it('should handle the value being the same as the minimum', function () {
+      assert.strictEqual(Parser.evaluate('clamp(0, 0, 10)'), 0);
+    });
+
+    it('should handle the value being the same as the maximum', function () {
+      assert.strictEqual(Parser.evaluate('clamp(0, 10, 10)'), 10);
+    });
+  });
 });

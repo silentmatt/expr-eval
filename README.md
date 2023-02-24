@@ -297,23 +297,24 @@ Besides the "operator" functions, there are several pre-defined functions. You
 can provide your own, by binding variables to normal JavaScript functions.
 These are not evaluated by simplify.
 
-Function      | Description
-:------------ | :----------
-random(n)     | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
-fac(n)        | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
-min(a,b,…)    | Get the smallest (minimum) number in the list.
-max(a,b,…)    | Get the largest (maximum) number in the list.
-hypot(a,b)    | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
-pyt(a, b)     | Alias for hypot.
-pow(x, y)     | Equivalent to x^y. For consistency with JavaScript's Math object.
-atan2(y, x)   | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
-roundTo(x, n) | Rounds x to n places after the decimal point.
-map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results.
-fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array.
-filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`.
-indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found.
-join(sep, a)  | Concatenate the elements of `a`, separated by `sep`.
-if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive.
+Function           | Description
+:----------------- | :-----------------
+random(n)          | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1.
+fac(n)             | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead.
+min(a,b,…)         | Get the smallest (minimum) number in the list.
+max(a,b,…)         | Get the largest (maximum) number in the list.
+hypot(a,b)         | Hypotenuse, i.e. the square root of the sum of squares of its arguments.
+pyt(a, b)          | Alias for hypot.
+pow(x, y)          | Equivalent to x^y. For consistency with JavaScript's Math object.
+atan2(y, x)        | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians.
+roundTo(x, n)      | Rounds x to n places after the decimal point.
+map(f, a)          | Array map: Pass each element of `a` the function `f`, and return an array of the results.
+fold(f, y, a)      | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array.
+filter(f, a)       | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`.
+indexOf(x, a)      | Return the first index of string or array `a` matching the value `x`, or `-1` if not found.
+join(sep, a)       | Concatenate the elements of `a`, separated by `sep`.
+if(c, a, b)        | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive.
+clamp(min, n, max) | Takes a number `n` and limits it to a range between `min` and `max`, returning `min` if `n` is less than `min`, `max` if `n` is greater than `max`, and `n` otherwise.
 
 #### Array literals
 

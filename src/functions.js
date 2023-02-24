@@ -352,3 +352,7 @@ export function sum(array) {
     return total + Number(value);
   }, 0);
 }
+
+export function clamp(min, val, max) {
+  return Math.min(Math.max(val, min), max);
+}

@@ -88,7 +88,7 @@ For example, the following will create a `Parser` that does not allow comparison
         comparison: false,
 
         // Disable 'in' and = operators
-        'in': false,
+        'in': true,
         assignment: false
       }
     });

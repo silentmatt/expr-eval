@@ -5,6 +5,23 @@ JavaScript Expression Evaluator
 [![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg?maxAge=3600)](https://cdnjs.com/libraries/expr-eval)
 [![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
 
+This fork addresses https://github.com/silentmatt/expr-eval/issues/266, security fix has been committed but was never released to NPM
+Therefore, we publish expr-eval-fork to NPM to work around this issue.
+If expr-eval ever gets released, raise an issue and we'll deprecate this fork.
+
+This fork addresses a security vulnerability identified by CVE-2025-12735.
+An important update with a strict allow-list security model to prevent
+Code Injection (CWE-94) and Prototype Pollution (CWE-1321) vulnerabilities.
+To achieve this, the expression evaluator no longer allows arbitrary
+functions to be passed directly into the evaluation context
+`(.evaluate({ myFunc: function() { ... } }))`. Any external function that
+is intended for use in an expression must be explicitly registered with
+the Parser instance via the parser.functions map prior to evaluation. This
+impacts very few test cases that have been updated in test/*.js. A new
+`test/security.js` highlights the attacks against vulnerbaility
+CVE-2025-12735 that will be prevented.
+
+
 Description
 -------------------------------------
 

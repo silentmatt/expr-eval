@@ -162,17 +162,18 @@ describe('Operators', function () {
       assert.strictEqual(Parser.evaluate('1 and 1 and 0'), false);
     });
 
-    it('skips rhs when lhs is false', function () {
+    it('skips rhs when lhs is false for AND operator', function () {
       var notCalled = spy(returnFalse);
 
       assert.strictEqual(Parser.evaluate('false and notCalled()', { notCalled: notCalled }), false);
       assert.strictEqual(notCalled.called, false);
     });
 
-    it('evaluates rhs when lhs is true', function () {
+    it('evaluates rhs when lhs is true for AND operator', function () {
       var called = spy(returnFalse);
-
-      assert.strictEqual(Parser.evaluate('true and called()', { called: called }), false);
+	var parser = new Parser;
+	parser.functions = {f: called};
+	assert.strictEqual(parser.evaluate('true and spies.called()', { spies: {called: called }}), false);
       assert.strictEqual(called.called, true);
     });
   });
@@ -211,8 +212,9 @@ describe('Operators', function () {
 
     it('evaluates rhs when lhs is false', function () {
       var called = spy(returnTrue);
-
-      assert.strictEqual(Parser.evaluate('false or called()', { called: called }), true);
+	var parser = new Parser();
+	parser.functions = {f: called};
+	assert.strictEqual(parser.evaluate('false or spies.called()', { spies: {called: called }}), true);
       assert.strictEqual(called.called, true);
     });
   });

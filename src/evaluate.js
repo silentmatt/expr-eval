@@ -9,6 +9,73 @@ export default function evaluate(tokens, expr, values) {
     return resolveExpression(tokens, values);
   }
 
+  /**
+   * Checks if a function reference 'f' is explicitly allowed to be executed.
+   * This logic is the core security allowance gate.
+   */
+  var isAllowedFunc = function (f) {
+      if (typeof f !== 'function') return true;
+      const SAFE_MATH = Object.freeze({
+	    abs: Math.abs,
+	    acos: Math.acos,
+	    asin: Math.asin,
+	    atan: Math.atan,
+	    atan2: Math.atan2,
+	    ceil: Math.ceil,
+	    clz32: Math.clz32,
+	    cos: Math.cos,
+	    exp: Math.exp,
+	    floor: Math.floor,
+	    imul: Math.imul,
+	    fround: Math.fround,
+	    f16round: Math.f16round,
+	    log: Math.log,
+	    max: Math.max,
+	    min: Math.min,
+	    pow: Math.pow,
+	    random: Math.random,
+	    round: Math.round,
+	    sin: Math.sin,
+	    sqrt: Math.sqrt,
+	    tan: Math.tan,
+	    log10: Math.log10,
+	    log2: Math.log2,
+	    log1p: Math.log1p,
+	    expm1: Math.expm1,
+	    cosh: Math.cosh,
+	    sinh: Math.sinh,
+	    tanh: Math.tanh,
+	    acosh: Math.acosh,
+	    asinh: Math.asinh,
+	    atanh: Math.atanh,
+	    hypot: Math.hypot,
+	    trunc: Math.trunc,
+	    sign: Math.sign,
+	    cbrt: Math.cbrt,
+      });
+      for (var key in expr.functions) {
+          if (expr.functions[key] === f) return true;
+      }
+
+      for (var key in values) {
+          if (typeof values[key] === 'object' && values[key] !== null) {
+              for (var subKey in values[key]) {
+                  if (values[key][subKey] === f) {
+		      const tf = values[key][subKey];
+		      for (var key in expr.functions) {
+			  if (expr.functions[key] === tf) return true;
+		      }
+		      for (var key of Object.getOwnPropertyNames(SAFE_MATH)) {
+			  if(SAFE_MATH[key] === tf) return true;
+		      }
+		  }
+              }
+          }
+      }
+      return false;
+  };
+  /* --- END: LOCAL HELPER FUNCTION FOR SECURITY --- */
+
   var numTokens = tokens.length;
 
   for (var i = 0; i < numTokens; i++) {
@@ -50,7 +117,11 @@ export default function evaluate(tokens, expr, values) {
         nstack.push(expr.unaryOps[item.value]);
       } else {
         var v = values[item.value];
-        if (v !== undefined) {
+          if (v !== undefined) {
+              if (typeof v === 'function' && !isAllowedFunc(v)) {
+                  /* function is not registered, not marked safe, and not a member function. BLOCKED. */
+                throw new Error('Variable references an unallowed function: ' + item.value);
+            }
           nstack.push(v);
         } else {
           throw new Error('undefined variable: ' + item.value);
@@ -66,7 +137,13 @@ export default function evaluate(tokens, expr, values) {
       while (argCount-- > 0) {
         args.unshift(resolveExpression(nstack.pop(), values));
       }
-      f = nstack.pop();
+	f = nstack.pop();
+      // --- FINAL SECURITY CHECK ---
+      if (!isAllowedFunc(f)) {
+          throw new Error('Is not an allowed function.');
+      }
+      // --- END FINAL SECURITY CHECK ---
+
       if (f.apply && f.call) {
         nstack.push(f.apply(undefined, args));
       } else {
@@ -89,11 +166,9 @@ export default function evaluate(tokens, expr, values) {
           }
           return evaluate(n2, expr, scope);
         };
-        // f.name = n1
-        Object.defineProperty(f, 'name', {
-          value: n1,
-          writable: false
-        });
+          // *** MARK AS SAFE FOR SECURITY CHECK ***
+	  expr.functions["lambda_" + expr.functions.__counter++] = f;
+        // ***************************************
         values[n1] = f;
         return f;
       })());
@@ -102,7 +177,14 @@ export default function evaluate(tokens, expr, values) {
     } else if (type === IEXPREVAL) {
       nstack.push(item);
     } else if (type === IMEMBER) {
-      n1 = nstack.pop();
+	n1 = nstack.pop();
+	if (/^__proto__|prototype|constructor$/.test(item.value)) {
+	    throw new Error('prototype access detected in MEMBER');
+	}
+	if(typeof(n1) === "object" && (typeof(n1[item.value]) === "function")
+	   && (!isAllowedFunc(n1[item.value]))) {
+	    throw new Error('Is not an allowed function in MEMBER.');
+	}
       nstack.push(n1[item.value]);
     } else if (type === IENDSTATEMENT) {
       nstack.pop();

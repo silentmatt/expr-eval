@@ -18,6 +18,22 @@ function assertCloseTo(expected, actual, delta) {
   return assert.ok(Math.abs(expected - actual) <= delta);
 }
 
+function withNativeMathUnavailable(names, callback) {
+  var original = {};
+  names.forEach(function (name) {
+    original[name] = Math[name];
+    Math[name] = null;
+  });
+
+  try {
+    callback();
+  } finally {
+    names.forEach(function (name) {
+      Math[name] = original[name];
+    });
+  }
+}
+
 describe('Operators', function () {
   var parser = new Parser();
 
@@ -1024,6 +1040,23 @@ describe('Operators', function () {
 
       assert.strictEqual(parser.parse('log2 x').toJSFunction('x')(4), 2);
       assertCloseTo(parser.parse('log2 x').toJSFunction('x')(3), 1.584962500721156, delta);
+    });
+  });
+
+  describe('fallback math implementations', function () {
+    it('uses fallback implementations when native Math helpers are unavailable', function () {
+      withNativeMathUnavailable(['expm1', 'log1p', 'log2'], function () {
+        var fallbackParser = new Parser();
+        var delta = 1e-15;
+
+        assertCloseTo(fallbackParser.evaluate('expm1 1'), 1.718281828459045, delta);
+        assertCloseTo(fallbackParser.evaluate('log1p 9'), 2.302585092994046, delta);
+        assertCloseTo(fallbackParser.evaluate('log2 8'), 3, delta);
+
+        assertCloseTo(fallbackParser.parse('expm1 x').toJSFunction('x')(2), 6.38905609893065, delta);
+        assertCloseTo(fallbackParser.parse('log1p x').toJSFunction('x')(1), 0.6931471805599453, delta);
+        assertCloseTo(fallbackParser.parse('log2 x').toJSFunction('x')(3), 1.584962500721156, delta);
+      });
     });
   });
 });

@@ -6,6 +6,22 @@ var assert = require('assert');
 var Parser = require('../dist/bundle').Parser;
 
 describe('Functions', function () {
+  function withMathFallbacksDisabled(names, fn) {
+    var originals = {};
+    names.forEach(function (name) {
+      originals[name] = Math[name];
+      Math[name] = undefined;
+    });
+
+    try {
+      fn();
+    } finally {
+      names.forEach(function (name) {
+        Math[name] = originals[name];
+      });
+    }
+  }
+
   describe('roundTo()', function () {
     // Simple cases
     it('should handle roundTo(663)', function () {
@@ -483,6 +499,47 @@ describe('Functions', function () {
     it('should work on a multi-element array', function () {
       var parser = new Parser();
       assert.strictEqual(parser.evaluate('sum([1, 2])'), 3);
+    });
+  });
+
+  describe('math fallbacks', function () {
+    it('uses hyperbolic function fallbacks when native Math methods are unavailable', function () {
+      withMathFallbacksDisabled(['sinh', 'cosh', 'tanh'], function () {
+        var parser = new Parser();
+
+        assert.ok(Math.abs(parser.evaluate('sinh(2)') - 3.626860407847019) <= 1e-15);
+        assert.ok(Math.abs(parser.evaluate('cosh(2)') - 3.7621956910836314) <= 1e-15);
+        assert.ok(Math.abs(parser.evaluate('tanh(2)') - 0.9640275800758169) <= 1e-15);
+        assert.strictEqual(parser.evaluate('tanh(1 / 0)'), 1);
+        assert.strictEqual(parser.evaluate('tanh(-1 / 0)'), -1);
+      });
+    });
+
+    it('uses inverse hyperbolic function fallbacks when native Math methods are unavailable', function () {
+      withMathFallbacksDisabled(['asinh', 'acosh', 'atanh'], function () {
+        var parser = new Parser();
+
+        assert.ok(Math.abs(parser.evaluate('asinh(2)') - 1.4436354751788103) <= 1e-15);
+        assert.strictEqual(parser.evaluate('asinh(-1 / 0)'), -Infinity);
+        assert.ok(Math.abs(parser.evaluate('acosh(2)') - 1.3169578969248166) <= 1e-15);
+        assert.ok(Math.abs(parser.evaluate('atanh(0.5)') - 0.5493061443340548) <= 1e-15);
+      });
+    });
+
+    it('uses logarithm and numeric fallbacks when native Math methods are unavailable', function () {
+      withMathFallbacksDisabled(['log10', 'sign', 'cbrt', 'expm1', 'log1p', 'log2'], function () {
+        var parser = new Parser();
+
+        assert.strictEqual(parser.evaluate('log10(1000)'), 3);
+        assert.strictEqual(parser.evaluate('sign(10)'), 1);
+        assert.strictEqual(parser.evaluate('sign(-10)'), -1);
+        assert.strictEqual(parser.evaluate('sign(0)'), 0);
+        assert.strictEqual(parser.evaluate('cbrt(27)'), 3);
+        assert.strictEqual(parser.evaluate('cbrt(-8)'), -2);
+        assert.ok(Math.abs(parser.evaluate('expm1(2)') - (Math.exp(2) - 1)) <= 1e-15);
+        assert.ok(Math.abs(parser.evaluate('log1p(2)') - Math.log(3)) <= 1e-15);
+        assert.strictEqual(parser.evaluate('log2(32)'), 5);
+      });
     });
   });
 });
